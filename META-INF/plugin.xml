@@ -1,0 +1,14 @@
+<plugin>
+  <key>EC-Bamboo</key>
+  <label>EC-Bamboo</label>
+  <version>1.0.0</version>
+  <author>Electric Cloud</author>
+  <authorUrl>info@electric-cloud.com</authorUrl>
+  <category>Utilities</category>
+  <commander-version min="6.0" />
+  <description></description>
+  <configure>ec_config</configure>
+  <pluginWizardBased>true</pluginWizardBased>
+  <depends min="1.4.0">EC-PluginManager</depends>
+  <help>help.xml</help>
+</plugin>
