@@ -388,7 +388,6 @@ it will return credentials {user => 'username', password=>'coolpassword'}
 sub get_credentials {
     my ($self, $config_name, $config_rows, $cfgs_path) = @_;
 
-    print "Running it\n";
     if ($self->{_credentials} && ref $self->{_credentials} eq 'HASH' && %{$self->{_credentials}}) {
         return $self->{_credentials};
     }

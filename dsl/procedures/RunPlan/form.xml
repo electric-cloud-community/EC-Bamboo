@@ -35,21 +35,21 @@ documentation : Help text for the parameter
         <label>Configuration name:</label>
         <property>config</property>
         <required>1</required>
-        <documentation>Configuration name</documentation>
+        <documentation>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</documentation>
     </formElement>
     <formElement>
         <type>entry</type>
         <label>Project key:</label>
         <property>project_key</property>
         <required>1</required>
-        <documentation>Project key</documentation>
+        <documentation>Project key (short name) of project that contains build plan.</documentation>
     </formElement>
     <formElement>
         <type>entry</type>
         <label>Plan key:</label>
         <property>plan_key</property>
         <required>1</required>
-        <documentation>Plan key</documentation>
+        <documentation>Short name of plan to run. All stages within specified plan will be executed.</documentation>
     </formElement> 
 	<!--Add more parameters here-->
 </editor>

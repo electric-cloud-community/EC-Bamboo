@@ -32,10 +32,10 @@
     </formElement>
     <formElement>
         <type>entry</type>
-        <label>Description:</label>
+        <label>Bamboo server url:</label>
         <property>bamboo_server_url</property>
         <required>1</required>
-        <documentation>Description for the plugin configuration.</documentation>
+        <documentation>Attlassian Bamboo server URL.</documentation>
     </formElement>
     <formElement>
         <type>credential</type>

@@ -74,7 +74,7 @@ sub _call {
         croak "Method $meth is unknown";
     }
 
-    print "Request URL is:" .  $self->{_data}->{url} . $url . "\n";
+    # print "Request URL is:" .  $self->{_data}->{url} . $url . "\n";
     my $req = HTTP::Request->new($meth => $self->{_data}->{url} . $url);
     if ($self->{_data}->{auth} eq 'basic') {
         $req->authorization_basic($self->{_data}->{user}, $self->{_data}->{password});
