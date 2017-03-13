@@ -3,8 +3,6 @@ import java.io.File
 def procName = 'CreateConfiguration'
 procedure procName,
         description: 'Creates a plugin configuration', {
-            property 'ec_stepsWithAttachedCredentials', '''[{"RunPlan", "stepName": "RunPlan"}, {"GetPlanDetails", "stepName": "GetPlanDetails"}]'''
-
 
     step 'createConfiguration',
             command: new File(pluginDir, "dsl/procedures/$procName/steps/createConfiguration.pl").text,

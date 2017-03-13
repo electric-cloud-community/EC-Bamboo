@@ -19,8 +19,6 @@ my @ALLOWED_METHODS = ('GET', 'POST', 'PUT', 'OPTIONS', 'DELETE');
 sub ignore_errors {
     my (undef, $flag) = @_;
 
-    print "Ignore errors: $ignore_errors\n";
-
     unless (defined $flag) {
         return $ignore_errors;
     }
@@ -106,6 +104,7 @@ sub _call {
         if (! ignore_errors) {
             croak "Error occured: " . $resp->decoded_content() . "\n";
         }
+        $object = $self->decode_content($resp->decoded_content());
         print "Error occured: " . Dumper $resp->decoded_content();
     }
     return $object;

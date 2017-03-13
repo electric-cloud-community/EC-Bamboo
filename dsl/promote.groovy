@@ -18,6 +18,14 @@ def stepsWithAttachedCredentials = [
 			procedureName: 'RunPlan',
 			stepName: 'RunPlan'
 		 ],
+         [
+			procedureName: 'GetPlanDetails',
+			stepName: 'GetPlanDetails'
+		 ],
+         [
+			procedureName: 'GetPlanRuns',
+			stepName: 'GetPlanRuns'
+		 ],
 	]
 	
 project pluginName, {

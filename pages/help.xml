@@ -15,6 +15,8 @@
                 <li><p><a href="#setupconfig">Setting Up the Plugin Configuration</a></p></li>
                 <li><p><a href="#procedures">Plugin Procedures</a></p></li>
                 <ul>
+                    <li><a href="#GetPlanDetails">GetPlanDetails</a></li>
+                    <li><a href="#GetPlanRuns">GetPlanRuns</a></li>
                     <li><a href="#RunPlan">RunPlan</a></li>
                 </ul>
             </ul>
@@ -86,54 +88,142 @@
             <p>You can also manage your Bamboo configurations in this page. Click <b>Edit</b> to modify an existing configuration or
             <b>Delete</b> to remove an existing configuration.</p>
 
-        <h1 id="procedures">Plugin Procedures</h1>
-        <div id="RunPlan">
-            <h2>RunPlan</h2>
-            <p>This procedure runs Bamboo build plan.</p>
-            <h3>Input</h3>
-            <ol>
-                <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
-                <li>Got to the EC-Bamboo plugin.</li>
-                <li>Go to the RunPlan procedure.</li>
-                <li>Enter the following parameters:<br />
-                <table class="grid">
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="required">Configuration name</td>
-                            <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
-                        </tr>
-                        <tr>
-                            <td class="required">Project key</td>
-                            <td>Project key (short name) of project that contains build plan.</td>
-                        </tr>
-                        <tr>
-                            <td class="required">Plan key</td>
-                            <td>Short name of plan to run. All stages within specified plan will be executed.</td>
-                        </tr>
-                    </tbody>
-                </table>
-                </li>
-            </ol>
-            <br />
-            <img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Form.png" />
-            <br />
-            <h3>Output</h3>
-            <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
-            <img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Status.png" />
-            <p>In the <b>RunPlan</b> step, click the Log button to see the diagnostic information:</p>
-            <br /><img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Result.png" />
-        </div>
-        <h1 id="rns">Release Notes</h1>
-        <h2>@PLUGIN_KEY@ 1.0.0</h2>
-        <ul>
-            <li>RunPlan procedure has been added.</li>
-        </ul>
+            <h1 id="procedures">Plugin Procedures</h1>
+            <div id="GetPlanDetails">
+                <h2>GetPlanDetails</h2>
+                <p>This procedure prints Bamboo build plan details.</p>
+                <h3>Input</h3>
+                <ol>
+                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
+                    <li>Got to the EC-Bamboo plugin.</li>
+                    <li>Go to the GetPlanDetails procedure.</li>
+                    <li>Enter the following parameters:<br />
+                    <table class="grid">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="required">Configuration name</td>
+                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Project key</td>
+                                <td>Project key (short name) of project that contains build plan.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Plan key</td>
+                                <td>Short name of plan to get details.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </li>
+                </ol>
+                <br />
+                <img src="../../plugins/@PLUGIN_KEY@/images/GetPlanDetails/Form.png" />
+                <br />
+                <h3>Output</h3>
+                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
+                <img src="../../plugins/@PLUGIN_KEY@/images/GetPlanDetails/Status.png" />
+                <p>In the <b>GetPlanDetails</b> step, click the Log button to see the diagnostic information:</p>
+                <br /><img src="../../plugins/@PLUGIN_KEY@/images/GetPlanDetails/Result.png" />
+            </div>
+            <div id="GetPlanDetails">
+                <h2>GetPlanRuns</h2>
+                <p>This procedure returns information about runs on Bamboo build plan.</p>
+                <h3>Input</h3>
+                <ol>
+                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
+                    <li>Got to the EC-Bamboo plugin.</li>
+                    <li>Go to the GetPlanRuns procedure.</li>
+                    <li>Enter the following parameters:<br />
+                    <table class="grid">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="required">Configuration name</td>
+                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Project key</td>
+                                <td>Project key (short name) of project that contains build plan.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Plan key</td>
+                                <td>Short name of plan to get runs.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </li>
+                </ol>
+                <br />
+                <img src="../../plugins/@PLUGIN_KEY@/images/GetPlanRuns/Form.png" />
+                <br />
+                <h3>Output</h3>
+                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
+                <img src="../../plugins/@PLUGIN_KEY@/images/GetPlanRuns/Status.png" />
+                <p>In the <b>GetPlanRuns</b> step, click the Log button to see the diagnostic information:</p>
+                <br /><img src="../../plugins/@PLUGIN_KEY@/images/GetPlanRuns/Result.png" />
+            </div>
+            <div id="RunPlan">
+                <h2>RunPlan</h2>
+                <p>This procedure runs Bamboo build plan.</p>
+                <h3>Input</h3>
+                <ol>
+                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
+                    <li>Got to the EC-Bamboo plugin.</li>
+                    <li>Go to the RunPlan procedure.</li>
+                    <li>Enter the following parameters:<br />
+                    <table class="grid">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="required">Configuration name</td>
+                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Project key</td>
+                                <td>Project key (short name) of project that contains build plan.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Plan key</td>
+                                <td>Short name of plan to run. All stages within specified plan will be executed.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </li>
+                </ol>
+                <br />
+                <img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Form.png" />
+                <br />
+                <h3>Output</h3>
+                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
+                <img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Status.png" />
+                <p>In the <b>RunPlan</b> step, click the Log button to see the diagnostic information:</p>
+                <br /><img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Result.png" />
+            </div>
+            <h1 id="rns">Release Notes</h1>
+            <h2>@PLUGIN_KEY@ 1.0.1</h2>
+            <ul>
+                <li>GetPlanDetails and GetPlanRuns procedures have been added.</li>
+            </ul>
+            <h2>@PLUGIN_KEY@ 1.0.0</h2>
+            <ul>
+                <li>RunPlan procedure has been added.</li>
+            </ul>
         </div>
     </body>
 </html>	

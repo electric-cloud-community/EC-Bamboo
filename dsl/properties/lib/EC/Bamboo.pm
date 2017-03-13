@@ -40,15 +40,26 @@ sub get_rest_client {
         password => $cnf->{password},
         content_type => 'application/json'
     );
+    $self->{_ua}->ignore_errors(1);
     return $self->{_ua};
 }
 
 
 sub get_plan {
-    my ($self, $project_key, $plan_key) = @_;
+    my ($self, $project_key, $plan_key, $expand) = @_;
 
     my $rc = $self->get_rest_client();
-    my $retval = $rc->get('/rest/api/latest/plan?os_authType=basic');
+    if ($expand) {
+        $expand = "?expand=$expand";
+    }
+    $expand ||= '';
+    # my $retval = $rc->get('/rest/api/latest/plan/' . $project_key . '-' . $plan_key  . '?expand=stages.stage');
+    my $retval = $rc->get('/rest/api/latest/plan/' . $project_key . '-' . $plan_key  . $expand);
+    if ($retval->{"status-code"} && $retval->{"status-code"} > 399) {
+        $retval->{message} ||= '';
+        $self->bail_out($retval->{message});
+        exit 1;
+    }
     return $retval;
 }
 
@@ -71,6 +82,33 @@ sub get_result {
     }
     my $plan = $1 if $runplan->{link}->{href} =~ m|/result/(.*?)$|s;
     return $self->get_rest_client()->get('/rest/api/latest/result/' . $plan);
+}
+
+sub get_plan_statistics {
+    my ($self, $project_key, $plan_key) = @_;
+
+    return $self->get_rest_client()->get("/rest/api/latest/result/$project_key-$plan_key");
+}
+
+
+sub print_stats {
+    my ($self, $plan) = @_;
+    my $retval = {
+        Failed => 0,
+        Successful => 0,
+        Unknown => 0
+    };
+    print "Plan link: $plan->{link}->{href}\n";
+    for my $p (@{$plan->{results}->{result}}) {
+        print '=' x 60 . "\n";
+        print "Number: $p->{number}\n";
+        print "Run link: $p->{link}->{href}\n";
+        print "State: $p->{state}\n";
+        print "Build State: $p->{buildState}\n";
+        print '=' x 60 . "\n";
+        $retval->{$p->{buildState}} += 1;
+    }
+    return $retval;
 }
 
 1;
