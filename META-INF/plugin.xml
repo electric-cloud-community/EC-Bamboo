@@ -1,7 +1,7 @@
 <plugin>
   <key>EC-Bamboo</key>
   <label>EC-Bamboo</label>
-  <version>1.0.1</version>
+  <version>1.4.1</version>
   <author>Electric Cloud</author>
   <authorUrl>info@electric-cloud.com</authorUrl>
   <category>Build</category>
