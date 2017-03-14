@@ -161,6 +161,15 @@ sub post {
     );
 }
 
+sub delete {
+    my ($self, $url, $params) = @_;
+
+    return $self->_call(
+        'DELETE' =>  $url,
+        $params
+    );
+}
+
 
 
 sub encode_request {

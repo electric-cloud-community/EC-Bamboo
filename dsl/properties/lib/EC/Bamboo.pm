@@ -3,7 +3,8 @@ use strict;
 use warnings;
 use base 'EC::Plugin::Core';
 use Data::Dumper;
-# use EC::Plugin::MicroRest;
+use JSON;
+
 
 sub after_init_hook {
     my ($self, %params) = @_;
@@ -81,23 +82,20 @@ sub get_result {
         exit 1;
     }
     my $plan = $1 if $runplan->{link}->{href} =~ m|/result/(.*?)$|s;
-    return $self->get_rest_client()->get('/rest/api/latest/result/' . $plan);
+    my $retval = $self->get_rest_client()->get('/rest/api/latest/result/' . $plan);
+    $self->save_properties($retval);
+    return $retval;
 }
-
-sub get_plan_statistics {
-    my ($self, $project_key, $plan_key) = @_;
-
-    return $self->get_rest_client()->get("/rest/api/latest/result/$project_key-$plan_key");
-}
-
 
 sub print_stats {
     my ($self, $plan) = @_;
+
     my $retval = {
-        Failed => 0,
-        Successful => 0,
-        Unknown => 0
+        'Failed' => 0,
+        'Successful' => 0,
+        'Unknown' => 0,
     };
+
     print "Plan link: $plan->{link}->{href}\n";
     for my $p (@{$plan->{results}->{result}}) {
         print '=' x 60 . "\n";
@@ -110,5 +108,63 @@ sub print_stats {
     }
     return $retval;
 }
+
+
+sub get_plan_statistics {
+    my ($self, $project_key, $plan_key) = @_;
+
+    my $retval = $self->get_rest_client()->get("/rest/api/latest/result/$project_key-$plan_key");
+    $self->save_properties($retval);
+    return $retval;
+}
+
+
+sub get_all_plans {
+    my ($self) = @_;
+
+    my $retval = $self->get_rest_client()->get("/rest/api/latest/plan?expand=plans.plan");
+    $self->save_properties($retval);
+    return $retval;
+}
+
+
+sub enable_plan {
+    my ($self, $project_key, $plan_key) = @_;
+
+    my $retval = $self->get_rest_client()->post("/rest/api/latest/plan/$project_key-$plan_key/enable");
+    return $retval;
+}
+
+
+sub disable_plan {
+    my ($self, $project_key, $plan_key) = @_;
+
+    my $retval = $self->get_rest_client()->delete("/rest/api/latest/plan/$project_key-$plan_key/enable");
+    return $retval;
+}
+
+
+sub save_properties {
+    my ($self, $params) = @_;
+
+    $self->set_property(response => encode_json($params));
+    return 1;
+}
+
+sub flow_result {
+    my ($self, $success_response) = @_;
+
+    my $is_flow_runtime = 0;
+    eval {
+        my $prop = $self->ec()->getProperty('/myPipelineStageRuntime/ec_summary');
+        $is_flow_runtime = 1;
+    };
+
+    return unless $is_flow_runtime;
+
+    $self->ec()->setProperty('/myPipelineStageRuntime/ec_summary/Bamboo Result:', $success_response);
+    return 1;
+}
+
 
 1;

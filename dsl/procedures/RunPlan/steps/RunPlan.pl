@@ -45,8 +45,10 @@ sub main {
             my $msg = qq|Go to <a href="$result->{link}->{href}" target="_BLANK">$bsu/$result->{planResultKey}->{key}</a>.|;
             if ($result->{state} eq 'Failed') {
                 $bamboo->error('<html><span>   Failed. </span>' . $msg . '</html>');
+                $bamboo->flow_result('<html><span>   Failed. </span>' . $msg . '</html>');
                 exit 1;
             }
+            $bamboo->flow_result("<html><span>   Success. </span>" . $msg . '</html>');
             $bamboo->success("<html><span>   Success. </span>" . $msg . '</html>');
             exit 0;
         }

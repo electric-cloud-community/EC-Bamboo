@@ -88,7 +88,7 @@ abstract class BasePlugin extends DslDelegatingScript {
 	def determinePluginCategory(String pluginDir) {
 		File pluginXml = new File("$pluginDir/META-INF", 'plugin.xml')
 		def pluginRoot = new XmlSlurper().parseText(pluginXml.text)
-		pluginRoot.category?: 'Utilities'
+		pluginRoot.category?: 'Build'
 	}
 
 	def shouldAddStepPicker(def pluginName, def procedureName) {

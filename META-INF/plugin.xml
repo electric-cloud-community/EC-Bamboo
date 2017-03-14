@@ -4,7 +4,7 @@
   <version>1.0.1</version>
   <author>Electric Cloud</author>
   <authorUrl>info@electric-cloud.com</authorUrl>
-  <category>Utilities</category>
+  <category>Build</category>
   <commander-version min="6.0" />
   <description></description>
   <configure>ec_config</configure>
