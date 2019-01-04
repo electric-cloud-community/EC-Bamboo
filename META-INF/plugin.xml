@@ -1,14 +1,15 @@
 <plugin>
-  <key>EC-Bamboo</key>
-  <label>EC-Bamboo</label>
-  <version>1.4.1</version>
-  <author>Electric Cloud</author>
-  <authorUrl>info@electric-cloud.com</authorUrl>
-  <category>Build</category>
-  <commander-version min="6.0" />
-  <description></description>
-  <configure>ec_config</configure>
-  <pluginWizardBased>true</pluginWizardBased>
-  <depends min="1.4.0">EC-PluginManager</depends>
-  <help>help.xml</help>
+    <key>EC-Bamboo</key>
+    <label>EC-Bamboo</label>
+    <version>1.4.1</version>
+    <author>Electric Cloud</author>
+    <authorUrl>info@electric-cloud.com</authorUrl>
+    <category>Build</category>
+    <commander-version min="6.0" />
+    <description></description>
+    <configure>ec_config</configure>
+    <pluginWizardBased>true</pluginWizardBased>
+    <depends min="1.4.0">EC-PluginManager</depends>
+    <help>help.xml</help>
+    <ecSupportLevel>10</ecSupportLevel>
 </plugin>
