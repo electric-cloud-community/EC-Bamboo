@@ -5,6 +5,7 @@
   <author>Electric Cloud</author>
   <authorUrl>info@electric-cloud.com</authorUrl>
   <category>Build</category>
+  <ecSupportLevel>10</ecSupportLevel>
   <commander-version min="6.0" />
   <description></description>
   <configure>ec_config</configure>
