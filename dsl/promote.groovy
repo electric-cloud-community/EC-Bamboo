@@ -14,47 +14,47 @@ def pluginDir = getProperty("/projects/$pluginName/pluginDir").value
 
 //List of procedure steps to which the plugin configuration credentials need to be attached
 def stepsWithAttachedCredentials = [
-		[
-			procedureName: 'RunPlan',
-			stepName: 'RunPlan'
-		 ],
-         [
-			procedureName: 'GetPlanDetails',
-			stepName: 'GetPlanDetails'
-		 ],
-         [
-			procedureName: 'GetPlanRuns',
-			stepName: 'GetPlanRuns'
-		 ],
-         [
-			procedureName: 'GetAllPlans',
-			stepName: 'GetAllPlans'
-		 ],
-         [
-			procedureName: 'DisablePlan',
-			stepName: 'DisablePlan'
-		 ],
-         [
-			procedureName: 'EnablePlan',
-			stepName: 'EnablePlan'
-		 ],
-	]
-	
-project pluginName, {
-	
-	loadPluginProperties(pluginDir, pluginName)
-	loadProcedures(pluginDir, pluginKey, pluginName, stepsWithAttachedCredentials)
-	//plugin configuration metadata
-	property 'ec_config', {
-		form = '$[' + "/projects/${pluginName}/procedures/CreateConfiguration/ec_parameterForm]"
-		property 'fields', {
-			property 'desc', {
-				property 'label', value: 'Description'
-				property 'order', value: '1'
-			}
-		}
-	}
+[procedureName: "GetAllPlans", stepName: "GetAllPlans"],
+[procedureName: "GetPlanDetails", stepName: "GetPlanDetails"],
+[procedureName: "GetPlanRuns", stepName: "GetPlanRuns"],
+[procedureName: "RunPlan", stepName: "RunPlan"],
+[procedureName: "EnablePlan", stepName: "EnablePlan"],
+[procedureName: "DisablePlan", stepName: "DisablePlan"],
+// === steps with credentials ends ===
+// Please do not remove the line above, it marks the place for the new steps
+// The code above will be updated automatically as you add more procedures into your plugin
+// Feel free to change the code below
+]
 
+
+project pluginName, {
+    // Please do not remove the line below
+    property 'ec_keepFilesExtensions', value: 'true'
+
+    // This line is required in order for React forms to work (you probably do not want to remove it too)
+    property 'ec_formXmlCompliant', value: 'true'
+    loadPluginProperties(pluginDir, pluginName)
+    loadProcedures(pluginDir, pluginKey, pluginName, stepsWithAttachedCredentials)
+    // plugin configuration metadata
+    // Please remove the block below if your plugin does not require configuration
+    property 'ec_config', {
+        configLocation = 'ec_plugin_cfgs'
+        form = '$[' + "/projects/$pluginName/procedures/CreateConfiguration/ec_parameterForm]"
+        property 'fields', {
+            property 'desc', {
+                property 'label', value: 'Description'
+                property 'order', value: '1'
+            }
+        }
+    }
+    // Place your custom project-level properties in here, like
+    // property 'myPropName', {
+    //     value = 'some value'
+    // }
+    // or
+    // property 'myPropName', {
+    //     property 'second level', value: 1
+    // }
 }
 
 // Copy existing plugin configurations from the previous

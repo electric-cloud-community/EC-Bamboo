@@ -1,55 +1,76 @@
 <!--
-
-     Copyright 2016 Electric Cloud, Inc.
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-         http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
-
--->
-<!--
-Each form element represents a procedure parameter. 
-The corresponding procedure parameters will be created automatically when 
-the plugin in installed and promoted.
-
-formElement nested elements:
-============================
-property:   formal parameter name
-type    :   entry|textarea|checkbox|select|radio|credential
-label   :   String-type. Parameter label value
-required:   1|0
-value   : Parameter default value
-documentation : Help text for the parameter
+    This form is generated automatically from the parameters pluginspec.
+    Please not not edit this file manually as it will be regenerated.
 -->
 <editor>
-    <formElement>
-        <type>entry</type>
-        <label>Configuration name:</label>
-        <property>config</property>
-        <required>1</required>
-        <documentation>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</documentation>
-    </formElement>
-    <formElement>
-        <type>entry</type>
-        <label>Project key:</label>
-        <property>project_key</property>
-        <required>1</required>
-        <documentation>Project key (short name) of project that contains build plan.</documentation>
-    </formElement>
-    <formElement>
-        <type>entry</type>
-        <label>Plan key:</label>
-        <property>plan_key</property>
-        <required>1</required>
-        <documentation>Short name of plan to run. All stages within specified plan will be executed.</documentation>
-    </formElement> 
-	<!--Add more parameters here-->
+  <help>/commander/pages/@PLUGIN_NAME@/help?s=Administration&amp;amp;ss=Plugins#RunPlan</help>
+  <formElement>
+    <type>entry</type>
+    <property>config</property>
+    <configuration>1</configuration>
+    <propertyReference>/plugins/@PLUGIN_NAME@/project/ec_plugin_cfgs</propertyReference>
+    <required>1</required>
+    <documentation>Previously defined configuration for the plugin</documentation>
+    <label>Configuration Name:</label>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>projectKey</property>
+    <required>1</required>
+    <documentation>Project key (short name) of project that contains build plan.</documentation>
+    <label>Project Key:</label>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>planKey</property>
+    <required>1</required>
+    <documentation>Short name of plan to get details.</documentation>
+    <label>Plan Key:</label>
+  </formElement>
+  <formElement>
+    <type>checkbox</type>
+    <property>waitForBuild</property>
+    <required>1</required>
+    <documentation>If checked, procedure will sequentually request for the state of Run until it is finished.</documentation>
+    <label>Wait For Build:</label>
+    <checkedValue>1</checkedValue>
+    <initiallyChecked>true</initiallyChecked>
+    <uncheckedValue>0</uncheckedValue>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>waitTimeout</property>
+    <required>0</required>
+    <documentation>Maximum time to wait for the run to be finished.</documentation>
+    <label>Wait Timeout:</label>
+    <value>300</value>
+  </formElement>
+  <formElement>
+    <type>select</type>
+    <property>resultFormat</property>
+    <required>0</required>
+    <documentation>Format to save the results.</documentation>
+    <label>Result Format:</label>
+    <option>
+      <name>JSON</name>
+      <value>json</value>
+    </option>
+    <option>
+      <name>Property Sheet</name>
+      <value>propertysheet</value>
+    </option>
+    <option>
+      <name>Do not save the result</name>
+      <value>none</value>
+    </option>
+    <value>json</value>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>resultPropertySheet</property>
+    <required>0</required>
+    <documentation>Property sheet to store the results.</documentation>
+    <label>Result Property Sheet:</label>
+    <value>/myJob/runResult</value>
+  </formElement>
 </editor>

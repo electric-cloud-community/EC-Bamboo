@@ -5,3 +5,5 @@ ecpluginbuilder
 .DS_Store
 build
 bin
+/temp
+/.assets
