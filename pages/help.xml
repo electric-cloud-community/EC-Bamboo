@@ -9,6 +9,7 @@
             <h1>Atlassian Bamboo</h1>
             <p>Plugin Version @PLUGIN_VERSION@</p>
             <hr style="margin-left: -10px; margin-top: 10px; height: 1px; width: 100%; color: #5981BD;" noshade="noshade" />
+            <p>Revised on December 19, 2018</p>
             <h1>Contents</h1>
             <ul>
                 <li><p><a href="#overview">Overview</a></p></li>
@@ -337,6 +338,10 @@
                 <br /><img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Result.png" />
             </div>
             <h1 id="rns">Release Notes</h1>
+            <h2>@PLUGIN_KEY@ 1.4.2</h2>
+            <ul>
+                <li>The plugin icon has beed updated.</li>
+            </ul>
             <h2>@PLUGIN_KEY@ 1.4.1</h2>
             <ul>
                 <li>Output for ElectricFlow Pipelines has been improved.</li>
