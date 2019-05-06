@@ -12,4 +12,5 @@
   <pluginWizardBased>true</pluginWizardBased>
   <depends min="1.4.0">EC-PluginManager</depends>
   <help>help.xml</help>
+
 </plugin>
