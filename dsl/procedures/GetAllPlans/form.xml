@@ -14,6 +14,13 @@
     <label>Configuration Name:</label>
   </formElement>
   <formElement>
+    <type>entry</type>
+    <property>projectKey</property>
+    <required>0</required>
+    <documentation>Project key (short name) of project to filter plans.</documentation>
+    <label>Project Key:</label>
+  </formElement>
+  <formElement>
     <type>select</type>
     <property>resultFormat</property>
     <required>0</required>

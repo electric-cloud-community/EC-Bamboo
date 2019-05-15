@@ -1,3 +1,128 @@
+=head1 NAME
+
+ECPDF::Component::EF::Reporting::Payload
+
+=head1 AUTHOR
+
+Electric Cloud
+
+=head1 DESCRIPTION
+
+A payload object.
+
+=head1 METHODS
+
+=head2 getReportObjectType()
+
+=head3 Description
+
+Returns a report object type for current payload.
+
+=head3 Parameters
+
+=over 4
+
+=item None
+
+=back
+
+=head3 Returns
+
+=over 4
+
+=item (String) Report object type for current payload
+
+=back
+
+=head3 Exceptions
+
+=over 4
+
+=item None
+
+=back
+
+=head3 Usage
+
+%%%LANG=perl%%%
+
+    my $reportObhectType = $payload->getReportObjectType();
+
+%%%LANG%%%
+
+
+
+=head2 getValues()
+
+=head3 Description
+
+Returns a values that will be sent for the current payload.
+
+=head3 Parameters
+
+=over 4
+
+=item None
+
+=back
+
+=head3 Returns
+
+=over 4
+
+=item (HASH ref) A values for the current payload to be sent.
+
+=back
+
+=head3 Usage
+
+%%%LANG=perl%%%
+
+    my $values = $payload->getValues();
+
+%%%LANG%%%
+
+=head2 getDependentPayloads()
+
+=head3 Note
+
+B<This method still experimental>
+
+=head3 Description
+
+This method returns a dependent payloads for the current payload.
+
+This method may be used when there is more than one report object type should be send in the context of a single payload.
+
+=head3 Parameters
+
+=over 4
+
+=item None
+
+=back
+
+=head3 Returns
+
+=over 4
+
+=item (ARRAY ref of ECPDF::Component::EF::Reporting::Payload)
+
+=back
+
+=head3 Exceptions
+
+=head3 Usage
+
+%%%LANG=perl%%%
+
+    my $payloads = $payload->getDependentPayloads();
+
+%%%LANG%%%
+
+=cut
+
+
 package ECPDF::Component::EF::Reporting::Payload;
 use base qw/ECPDF::BaseClass2/;
 __PACKAGE__->defineClass({
@@ -52,7 +177,27 @@ sub encode {
     return $encodedPayload;
 }
 
+# TODO: Switch logic to this method.
+sub sendAllReportsToEF {
+    my ($self) = @_;
 
+    my $result = $self->sendReportToEF();
+
+    my $dependentPayloads = $self->getDependentPayloads();
+
+    unless (@$dependentPayloads) {
+        return $result;
+    }
+
+    my $result2 = [];
+    for my $dp (@$dependentPayloads) {
+        my $tempResult = $dp->sendReportToEF();
+        push @$result2, $tempResult;
+    }
+
+    # TODO: add error handling here.
+    return $result2;
+}
 sub sendReportToEF {
     my ($self) = @_;
 
@@ -87,6 +232,34 @@ sub sendReportToEF {
         }
     }
     return $retval;
+}
+
+# TODO: Implement addition of dependent payload.
+
+sub createNewDependentPayload {
+    my ($self, $reportObjectType, $values) = @_;
+
+    if (!$reportObjectType) {
+        bailOut("mising reportObjectType parameter for createNewDependentPayload");
+    }
+    if (!$values) {
+        $values = {};
+    }
+    my $dep = $self->getDependentPayloads();
+    my $payload = __PACKAGE__->new({
+        reportObjectType => $reportObjectType,
+        values => $values,
+        dependentPayloads => [],
+    });
+    push @$dep, $payload;
+    return $payload;
+}
+
+
+sub addDependentPayload {
+    my ($self, $reportObjectType) = @_;
+
+    return $self;
 }
 
 1;

@@ -25,18 +25,8 @@
     <type>entry</type>
     <property>endpoint</property>
     <required>1</required>
-    <documentation>Attlassian Bamboo server URL.</documentation>
+    <documentation>Atlassian Bamboo server URL.</documentation>
     <label>Bamboo Server URL:</label>
-  </formElement>
-  <formElement>
-    <type>credential</type>
-    <property>basic_credential</property>
-    <required>1</required>
-    <htmlDocumentation>Basic authentication</htmlDocumentation>
-    <label>Credential:</label>
-    <attachedAsParameterToStep>createConfiguration</attachedAsParameterToStep>
-    <passwordLabel>Password</passwordLabel>
-    <userNameLabel>Username</userNameLabel>
   </formElement>
   <formElement>
     <type>credential</type>

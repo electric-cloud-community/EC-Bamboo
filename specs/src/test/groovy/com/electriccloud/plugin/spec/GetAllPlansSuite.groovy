@@ -1,16 +1,17 @@
 package com.electriccloud.plugin.spec
 
-import com.electriccloud.plugins.annotations.*
-import spock.lang.*
+
+import com.electriccloud.plugins.annotations.Sanity
+import spock.lang.Shared
 
 class GetAllPlansSuite extends PluginTestHelper {
     static procedureName = 'GetAllPlans'
     static projectName = "EC-Specs $procedureName"
 
     static def procedureParams = [
-            config: '',
-            projectKey : '',
-            resultFormat: '',
+            config             : '',
+            projectKey         : '',
+            resultFormat       : '',
             resultPropertySheet: ''
     ]
 
@@ -24,6 +25,8 @@ class GetAllPlansSuite extends PluginTestHelper {
     String config, projectKey, resultFormat, resultPropertySheet
 
     def doSetupSpec() {
+        redirectLogs()
+
         createConfiguration(CONFIG_NAME)
 
         // Import procedure project
@@ -36,6 +39,7 @@ class GetAllPlansSuite extends PluginTestHelper {
     }
 
     def doCleanupSpec() {
+        deleteConfiguration(PLUGIN_NAME, CONFIG_NAME)
         conditionallyDeleteProject(projectName)
     }
 
@@ -46,7 +50,7 @@ class GetAllPlansSuite extends PluginTestHelper {
         def project = bambooProjects[projectKey]
 
         def procedureParams = [
-                config             : config,
+                config             : CONFIG_NAME,
                 projectKey         : project,
                 resultFormat       : resultFormat,
                 resultPropertySheet: resultPropertySheet
@@ -67,10 +71,10 @@ class GetAllPlansSuite extends PluginTestHelper {
 
 
         where:
-        caseId       | projectKey | resultFormat    | resultPropertySheet
-        'CHANGEME_1' | 'empty'    | 'json'          | ''
+        caseId       | projectKey | resultFormat | resultPropertySheet
+        'CHANGEME_1' | 'empty'    | 'json'       | ''
 //        'CHANGEME_2' | 'empty'    | 'propertySheet' | ''
-        'CHANGEME_3' | 'valid'    | 'json'          | '/myJob/result'
+        'CHANGEME_3' | 'valid'    | 'json'       | '/myJob/result'
 //        'CHANGEME_4' | 'valid'    | 'propertySheet' | '/myJob/result'
     }
 
