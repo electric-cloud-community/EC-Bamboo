@@ -1,8 +1,6 @@
 package com.electriccloud.plugin.spec
 
-
 import com.electriccloud.spec.PluginSpockTestSupport
-import org.apache.commons.lang3.StringUtils
 
 class PluginTestHelper extends PluginSpockTestSupport {
 
@@ -11,8 +9,8 @@ class PluginTestHelper extends PluginSpockTestSupport {
     static String PLUGIN_VERSION = System.getenv('PLUGIN_VERSION') ?: '1.5.0'
 
     static String BAMBOO_URL = getURL()
-    static String BAMBOO_USERNAME = getBambooUsername()
-    static String BAMBOO_PASSWORD = getBambooPassword()
+    static String BAMBOO_USERNAME = getUsername()
+    static String BAMBOO_PASSWORD = getPassword()
 
     static String CONFIG_NAME = 'specConfig'
 
@@ -28,18 +26,19 @@ class PluginTestHelper extends PluginSpockTestSupport {
         }
 
         createPluginConfiguration(
-            PLUGIN_NAME,
-            configName,
-            [
-                desc             : 'Spec tests configuration',
-                endpoint         : endpoint,
-                credential       : 'credential',
-                debugLevel       : 3,
-                checkConnection: checkConnection,
-            ],
-            username,
-            password,
-            props
+                PLUGIN_NAME,
+                configName,
+                [
+                        desc           : 'Spec tests configuration',
+                        bamboo_server_url       : endpoint,
+//                        endpoint       : endpoint,
+                        credential     : 'credential',
+//                        debugLevel     : 3,
+//                        checkConnection: checkConnection,
+                ],
+                username,
+                password,
+                props
         )
     }
 
@@ -51,16 +50,18 @@ class PluginTestHelper extends PluginSpockTestSupport {
     }
 
     static String getURL() { getAssertedEnvVariable("BAMBOO_URL") }
+    static String getUsername() { getAssertedEnvVariable("BAMBOO_USERNAME") }
+    static String getPassword() { getAssertedEnvVariable("BAMBOO_PASSWORD") }
 
-    static String getBambooUsername() { getAssertedEnvVariable("BAMBOO_USERNAME") }
-
-    static String getBambooPassword() { getAssertedEnvVariable("BAMBOO_PASSWORD") }
+    static String getResourceName(){
+        return 'local'
+    }
 
     def runProcedure(String projectName, String procedureName, Map parameters) {
         // Skip undefined values
         def parametersString = parameters
-            .findAll { k, v -> v != null }
-            .collect { k, v ->
+                .findAll { k, v -> v != null }
+                .collect { k, v ->
             v = ((String) v).replace('\'', '\\\'')
             "$k: '''$v'''"
         }.join(', ')
@@ -201,7 +202,7 @@ class PluginTestHelper extends PluginSpockTestSupport {
         return propertyValue
     }
 
-    def createPluginConfiguration(def configName, Map params, def userName, def password) {
+    def createPluginConfiguration(def configName, Map params, def userName = getUsername(), def password = getPassword()) {
         assert PLUGIN_NAME
         assert configName
         def result = runProcedure("""
