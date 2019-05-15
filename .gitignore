@@ -7,3 +7,6 @@ build
 bin
 /temp
 /.assets
+.gradle/
+spec-report/
+logs/
