@@ -129,6 +129,51 @@ sub enablePlan {
 # Add your code into this method and it will be called when step runs
 sub disablePlan {
     my ($pluginObject) = @_;
+
+    my $context = $pluginObject->newContext();
+    print "Current context is: ", $context->getRunContext(), "\n";
+    my $params = $context->getStepParameters();
+    print Dumper $params;
+
+    my $configValues = $context->getConfigValues();
+    print Dumper $configValues;
+
+    my $stepResult = $context->newStepResult();
+    print "Created stepresult\n";
+    $stepResult->setJobStepOutcome('warning');
+    print "Set stepResult\n";
+
+    $stepResult->setJobSummary("See, this is a whole job summary");
+    $stepResult->setJobStepSummary('And this is a job step summary');
+
+    $stepResult->apply();
+}
+# Auto-generated method for the procedure TriggerDeployment/TriggerDeployment
+# Add your code into this method and it will be called when step runs
+sub triggerDeployment {
+    my ($pluginObject) = @_;
+    my $context = $pluginObject->newContext();
+    print "Current context is: ", $context->getRunContext(), "\n";
+    my $params = $context->getStepParameters();
+    print Dumper $params;
+
+    my $configValues = $context->getConfigValues();
+    print Dumper $configValues;
+
+    my $stepResult = $context->newStepResult();
+    print "Created stepresult\n";
+    $stepResult->setJobStepOutcome('warning');
+    print "Set stepResult\n";
+
+    $stepResult->setJobSummary("See, this is a whole job summary");
+    $stepResult->setJobStepSummary('And this is a job step summary');
+
+    $stepResult->apply();
+}
+# Auto-generated method for the procedure GetDeploymentProjectsForPlan/GetDeploymentProjectsForPlan
+# Add your code into this method and it will be called when step runs
+sub getDeploymentProjectsForPlan {
+    my ($pluginObject) = @_;
     my $context = $pluginObject->newContext();
     print "Current context is: ", $context->getRunContext(), "\n";
     my $params = $context->getStepParameters();
@@ -150,5 +195,22 @@ sub disablePlan {
 ## === step ends ===
 # Please do not remove the marker above, it is used to place new procedures into this file.
 
+
+sub requestJSON {
+    my ($self, $path, $query_parameters) = @_;
+
+
+}
+
+sub _saveProperties {
+    my ($self, $properties_map, $result_format, $result_property) = @_;
+
+
+}
+
+sub _saveOutputParameters {
+    my ($self, $parameters_map) = @_;
+
+}
 
 1;

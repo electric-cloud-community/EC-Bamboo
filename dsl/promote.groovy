@@ -20,6 +20,8 @@ def stepsWithAttachedCredentials = [
 [procedureName: "RunPlan", stepName: "RunPlan"],
 [procedureName: "EnablePlan", stepName: "EnablePlan"],
 [procedureName: "DisablePlan", stepName: "DisablePlan"],
+[procedureName: "TriggerDeployment", stepName: "TriggerDeployment"],
+[procedureName: "GetDeploymentProjectsForPlan", stepName: "GetDeploymentProjectsForPlan"],
 // === steps with credentials ends ===
 // Please do not remove the line above, it marks the place for the new steps
 // The code above will be updated automatically as you add more procedures into your plugin
