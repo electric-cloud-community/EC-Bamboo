@@ -17,11 +17,12 @@ This class sets various output results of step run in pipeline of procedure cont
 package ECPDF::StepResult;
 
 use base qw/ECPDF::BaseClass2/;
+use ECPDF::Types;
 __PACKAGE__->defineClass({
-    context => 'ECPDF::Context',
-    actions => '*',
-    cache => '*',
-    isApplied => '*'
+    context   => ECPDF::Types::Reference('ECPDF::Context'),
+    actions   => ECPDF::Types::ArrayrefOf(ECPDF::Types::Reference('ECPDF::StepResult::Action')),
+    cache     => ECPDF::Types::Reference('HASH'),
+    isApplied => ECPDF::Types::Enum(1, 0)
 });
 
 use strict;
