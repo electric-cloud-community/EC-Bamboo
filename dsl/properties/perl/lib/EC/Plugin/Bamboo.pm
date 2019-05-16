@@ -32,10 +32,7 @@ sub init {
 
     $self->{restClient} = $context->newRESTClient();
     $self->{restAPIBase} = '/rest/api/latest/';
-    $self->{restEncode} = sub {
-        my ($request_content) = @_;
-        return JSON::encode_json($request_content);
-    };
+    $self->{restEncode} = \&JSON::encode_json;
     $self->{restDecode} = sub {
         my ($response_content) = @_;
         my $result = eval {JSON::decode_json($response_content)};
@@ -106,17 +103,19 @@ sub REST_newRequest {
     return $request;
 }
 
-
 sub REST_doRequest {
     my ($self, $path, $query_params, $content) = @_;
 
     my ECPDF::Client::REST $rest = $self->{restClient};
 
     my HTTP::Request $request = $self->REST_newRequest('GET', $path, $query_params, $content);
+    logTrace("Request", $request);
+
     my HTTP::Response $response = $rest->doRequest($request);
+    logTrace("Response", $response);
 
     if (!$response->is_success) {
-        logDebug("Was requesting: " . $request->uri);
+        logDebug("Requested " . $request->uri);
         $self->exit_with_error("Error while performing request. " . $response->status_line);
     }
 
@@ -134,195 +133,176 @@ sub REST_doRequest {
 =cut
 sub getAllPlans {
     my ECPDF $self = shift;
-    my ($params, $stepResult) = @_;
+    my $params = shift;
+    my ECPDF::StepResult $stepResult = shift;
     $self->init($params);
 
-    # Perform request
+    $params->{resultPropertySheet} ||= '/myJob/plans';
 
-    my $json = $self->REST_doRequest('/project', { expand => 'projects.project.plans.plan' });
-    logTrace("Result", $json);
+    # Perform request
+    # TODO: request differs when have projectName in parameters
+    my $response = $self->REST_doRequest('/project', { expand => 'projects.project.plans.plan' });
+    logTrace("Result", $response);
+
+    # Get the info we need
+    my @infoToSave = ();
+    for my $project (@{$response->{projects}{project}}) {
+        logInfo("Found project: '$project->{key}'");
+
+        for my $plan (@{$project->{plans}{plan}}) {
+            logInfo("Found plan: '$plan->{key}'");
+            push(@infoToSave, planToShortInfo($plan));
+        }
+    }
+
+    if (!@infoToSave) {
+        $stepResult->setJobStepOutcome('warning');
+        $stepResult->setJobSummary("No plans found");
+        $stepResult->setJobStepSummary("No plans found");
+        return
+    }
 
     # Save to a properties
+    $self->saveResultProperties(
+        $stepResult,
+        $params->{resultFormat},
+        $params->{resultPropertySheet},
+        \@infoToSave
+    );
 
+    # TODO: Print short info
 
+    $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobSummary("Found " . scalar(@infoToSave) . ' plan(s).');
+    $stepResult->setJobStepSummary('Plans found: ' . join(', ', map {$_->{key}} @infoToSave));
 
-    # Print short info
-
-    $stepResult->setJobStepOutcome('warning');
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
+    return;
 }
 
-=head2 getPlanDetails
-
-=cut
-sub getPlanDetails {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
-
-=head2 getPlanRuns
-
-=cut
-sub getPlanRuns {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
-
-=head2 runPlan
-
-=cut
-sub runPlan {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
-
-=head2 enablePlan
-
-=cut
-sub enablePlan {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
-
-=head2 disablePlan
-
-=cut
-sub disablePlan {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
-
-=head2 triggerDeployment
-
-=cut
-sub triggerDeployment {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
-
-=head2 getDeploymentProjectsForPlan
-
-=cut
-sub getDeploymentProjectsForPlan {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
 ## === step ends ===
-# Please do not remove the marker above, it is used to place new procedures into this file.
+
+sub planToShortInfo {
+    my ($plan) = @_;
+    my @oneToOne = qw/
+        key
+        name
+        type
+
+        shortName
+        buildName
+        description
+
+        averageBuildTimeInSeconds
+
+        projectName
+        projectKey
+
+        enabled
+        isBuilding
+    /;
+
+    my %shortInfo = ();
+    for (@oneToOne) {
+        $shortInfo{$_} = $plan->{$_};
+    }
+
+    $shortInfo{url} = $plan->{link}{href};
+    $shortInfo{stagesSize} = $plan->{stages}{size};
+
+    return \%shortInfo;
+}
+
+sub saveResultProperties {
+    my ($self, $stepResult, $resultFormat, $resultProperty, $result, $transformSub) = @_;
+
+    if ($resultFormat eq 'none') {
+        logInfo("Will not save the results. 'Do Not Save The Result' was chosen for Result Format.");
+        return;
+    }
+
+    if (!$resultProperty) {
+        bailOut("No result property was supplied to saveResultProperties()");
+    }
+
+    if ($resultFormat eq 'json') {
+        my $encodedResult = JSON::encode_json($result);
+        $stepResult->setOutcomeProperty($resultProperty, $encodedResult);
+        return;
+    }
+
+    if ($resultFormat eq 'propertySheet') {
+        my $properties = transformToProperties($resultProperty, $result, 'key');
+
+        for my $property (keys %$properties) {
+            my $value = $properties->{$property};
+            logDebug("Saving property '$property' with value '$value'");
+            $stepResult->setOutcomeProperty($property, $properties->{$property});
+        }
+    }
+
+    $stepResult->apply();
+
+    return;
+}
+
+sub transformToProperties {
+    my ($currentPath, $object, $IdKeyName) = @_;
+
+    $IdKeyName ||= 'key';
+
+    my %result = ();
+    my $adopt = sub {
+        my ($flattened) = @_;
+        for my $f (keys %$flattened) {
+            $result{$f} = $flattened->{$f};
+        }
+    };
+
+    if (!ref $object) {
+        $result{$currentPath} = $object;
+    }
+    # JSON boolean
+    if (JSON::is_bool($object)) {
+        $result{$currentPath} = (!!$object) ? 'true' : 'false';
+    }
+    elsif ('ARRAY' eq ref $object && @$object) {
+        # Simple scalar array
+        if (!ref $object->[0]) {
+            $result{$currentPath} = join(", ", @$object);
+        }
+        # Array of maps with id
+        elsif (ref $object->[0] eq 'HASH' && $object->[0]{$IdKeyName}) {
+            for my $item (@$object) {
+                my $id = $item->{$IdKeyName};
+                die "One of the items doesn't have id: " . Dumper $item unless $id;
+                $adopt->(transformToProperties("$currentPath/$id", $item));
+            }
+            $result{$currentPath . '/ids'} = join(',', map {$_->{$IdKeyName}} @$object);
+        }
+        # Array of maps without ids
+        elsif (ref $object->[0] eq 'HASH') {
+            for my $item (@$object) {
+                for my $key (keys %$item) {
+                    $adopt->(transformToProperties($currentPath . "/$key", $item->{$key}));
+                }
+            }
+        }
+        # Array of arrays
+        elsif (ref $object->[0] eq 'ARRAY') {
+            for (my $i = 0; $i < scalar(@$object); $i++) {
+                $adopt->(transformToProperties($currentPath . "/$i", $object->[$i]));
+            }
+            $result{$currentPath . "/count"} = scalar(@$object);
+        }
+
+    }
+    elsif ('HASH' eq ref $object) {
+        for (keys %$object) {
+            $adopt->(transformToProperties($currentPath . "/$_", $object->{$_}));
+        }
+    }
+
+    return \%result;
+}
 
 1;

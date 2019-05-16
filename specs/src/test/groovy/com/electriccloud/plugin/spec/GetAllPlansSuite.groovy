@@ -46,9 +46,7 @@ class GetAllPlansSuite extends PluginTestHelper {
     @Sanity
     def "#caseId. GetAllPlans"() {
         given:
-
         def project = bambooProjects[projectKey]
-
         def procedureParams = [
                 config             : CONFIG_NAME,
                 projectKey         : project,
@@ -68,15 +66,17 @@ class GetAllPlansSuite extends PluginTestHelper {
         assert result.logs =~ /Found project: '$project'/
 
         // Check properties
-        def resultProperty = getJobProperty('response', result.jobId)
+        def properties =  getJobProperties(result.jobId)
+        def resultProperty = properties['result']
         assert resultProperty
-
+        assert resultProperty['PROJECT-PLAN']
+        assert resultProperty['PROJECT-PLAN']['projectKey'] == 'PROJECT'
 
         where:
-        caseId       | projectKey | resultFormat | resultPropertySheet
-        'CHANGEME_1' | 'empty'    | 'json'       | ''
+        caseId       | projectKey | resultFormat    | resultPropertySheet
+//        'CHANGEME_1' | 'empty'    | 'json'          | ''
 //        'CHANGEME_2' | 'empty'    | 'propertySheet' | ''
-        'CHANGEME_3' | 'valid'    | 'json'       | '/myJob/result'
+        'CHANGEME_3' | 'valid'    | 'propertySheet' | '/myJob/result'
 //        'CHANGEME_4' | 'valid'    | 'propertySheet' | '/myJob/result'
     }
 
