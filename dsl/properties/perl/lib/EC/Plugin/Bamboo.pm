@@ -5,28 +5,148 @@ use base qw/ECPDF/;
 use Data::Dumper;
 # Feel free to use new libraries here, e.g. use File::Temp;
 
-use ECPDF;
 use ECPDF::Log;
+use ECPDF::Helpers qw/bailOut/;
+use JSON qw/decode_json/;
 
 # Service function that is being used to set some metadata for a plugin.
 sub pluginInfo {
+    $ECPDF::Log::LOG_TO_PROPERTY = '/myJob/debug_logs';
+
     return {
-        pluginName    => '@PLUGIN_KEY@',
-        pluginVersion => '@PLUGIN_VERSION@',
-        configFields  => ['config'],
-        configLocations => ['ec_plugin_cfgs']
+        pluginName      => '@PLUGIN_KEY@',
+        pluginVersion   => '@PLUGIN_VERSION@',
+        configFields    => [ 'config' ],
+        configLocations => [ 'ec_plugin_cfgs' ]
     };
 }
 
-# Auto-generated method for the procedure GetAllPlans/GetAllPlans
-# Add your code into this method and it will be called when step runs
+sub init {
+    my ($self, $params) = @_;
+
+    my ECPDF::Context $context = $self->getContext();
+    my $config_values = $context->getConfigValues($params->{config});
+
+    # Will add
+    $self->{_config} = $config_values;
+
+    $self->{restClient} = $context->newRESTClient();
+    $self->{restAPIBase} = '/rest/api/latest/';
+    $self->{restEncode} = sub {
+        my ($request_content) = @_;
+        return JSON::encode_json($request_content);
+    };
+    $self->{restDecode} = sub {
+        my ($response_content) = @_;
+        my $result = eval {JSON::decode_json($response_content)};
+        if ($@) {
+            $self->exit_with_error("Error while decoding JSON: $@. Got: $response_content");
+        }
+        return $result;
+    };
+
+    $self->{restHeaders} = { 'Accept' => 'application/json' };
+
+}
+
+sub config {return shift->{_config}};
+
+sub exit_with_error {
+    my ($self, $error) = @_;
+    bailOut($error);
+}
+
+sub REST_newRequest {
+    my ($self, $method, $path, $query_params, $content, $params) = @_;
+
+    my $config = $self->config();
+
+    my ECPDF::Client::REST $rest = $self->{restClient};
+
+    my $path_base = $config->getRequiredParameter('endpoint')->getValue();
+    if ($self->{restAPIBase}) {
+        $path_base .= $self->{restAPIBase}
+    }
+    $path_base =~ s|/$||;
+
+    if (!$path =~ /^\//) {
+        $path = '/' . $path;
+    }
+
+    my HTTP::Request $request = $rest->newRequest($method, $path_base . $path);
+    $request->authorization_basic(
+        $config->getRequiredParameter('credential')->getUserName(),
+        $config->getRequiredParameter('credential')->getSecretValue()
+    );
+
+    if ($query_params) {
+        $request->uri->query_form(%$query_params);
+    }
+
+    if ($content && $self->{restEncode}) {
+        my $encoded = &{$self->{restEncode}}($content);
+        $request->content($encoded);
+    }
+
+    if ($self->{restHeaders}) {
+        while (my ($name, $value) = each %{$self->{restHeaders}}) {
+            $request->header($name, $value);
+        }
+    }
+
+    if ($self->{restRequestHook}) {
+        eval {
+            $request = &{$self->{restRequestHook}}($request);
+            1;
+        } or do {
+            $self->exit_with_error("Request hook failed: $@") unless ref $request;
+        };
+    }
+
+    return $request;
+}
+
+
+sub REST_doRequest {
+    my ($self, $path, $query_params, $content) = @_;
+
+    my ECPDF::Client::REST $rest = $self->{restClient};
+
+    my HTTP::Request $request = $self->REST_newRequest('GET', $path, $query_params, $content);
+    my HTTP::Response $response = $rest->doRequest($request);
+
+    if (!$response->is_success) {
+        logDebug("Was requesting: " . $request->uri);
+        $self->exit_with_error("Error while performing request. " . $response->status_line);
+    }
+
+    my $result = $response->decoded_content();
+    if ($self->{restDecode}) {
+        $result = &{$self->{restDecode}}($result);
+    }
+
+    return $result;
+}
+
+
+=head2 getAllPlans
+
+=cut
 sub getAllPlans {
-    my ECPDF $pluginObject = shift;
+    my ECPDF $self = shift;
     my ($params, $stepResult) = @_;
+    $self->init($params);
 
-    my ECPDF::Context $context = $pluginObject->getContext();
-    my ECPDF::Log $logger = ECPDF::Log->new();
+    # Perform request
 
+    my $json = $self->REST_doRequest('/project', { expand => 'projects.project.plans.plan' });
+    logTrace("Result", $json);
+
+    # Save to a properties
+
+
+
+    # Print short info
 
     $stepResult->setJobStepOutcome('warning');
     $stepResult->setJobSummary("See, this is a whole job summary");
@@ -34,8 +154,10 @@ sub getAllPlans {
 
     $stepResult->apply();
 }
-# Auto-generated method for the procedure GetPlanDetails/GetPlanDetails
-# Add your code into this method and it will be called when step runs
+
+=head2 getPlanDetails
+
+=cut
 sub getPlanDetails {
     my ($pluginObject) = @_;
     my $context = $pluginObject->newContext();
@@ -56,8 +178,10 @@ sub getPlanDetails {
 
     $stepResult->apply();
 }
-# Auto-generated method for the procedure GetPlanRuns/GetPlanRuns
-# Add your code into this method and it will be called when step runs
+
+=head2 getPlanRuns
+
+=cut
 sub getPlanRuns {
     my ($pluginObject) = @_;
     my $context = $pluginObject->newContext();
@@ -78,8 +202,10 @@ sub getPlanRuns {
 
     $stepResult->apply();
 }
-# Auto-generated method for the procedure RunPlan/RunPlan
-# Add your code into this method and it will be called when step runs
+
+=head2 runPlan
+
+=cut
 sub runPlan {
     my ($pluginObject) = @_;
     my $context = $pluginObject->newContext();
@@ -100,8 +226,10 @@ sub runPlan {
 
     $stepResult->apply();
 }
-# Auto-generated method for the procedure EnablePlan/EnablePlan
-# Add your code into this method and it will be called when step runs
+
+=head2 enablePlan
+
+=cut
 sub enablePlan {
     my ($pluginObject) = @_;
     my $context = $pluginObject->newContext();
@@ -122,8 +250,10 @@ sub enablePlan {
 
     $stepResult->apply();
 }
-# Auto-generated method for the procedure DisablePlan/DisablePlan
-# Add your code into this method and it will be called when step runs
+
+=head2 disablePlan
+
+=cut
 sub disablePlan {
     my ($pluginObject) = @_;
     my $context = $pluginObject->newContext();
@@ -144,8 +274,10 @@ sub disablePlan {
 
     $stepResult->apply();
 }
-# Auto-generated method for the procedure TriggerDeployment/TriggerDeployment
-# Add your code into this method and it will be called when step runs
+
+=head2 triggerDeployment
+
+=cut
 sub triggerDeployment {
     my ($pluginObject) = @_;
     my $context = $pluginObject->newContext();
@@ -166,8 +298,10 @@ sub triggerDeployment {
 
     $stepResult->apply();
 }
-# Auto-generated method for the procedure GetDeploymentProjectsForPlan/GetDeploymentProjectsForPlan
-# Add your code into this method and it will be called when step runs
+
+=head2 getDeploymentProjectsForPlan
+
+=cut
 sub getDeploymentProjectsForPlan {
     my ($pluginObject) = @_;
     my $context = $pluginObject->newContext();
@@ -190,6 +324,5 @@ sub getDeploymentProjectsForPlan {
 }
 ## === step ends ===
 # Please do not remove the marker above, it is used to place new procedures into this file.
-
 
 1;

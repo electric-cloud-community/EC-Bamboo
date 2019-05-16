@@ -60,6 +60,8 @@ class GetAllPlansSuite extends PluginTestHelper {
         def result = runProcedure(projectName, procedureName, procedureParams)
 
         then:
+        print getJobLink(result.jobId)
+
         assert result.outcome == 'success'
 
         // Check logs
