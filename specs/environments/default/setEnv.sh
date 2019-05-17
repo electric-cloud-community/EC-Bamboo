@@ -1,4 +1,4 @@
-export BAMBOO_URL=http://localhost:8085
+export BAMBOO_URL=http://bamboo-server:8085
 export BAMBOO_USERNAME=admin
 export BAMBOO_PASSWORD=changeme
 export AUTOMATION_TESTS_CONTEXT_RUN=Sanity,E2E
