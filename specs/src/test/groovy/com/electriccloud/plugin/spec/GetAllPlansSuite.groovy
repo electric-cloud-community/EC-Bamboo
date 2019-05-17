@@ -3,6 +3,7 @@ package com.electriccloud.plugin.spec
 
 import com.electriccloud.plugins.annotations.Sanity
 import spock.lang.Shared
+import spock.lang.Unroll
 
 class GetAllPlansSuite extends PluginTestHelper {
     static procedureName = 'GetAllPlans'
@@ -20,6 +21,8 @@ class GetAllPlansSuite extends PluginTestHelper {
             unexisting: randomize("UNEXISTING"),
             empty     : ''
     ]
+
+    static defaultResultPropertyPath = 'plans'
 
     @Shared
     String config, projectKey, resultFormat, resultPropertySheet
@@ -44,9 +47,18 @@ class GetAllPlansSuite extends PluginTestHelper {
     }
 
     @Sanity
+    @Unroll
     def "#caseId. GetAllPlans"() {
         given:
         def project = bambooProjects[projectKey]
+
+        resultPropertySheet = ''
+        if (resultPropertyPath) {
+            resultPropertySheet = '/myJob/' + resultPropertyPath
+        } else {
+            resultPropertyPath = defaultResultPropertyPath
+        }
+
         def procedureParams = [
                 config             : CONFIG_NAME,
                 projectKey         : project,
@@ -58,26 +70,30 @@ class GetAllPlansSuite extends PluginTestHelper {
         def result = runProcedure(projectName, procedureName, procedureParams)
 
         then:
-        print getJobLink(result.jobId)
-
+        println(getJobLink(result.jobId))
         assert result.outcome == 'success'
 
         // Check logs
-        assert result.logs =~ /Found project: '$project'/
+        if (project) {
+            assert result.logs =~ /Found project: '$project'/
+        }
 
-        // Check properties
-        def properties =  getJobProperties(result.jobId)
-        def resultProperty = properties['result']
-        assert resultProperty
-        assert resultProperty['PROJECT-PLAN']
-        assert resultProperty['PROJECT-PLAN']['projectKey'] == 'PROJECT'
+        if (resultFormat == 'propertySheet') {
+            // Check properties
+            def properties = getJobProperties(result.jobId)
+            def resultProperties = properties[resultPropertyPath]
+            assert resultProperties['PROJECT-PLAN']['projectKey'] == 'PROJECT'
+        }
+
+        def outputParameters = getJobOutputParameters(result.jobId, 1)
+        assert outputParameters['planKeys']
 
         where:
-        caseId       | projectKey | resultFormat    | resultPropertySheet
-//        'CHANGEME_1' | 'empty'    | 'json'          | ''
-//        'CHANGEME_2' | 'empty'    | 'propertySheet' | ''
-        'CHANGEME_3' | 'valid'    | 'propertySheet' | '/myJob/result'
-//        'CHANGEME_4' | 'valid'    | 'propertySheet' | '/myJob/result'
+        caseId       | projectKey | resultFormat    | resultPropertyPath
+        'CHANGEME_1' | 'empty'    | 'json'          | ''
+        'CHANGEME_2' | 'empty'    | 'propertySheet' | ''
+        'CHANGEME_3' | 'valid'    | 'propertySheet' | 'result'
     }
 
 }
+

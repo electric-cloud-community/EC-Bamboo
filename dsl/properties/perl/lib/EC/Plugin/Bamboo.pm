@@ -137,24 +137,32 @@ sub getAllPlans {
     my ECPDF::StepResult $stepResult = shift;
     $self->init($params);
 
+    # Setting default parameters
     $params->{resultPropertySheet} ||= '/myJob/plans';
 
-    # Perform request
-    # TODO: request differs when have projectName in parameters
-    my $response = $self->REST_doRequest('/project', { expand => 'projects.project.plans.plan' });
-    logTrace("Result", $response);
-
-    # Get the info we need
+    # Requesting and formatting information
     my @infoToSave = ();
-    for my $project (@{$response->{projects}{project}}) {
-        logInfo("Found project: '$project->{key}'");
+    if (!$params->{projectKey}) {
+        my $response = $self->REST_doRequest('/project', { expand => 'projects.project.plans.plan' });
+        for my $project (@{$response->{projects}{project}}) {
+            logInfo("Found project: '$project->{key}'");
 
-        for my $plan (@{$project->{plans}{plan}}) {
+            for my $plan (@{$project->{plans}{plan}}) {
+                logInfo("Found plan: '$plan->{key}'");
+                push(@infoToSave, planToShortInfo($plan));
+            }
+        }
+    }
+    else {
+        my $response = $self->REST_doRequest('/project/' . $params->{projectKey}, { expand => 'plans.plan' });
+        logInfo("Found project: '$response->{key}'");
+        for my $plan (@{$response->{plans}{plan}}) {
             logInfo("Found plan: '$plan->{key}'");
             push(@infoToSave, planToShortInfo($plan));
         }
     }
 
+    # When have no information
     if (!@infoToSave) {
         $stepResult->setJobStepOutcome('warning');
         $stepResult->setJobSummary("No plans found");
@@ -170,15 +178,16 @@ sub getAllPlans {
         \@infoToSave
     );
 
-    # TODO: Print short info
+    # Saving outcome properties and parameters
+    my $planKeysStr = join(', ', map {$_->{key}} @infoToSave);
+    $stepResult->setOutputParameter('planKeys', $planKeysStr);
 
+    logInfo()
     $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobStepSummary('Plans found: ' . $planKeysStr);
     $stepResult->setJobSummary("Found " . scalar(@infoToSave) . ' plan(s).');
-    $stepResult->setJobStepSummary('Plans found: ' . join(', ', map {$_->{key}} @infoToSave));
 
     $stepResult->apply();
-
-    return;
 }
 
 # Auto-generated method for the procedure GetPlanDetails/GetPlanDetails
@@ -396,7 +405,6 @@ sub saveResultProperties {
         }
     }
 
-
     $stepResult->apply();
 
     return;
@@ -434,7 +442,7 @@ sub transformToProperties {
                 die "One of the items doesn't have id: " . Dumper $item unless $id;
                 $adopt->(transformToProperties("$currentPath/$id", $item));
             }
-            $result{$currentPath . '/ids'} = join(',', map {$_->{$IdKeyName}} @$object);
+            $result{"$currentPath/$IdKeyName" . 's'} = join(',', map {$_->{$IdKeyName}} @$object);
         }
         # Array of maps without ids
         elsif (ref $object->[0] eq 'HASH') {
