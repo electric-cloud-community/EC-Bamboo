@@ -81,21 +81,18 @@ class ConfigurationSuite extends PluginTestHelper {
     @Sanity
     @Unroll
     def '#caseId, CreateConfiguration - Sanity'() {
-
         given:
         config = randomize(configs.correct)
-
         def creds = credentials[credentialCase]
-
         def params = [
                 endpoint       : endpoints.correct,
                 checkConnection: checkConnection,
                 debugLevel     : debugLevel,
                 desc           : desc
         ]
-
         when: "When section: Create Configuration"
         def result = createPluginConfiguration(config, params, creds.user, creds.password)
+
         then: "Verification Create procedures"
         assert result
         println getJobLink(result.jobId)

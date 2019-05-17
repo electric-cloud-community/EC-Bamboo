@@ -218,9 +218,9 @@ class PluginTestHelper extends PluginSpockTestSupport {
                 actualParameter: [
                     config           : '${configName}', 
                     desc             : '${params.desc}',
-                    bamboo_server_url         : '${params.endpoint}',
-                    // debugLevel       : '${params.debugLevel}',
-                    // attemptConnection: '${params.attemptConnection}',
+                    endpoint         : '${params.endpoint}',
+                    debugLevel       : '${params.debugLevel}',
+                    checkConnection  : '${params.checkConnection}',
                     credential       : 'credential',
                 ]
             )
