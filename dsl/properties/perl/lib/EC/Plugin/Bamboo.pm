@@ -182,7 +182,8 @@ sub getAllPlans {
     my $planKeysStr = join(', ', map {$_->{key}} @infoToSave);
     $stepResult->setOutputParameter('planKeys', $planKeysStr);
 
-    logInfo()
+    logInfo("Plan(s) information was saved to properties.");
+
     $stepResult->setJobStepOutcome('success');
     $stepResult->setJobStepSummary('Plans found: ' . $planKeysStr);
     $stepResult->setJobSummary("Found " . scalar(@infoToSave) . ' plan(s).');
