@@ -2,8 +2,7 @@ package com.electriccloud.plugin.spec
 
 
 import com.electriccloud.plugins.annotations.Sanity
-import spock.lang.Shared
-import spock.lang.Unroll
+import spock.lang.*
 
 class GetAllPlansSuite extends PluginTestHelper {
     static procedureName = 'GetAllPlans'
@@ -18,7 +17,7 @@ class GetAllPlansSuite extends PluginTestHelper {
 
     static bambooProjects = [
             valid     : 'PROJECT',
-            unexisting: randomize("UNEXISTING"),
+            unexisting: "__UNEXISTING__",
             empty     : ''
     ]
 

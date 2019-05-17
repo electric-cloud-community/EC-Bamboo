@@ -114,14 +114,22 @@ sub REST_doRequest {
     my HTTP::Response $response = $rest->doRequest($request);
     logTrace("Response", $response);
 
+    my $result = $response->decoded_content();
+    if ($self->{restDecode}) {
+        $result = eval {&{$self->{restDecode}}($result)};
+        if ($@){
+            logWarning("Failed to decode response content: $@.");
+        }
+    }
+
     if (!$response->is_success) {
         # Error handling
         if ($params->{errorHook}) {
             if ($params->{errorHook}{$response->code()}) {
-                return &{$params->{errorHook}{$response->code()}}($self, $response);
+                return &{$params->{errorHook}{$response->code()}}($self, $response, $result);
             }
             elsif ($params->{errorHook}{default}) {
-                return &{$params->{errorHook}{default}}($self, $response);
+                return &{$params->{errorHook}{default}}($self, $response, $result);
             }
             # Else proceed with usual logic
         }
@@ -130,11 +138,6 @@ sub REST_doRequest {
             logDebug("Requested " . $request->uri);
             $self->exit_with_error("Error while performing request. " . $response->status_line);
         }
-    }
-
-    my $result = $response->decoded_content();
-    if ($self->{restDecode}) {
-        $result = &{$self->{restDecode}}($result);
     }
 
     return $result;
@@ -267,11 +270,21 @@ sub runPlan {
     my $queueRequestPath = "/queue/$params->{projectKey}-$params->{planKey}";
 
     # Perform request to run the build
-    my $queueResponse = $self->REST_doRequest('POST', $queueRequestPath, \%queueRequestParams);
-    # TODO: error handling
+    my $queueResponse = $self->REST_doRequest('POST', $queueRequestPath, \%queueRequestParams, undef, {
+        errorHook => {
+            # Concurrent limit will cause 400
+            default => sub {
+               my (undef, $response, $decoded) = @_;
+               return $self->defaultErrorHandler($response, $decoded, $stepResult);
+            }
+        }
+    });
+    if (!$queueResponse) {
+        logDebug("Empty queueResponse. Assuming it was handled by errorHook");
+        return unless $queueResponse;
+    }
 
     my $buildNumber = $queueResponse->{buildNumber};
-
     logInfo("Build Number: $buildNumber.\nBuild Result Key: $queueResponse->{buildResultKey}.");
 
     # TODO: set Flow URL property
@@ -287,7 +300,7 @@ sub runPlan {
         my $finished;
         while (!$finished && $waited <= $params->{waitTimeout}) {
             # Request status
-            my $status = $self->REST_doRequest('GET', $statusRequestPath, {}, {
+            my $status = $self->REST_doRequest('GET', $statusRequestPath, {}, undef, {
                 # Request will return 404 if build is not running
                 errorHook => { 404 => sub {return { finished => 'true' }} }
             });
@@ -295,17 +308,20 @@ sub runPlan {
             # Check status (this could be moved to 404 handler, but this way is clearer)
             if ($status->{finished}) {
                 $finished = 1;
+                # Updating progress property
+                $stepResult->setJobStepSummary("Completed: 100%. Requesting build result.");
+                $stepResult->applyAndFlush();
                 logInfo("Build finished");
                 last;
             }
 
-            logInfo("Current Stage: '$status->{currentStage}'."
-                . "Approximate Completed: $status->{progress}{prettyTimeRemainingLong}"
+            logInfo("Current Stage: '". ($status->{currentStage} || 'Not available yet') ."'. "
+                . "Approximate Completed: $status->{progress}{prettyTimeRemainingLong}. "
                 . "Time remaining: '$status->{progress}{percentageCompletedPretty}'"
             );
 
             # Updating progress property
-            $stepResult->setJobStepOutcome("Approximate Completed: $status->{progress}{percentageCompletedPretty}");
+            $stepResult->setJobStepSummary("Approximate Completed: $status->{progress}{percentageCompletedPretty}");
             $stepResult->applyAndFlush();
 
             logInfo("Waiting $sleepTime second(s) before requesting the status again.");
@@ -315,9 +331,10 @@ sub runPlan {
 
         if (!$finished) {
             $stepResult->setJobStepOutcome('warning');
-            $stepResult->setJobStepSummary('Exceeded the wait timeout and build was not finished yet.');
-            $stepResult->setJobSummary('Exceeded the wait timeout and build was not finished yet.');
+            $stepResult->setJobStepSummary('Exceeded the wait timeout while waiting for the build to finish.');
+            $stepResult->setJobSummary('Exceeded the wait timeout while waiting for the build to finish.');
             $stepResult->apply();
+            return;
         }
     }
 
@@ -441,6 +458,22 @@ sub getDeploymentProjectsForPlan {
 }
 ## === step ends ===
 
+sub defaultErrorHandler {
+    my ($self, $response, $decoded, $stepResult) = @_;
+
+    if (!$decoded || !$decoded->{message}) {
+        $decoded->{message} = 'No specific error message was returned. Check logs for details';
+        logError($response->decoded_content || 'No content returned');
+    }
+
+    $stepResult->setJobStepOutcome('error');
+    $stepResult->setJobStepSummary($decoded->{message});
+    $stepResult->setJobSummary('Failed to start the build.');
+    $stepResult->apply();
+
+    return;
+}
+
 sub planToShortInfo {
     my ($plan) = @_;
     my @oneToOne = qw/
@@ -499,7 +532,8 @@ sub planBuildToShortInfo {
     /;
 
     my %result = (
-        url => $buildInfo->{link}{href},
+        url     => $buildInfo->{link}{href},
+        planKey => $buildInfo->{plan}{key},
     );
 
     if ($buildInfo->{artifacts}{size}) {
@@ -536,8 +570,14 @@ sub saveResultProperties {
 
         for my $property (keys %$properties) {
             my $value = $properties->{$property};
+
+
+            # TODO: remove when ECPDF-44 resolved
+            $value ||= '0E0';
+
+
             logDebug("Saving property '$property' with value '$value'");
-            $stepResult->setOutcomeProperty($property, $properties->{$property});
+            $stepResult->setOutcomeProperty($property, $value);
         }
     }
 

@@ -2,9 +2,7 @@ package com.electriccloud.plugin.spec
 
 
 import com.electriccloud.plugins.annotations.Sanity
-import spock.lang.Shared
-import spock.lang.Stepwise
-import spock.lang.Unroll
+import spock.lang.*
 
 @Stepwise
 
