@@ -114,7 +114,7 @@ use ECPDF::ContextFactory;
 use ECPDF::ComponentManager;
 
 
-our $VERSION = '1.0.12';
+our $VERSION = '1.0.13';
 
 # TODO: Explain this later.
 BEGIN {

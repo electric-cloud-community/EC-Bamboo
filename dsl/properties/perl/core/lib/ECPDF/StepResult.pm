@@ -49,7 +49,12 @@ sub setCacheForAction {
     logDebug("Parameters for set cache: '$actionType', '$name', '$value'");
     my $cache = $self->getCache();
     my $line = $self->getCacheForAction($actionType, $name);
-    $line = $line . "\n" . $value;
+    if ($line) {
+        $line = $line . "\n" . $value;
+    }
+    else {
+        $line = $value;
+    }
     $cache->{$actionType}->{$name} = $line;
     return $line;
 }
@@ -393,7 +398,13 @@ sub apply {
         }
         # TODO: Refactor this if condition
         elsif ($currentAction eq 'setPipelineSummary' || $currentAction eq 'setOutcomeProperty' || $currentAction eq 'setJobSummary' || $currentAction eq 'setJobStepSummary') {
-            my $line = $self->setCacheForAction($currentAction, $left, $right);
+            my $line;
+            if ($currentAction ne 'setOutcomeProperty') {
+                $line = $self->setCacheForAction($currentAction, $left, $right);
+            }
+            else {
+                $line = $right;
+            }
             logDebug("Got line: $line\n");
             $ec->setProperty($left, $line);
         }
