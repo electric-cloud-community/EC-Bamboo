@@ -1,0 +1,284 @@
+# This is default sample specification
+# Feel free to change it
+# Call ecpdk showdoc pluginspec to see the list of available fields and their description
+pluginName: EC-Bamboo
+description: ElectricFlow Plugin for Atlassian Bamboo
+version: 1.5.0
+author: info@electric-cloud.com
+authorUrl: https://electric-cloud.com/
+category: Build
+
+# This is a declaration for the plugin configuration
+configuration:
+  # Shell to be used for checking connection
+  shell: ec-perl
+  parameters:
+    - name: config
+      label: Configuration Name
+      documentation: Configuration name.
+      type: entry
+      required: true
+    - name: desc
+      label: Description
+      documentation: Description for the configuration
+      type: entry
+      required: false
+    - name: endpoint
+      label: Bamboo Server URL
+      documentation: Atlassian Bamboo server URL.
+      type: entry
+      required: true
+    - name: credential
+      label: Credential
+      type: credential
+      userNameLabel: Username
+      required: true
+      passwordLabel: Password
+    - name: checkConnection
+      label: Check Connection?
+      type: checkbox
+      checkedValue: true
+      uncheckedValue: false
+      initiallyChecked: 1
+    - name: debugLevel
+      # This parameter name "debugLevel" is supported by ECPDF Logger out of the box
+      label: Debug Level
+      type: select
+      required: 0
+      value: 0
+      options:
+        - name: Info
+          value: 0
+        - name: Debug
+          value: 1
+        - name: Trace
+          value: 2
+
+procedures:
+  - name: GetAllPlans
+    description: Returns all plans that are available for current user.
+    hasConfig: true # configuration field will be generated automatically
+    shell: ec-perl
+    parameters:
+      - name: projectKey
+        label: Project Key
+        documentation: Project key (short name) of project to filter plans.
+        type: entry
+        required: false
+      - name: resultFormat
+        label: Result Format
+        documentation: Format to save the results.
+        type: select
+        required: false
+        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet' }, { name: 'Do not save the result', value: 'none' }]
+        value: json
+      - name: resultPropertySheet
+        label: Result Property Sheet
+        documentation: Property sheet to store the results. Each plan will be saved under a separate property (property sheet). Additionally, the planKeys property will contain comma-separated plan keys.
+        type: entry
+        required: false
+        value: /myJob/plans/
+    outputParameters: {planKeys: 'List of comma-separated plan keys'}
+
+  - name: GetPlanDetails
+    description: Gets build plan details.
+    hasConfig: true # configuration field will be generated automatically
+    shell: ec-perl
+    parameters:
+      - name: projectKey
+        label: Project Key
+        documentation: Project key (short name) of project that contains build plan.
+        type: entry
+        required: true
+      - name: planKey
+        label: Plan Key
+        documentation: Short name of plan to get details.
+        type: entry
+        required: true
+      - name: resultFormat
+        label: Result Format
+        documentation: Format to save the results.
+        type: select
+        required: false
+        value: json
+        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet' }]
+      - name: resultPropertySheet
+        label: Result Property Sheet
+        documentation: Property sheet to store the results.
+        type: entry
+        required: false
+        value: /myJob/plan/
+
+  - name: GetPlanRuns
+    description: Returns information about build plan runs byt project key and plan key.
+    hasConfig: true # configuration field will be generated automatically
+    shell: ec-perl
+    parameters:
+      - name: projectKey
+        label: Project Key
+        documentation: Project key (short name) of project that contains build plan.
+        type: entry
+        required: true
+      - name: planKey
+        label: Plan Key
+        documentation: Short name of plan to get details.
+        type: entry
+        required: true
+      - name: resultFormat
+        label: Result Format
+        documentation: Format to save the results.
+        type: select
+        required: false
+        value: json
+        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet'}, { name: 'Do not save the result', value: 'none' }]
+      - name: resultPropertySheet
+        label: Result Property Sheet
+        documentation: Property sheet to store the results. Each plan run will be saved under a separate property (property sheet). Additionally, the planKeys property will contain comma-separated plan keys.
+        value: /myJob/planRuns/
+        type: entry
+        required: false
+    outputParameters: {planKeys: 'List of comma-separated plan keys.'}
+
+  - name: RunPlan
+    description: Runs build plan by plan key and project key.
+    hasConfig: true # configuration field will be generated automatically
+    shell: ec-perl
+    parameters:
+      - name: projectKey
+        label: Project Key
+        documentation: Project key (short name) of project that contains build plan.
+        type: entry
+        required: true
+      - name: planKey
+        label: Plan Key
+        documentation: Short name of plan to get details.
+        type: entry
+        required: true
+      - name: waitForBuild
+        label: Wait For Build
+        documentation: If checked, procedure will sequentually request for the state of Run until it is finished.
+        type: checkbox
+        initiallyChecked: true
+        checkedValue: 1
+        uncheckedValue: 0
+        required: true
+      - name: waitTimeout
+        label: Wait Timeout
+        documentation: Maximum time to wait for the run to be finished.
+        type: entry
+        value: 300
+        required: false
+      - name: resultFormat
+        label: Result Format
+        documentation: Format to save the results.
+        type: select
+        required: false
+        value: json
+        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet'}, { name: 'Do not save the result', value: 'none' }]
+      - name: resultPropertySheet
+        label: Result Property Sheet
+        documentation: Property sheet to store the results.
+        value: /myJob/runResult
+        type: entry
+        required: false
+    outputParameters: {planKeys: 'List of comma-separated plan keys.'}
+
+  - name: EnablePlan
+    description: Enables build plan.
+    hasConfig: true # configuration field will be generated automatically
+    shell: ec-perl
+    parameters:
+      - name: projectKey
+        label: Project Key
+        documentation: Project key (short name) of project that contains build plan.
+        type: entry
+        required: true
+      - name: planKey
+        label: Plan Key
+        documentation: Short name of plan.
+        type: entry
+        required: true
+
+  - name: DisablePlan
+    description: Disables build plan.
+    hasConfig: true # configuration field will be generated automatically
+    shell: ec-perl
+    parameters:
+      - name: projectKey
+        label: Project Key
+        documentation: Project key (short name) of project that contains build plan.
+        type: entry
+        required: true
+      - name: planKey
+        label: Plan Key
+        documentation: Short name of plan.
+        type: entry
+        required: true
+
+  - name: TriggerDeployment
+    description: Runs deployment plan.
+    hasConfig: true # configuration field will be generated automatically
+    shell: ec-perl
+    parameters:
+      - name: deploymentProjectName
+        label: Deployment Project Name
+        documentation: Name of the deployment project.
+        type: entry
+        required: true
+      - name: deploymentEnvironmentName
+        label: Environment Name
+        documentation: Name of the environment for the deployment.
+        type: entry
+        required: true
+      - name: deploymentVersionName
+        label: Version Name
+        documentation: Name of the version to be deployed.
+        type: entry
+        required: true
+      - name: waitForDeployment
+        label: Wait For Deployment
+        documentation: If checked, procedure will sequentually request for the state of Deployment until it is finished.
+        type: checkbox
+        initiallyChecked: true
+        checkedValue: 1
+        uncheckedValue: 0
+        required: true
+      - name: waitTimeout
+        label: Wait Timeout
+        documentation: Maximum time to wait for the deployment to be finished.
+        type: entry
+        value: 300
+        required: false
+      - name: resultFormat
+        label: Result Format
+        documentation: Format to save the results.
+        type: select
+        required: false
+        value: json
+        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet'}, { name: 'Do not save the result', value: 'none' }]
+      - name: resultPropertySheet
+        label: Result Property Sheet
+        documentation: Property sheet to store the results.
+        value: /myJob/deploymentResult
+        type: entry
+        required: false
+    outputParameters: {
+      deploymentKeys: 'List of comma-separated deployment result keys.',
+      resultURL: 'URL to the deployment result report.'
+    }
+
+  - name: GetDeploymentProjectsForPlan
+    description: Requests and returns list of all deployment projects linked to this build plan.
+    hasConfig: true # configuration field will be generated automatically
+    shell: ec-perl
+    parameters:
+      - name: projectKey
+        label: Project Key
+        documentation: Project key (short name) of project that contains build plan.
+        type: entry
+        required: true
+      - name: planKey
+        label: Plan Key
+        documentation: Short name of plan.
+        type: entry
+        required: true

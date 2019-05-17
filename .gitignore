@@ -5,3 +5,8 @@ ecpluginbuilder
 .DS_Store
 build
 bin
+/temp
+/.assets
+.gradle/
+spec-report/
+logs/

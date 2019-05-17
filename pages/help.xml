@@ -1,7 +1,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta content="text/html; charset=us-ascii" http-equiv="content-type"/>
-        <title>ElectricFlow Plugin for Atlassian Bamboo</title>
+        <title>CloudBees Flow Plugin for Atlassian Bamboo</title>
         <link rel="stylesheet" href="../../plugins/@PLUGIN_KEY@/pluginhelp.css" type="text/css" media="screen" />
     </head>
     <body>
