@@ -182,7 +182,10 @@ procedures:
         value: /myJob/runResult
         type: entry
         required: false
-    outputParameters: {planKeys: 'List of comma-separated plan keys.'}
+    outputParameters: {
+      buildResultKey: 'Composite key for the Run Result.',
+      buildUrl: 'Link to the result page.'
+    }
 
   - name: EnablePlan
     description: Enables build plan.

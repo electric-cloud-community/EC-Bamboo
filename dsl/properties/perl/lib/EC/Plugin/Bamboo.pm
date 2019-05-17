@@ -104,19 +104,32 @@ sub REST_newRequest {
 }
 
 sub REST_doRequest {
-    my ($self, $path, $query_params, $content) = @_;
+    my ($self, $method, $path, $query_params, $content, $params) = @_;
 
     my ECPDF::Client::REST $rest = $self->{restClient};
 
-    my HTTP::Request $request = $self->REST_newRequest('GET', $path, $query_params, $content);
+    my HTTP::Request $request = $self->REST_newRequest($method, $path, $query_params, $content);
     logTrace("Request", $request);
 
     my HTTP::Response $response = $rest->doRequest($request);
     logTrace("Response", $response);
 
     if (!$response->is_success) {
-        logDebug("Requested " . $request->uri);
-        $self->exit_with_error("Error while performing request. " . $response->status_line);
+        # Error handling
+        if ($params->{errorHook}) {
+            if ($params->{errorHook}{$response->code()}) {
+                return &{$params->{errorHook}{$response->code()}}($self, $response);
+            }
+            elsif ($params->{errorHook}{default}) {
+                return &{$params->{errorHook}{default}}($self, $response);
+            }
+            # Else proceed with usual logic
+        }
+
+        if (!$params->{ignoreErrors}) {
+            logDebug("Requested " . $request->uri);
+            $self->exit_with_error("Error while performing request. " . $response->status_line);
+        }
     }
 
     my $result = $response->decoded_content();
@@ -143,7 +156,7 @@ sub getAllPlans {
     # Requesting and formatting information
     my @infoToSave = ();
     if (!$params->{projectKey}) {
-        my $response = $self->REST_doRequest('/project', { expand => 'projects.project.plans.plan' });
+        my $response = $self->REST_doRequest('GET', '/project', { expand => 'projects.project.plans.plan' });
         for my $project (@{$response->{projects}{project}}) {
             logInfo("Found project: '$project->{key}'");
 
@@ -154,7 +167,7 @@ sub getAllPlans {
         }
     }
     else {
-        my $response = $self->REST_doRequest('/project/' . $params->{projectKey}, { expand => 'plans.plan' });
+        my $response = $self->REST_doRequest('GET', '/project/' . $params->{projectKey}, { expand => 'plans.plan' });
         logInfo("Found project: '$response->{key}'");
         for my $plan (@{$response->{plans}{plan}}) {
             logInfo("Found plan: '$plan->{key}'");
@@ -238,25 +251,106 @@ sub getPlanRuns {
 # Auto-generated method for the procedure RunPlan/RunPlan
 # Add your code into this method and it will be called when step runs
 sub runPlan {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
+    my ($self, $params, $stepResult) = @_;
+    $self->init($params);
 
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
+    # Setting default values
+    $params->{waitTimeout} ||= 300;
+    $params->{resultFormat} ||= 'json';
+    $params->{resultPropertySheet} ||= '/myJob/runResult';
 
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
+    my %queueRequestParams = (
+        executeAllStages => 'true'
+    );
+    $queueRequestParams{customRevision} = $params->{branch} if $params->{branch};
 
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
+    my $queueRequestPath = "/queue/$params->{projectKey}-$params->{planKey}";
 
+    # Perform request to run the build
+    my $queueResponse = $self->REST_doRequest('POST', $queueRequestPath, \%queueRequestParams);
+    # TODO: error handling
+
+    my $buildNumber = $queueResponse->{buildNumber};
+
+    logInfo("Build Number: $buildNumber.\nBuild Result Key: $queueResponse->{buildResultKey}.");
+
+    # TODO: set Flow URL property
+
+    $stepResult->setOutputParameter('buildUrl', $queueResponse->{link}{href});
+    $stepResult->setOutputParameter('buildResultKey', $queueResponse->{buildResultKey});
+
+    if ($params->{waitForBuild}) {
+        my $statusRequestPath = '/result/status/' . $queueResponse->{buildResultKey};
+
+        my $waited = 0;
+        my $sleepTime = 5;
+        my $finished;
+        while (!$finished && $waited <= $params->{waitTimeout}) {
+            # Request status
+            my $status = $self->REST_doRequest('GET', $statusRequestPath, {}, {
+                # Request will return 404 if build is not running
+                errorHook => { 404 => sub {return { finished => 'true' }} }
+            });
+
+            # Check status (this could be moved to 404 handler, but this way is clearer)
+            if ($status->{finished}) {
+                $finished = 1;
+                logInfo("Build finished");
+                last;
+            }
+
+            logInfo("Current Stage: '$status->{currentStage}'."
+                . "Approximate Completed: $status->{progress}{prettyTimeRemainingLong}"
+                . "Time remaining: '$status->{progress}{percentageCompletedPretty}'"
+            );
+
+            # Updating progress property
+            $stepResult->setJobStepOutcome("Approximate Completed: $status->{progress}{percentageCompletedPretty}");
+            $stepResult->applyAndFlush();
+
+            logInfo("Waiting $sleepTime second(s) before requesting the status again.");
+            $waited += $sleepTime;
+            sleep $sleepTime;
+        }
+
+        if (!$finished) {
+            $stepResult->setJobStepOutcome('warning');
+            $stepResult->setJobStepSummary('Exceeded the wait timeout and build was not finished yet.');
+            $stepResult->setJobSummary('Exceeded the wait timeout and build was not finished yet.');
+            $stepResult->apply();
+        }
+    }
+
+    # Get build info
+    #/result/{projectKey}-{buildKey}-{buildNumber : ([0-9]+)|(latest)}?expand&favourite&start-index&max-results
+    my $buildInfo = $self->REST_doRequest('GET', "/result/$queueResponse->{buildResultKey}");
+    my $infoToSave = planBuildToShortInfo($buildInfo);
+
+    # Save properties
+    $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $infoToSave);
+
+    if (!$params->{waitForBuild}) {
+        $stepResult->setJobStepOutcome('success');
+        $stepResult->setJobSummary("Build was successfully added to a queue.");
+        $stepResult->setJobStepSummary('Build was successfully added to a queue.');
+        $stepResult->apply();
+        return;
+    }
+
+    if ($infoToSave->{finished} && !$infoToSave->{successful}) {
+        $stepResult->setJobStepOutcome('warning');
+        $stepResult->setJobSummary("Build was not finished successfully");
+        $stepResult->setJobStepSummary('Build was not finished successfully');
+        $stepResult->apply();
+        return;
+    }
+
+    $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobSummary("Build result information saved to the properties");
+    $stepResult->setJobStepSummary('Build result information saved to the properties');
     $stepResult->apply();
 }
+
 # Auto-generated method for the procedure EnablePlan/EnablePlan
 # Add your code into this method and it will be called when step runs
 sub enablePlan {
@@ -376,6 +470,47 @@ sub planToShortInfo {
     $shortInfo{stagesSize} = $plan->{stages}{size};
 
     return \%shortInfo;
+}
+
+sub planBuildToShortInfo {
+    my ($buildInfo) = @_;
+
+    my @oneToOne = qw/
+        key
+        buildNumber
+        buildState
+        finished
+        successful
+        lifeCycleState
+
+        planName
+        projectName
+
+        vcsRevisionKey
+
+        buildTestSummary
+        successfulTestCount
+        failedTestCount
+        skippedTestCount
+        quarantinedTestCount
+
+        buildStartedTime
+        buildCompletedTime
+    /;
+
+    my %result = (
+        url => $buildInfo->{link}{href},
+    );
+
+    if ($buildInfo->{artifacts}{size}) {
+        $result{artifacts} = $buildInfo->{artifacts}{artifact};
+    }
+
+    for (@oneToOne) {
+        $result{$_} = $buildInfo->{$_};
+    }
+
+    return \%result;
 }
 
 sub saveResultProperties {
