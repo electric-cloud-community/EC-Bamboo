@@ -339,7 +339,6 @@ sub runPlan {
             $stepResult->setJobStepOutcome('warning');
             $stepResult->setJobStepSummary('Exceeded the wait timeout while waiting for the build to finish.');
             $stepResult->setJobSummary('Exceeded the wait timeout while waiting for the build to finish.');
-            $stepResult->apply();
             return;
         }
     }
@@ -356,7 +355,6 @@ sub runPlan {
         $stepResult->setJobStepOutcome('success');
         $stepResult->setJobSummary("Build was successfully added to a queue.");
         $stepResult->setJobStepSummary('Build was successfully added to a queue.');
-        $stepResult->apply();
         return;
     }
     # Failed build
@@ -364,15 +362,13 @@ sub runPlan {
         $stepResult->setJobStepOutcome('warning');
         $stepResult->setJobSummary("Build was not finished successfully");
         $stepResult->setJobStepSummary('Build was not finished successfully');
-        $stepResult->apply();
         return;
     }
     # Build that was not started
-    elsif (!$infoToSave->{finished} && $infoToSave->{buildState} eq 'Unknown'){
+    elsif (!$infoToSave->{finished} && $infoToSave->{buildState} eq 'Unknown') {
         $stepResult->setJobStepOutcome('warning');
         $stepResult->setJobSummary("Build was not started.");
         $stepResult->setJobStepSummary('Build was not started (probably because of compilation errors)');
-        $stepResult->apply();
         return;
     }
 
@@ -482,7 +478,7 @@ sub defaultErrorHandler {
 
     $stepResult->setJobStepOutcome('error');
     $stepResult->setJobStepSummary($decoded->{message});
-    $stepResult->setJobSummary('Failed to start the build.');
+    $stepResult->setJobSummary("Error happened while performing the operation: '$decoded->{message}'");
     $stepResult->apply();
 
     return;
@@ -594,7 +590,7 @@ sub saveResultProperties {
         }
     }
 
-    $stepResult->apply();
+
 
     return;
 }
