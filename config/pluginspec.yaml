@@ -42,7 +42,6 @@ configuration:
       uncheckedValue: false
       initiallyChecked: 1
     - name: debugLevel
-      # This parameter name "debugLevel" is supported by ECPDF Logger out of the box
       label: Debug Level
       type: select
       required: 0
@@ -58,7 +57,7 @@ configuration:
 procedures:
   - name: GetAllPlans
     description: Returns all plans that are available for current user.
-    hasConfig: true # configuration field will be generated automatically
+    hasConfig: true
     shell: ec-perl
     parameters:
       - name: projectKey
@@ -83,7 +82,7 @@ procedures:
 
   - name: GetPlanDetails
     description: Gets build plan details.
-    hasConfig: true # configuration field will be generated automatically
+    hasConfig: true
     shell: ec-perl
     parameters:
       - name: projectKey
@@ -112,7 +111,7 @@ procedures:
 
   - name: GetPlanRuns
     description: Returns information about build plan runs byt project key and plan key.
-    hasConfig: true # configuration field will be generated automatically
+    hasConfig: true
     shell: ec-perl
     parameters:
       - name: projectKey
@@ -142,7 +141,7 @@ procedures:
 
   - name: RunPlan
     description: Runs build plan by plan key and project key.
-    hasConfig: true # configuration field will be generated automatically
+    hasConfig: true
     shell: ec-perl
     parameters:
       - name: projectKey
@@ -152,9 +151,29 @@ procedures:
         required: true
       - name: planKey
         label: Plan Key
-        documentation: Short name of plan to get details.
+        documentation: Short key of plan to run.
         type: entry
         required: true
+      - name: customRevision
+        label: Custom Revision
+        type: entry
+        documentation: Run a build against a custom branch (revision).
+        required: false
+      - name: additionalBuildVariables
+        label: Additional Variables
+        htmlDocumentation: |
+          Additional variables for this Run specified as name-value pairs, with 1 pair per line. <br/>If not specified, the default variables for the definition will be used. <br/>Example: <br/>
+            <b>system.debug=true</b> <br/>
+            <b>BuildConfiguration=debug</b> <br/>
+            <b>BuildPlatform=x64</b> <br/>
+           Variables defined in Bamboo as global variables or plan variables MUST be prefixed with bamboo.variable ie. bamboo.variable.myVariable=valueForMyVariable
+        type: textarea
+        required: false
+        collection: 1
+        collectionName: Parameter name
+        collectionValue: Parameter value
+        collectionEntrySeparator: ;#;#;#
+        collectionValueSeparator: =
       - name: waitForBuild
         label: Wait For Build
         documentation: If checked, procedure will sequentually request for the state of Run until it is finished.
@@ -189,7 +208,7 @@ procedures:
 
   - name: EnablePlan
     description: Enables build plan.
-    hasConfig: true # configuration field will be generated automatically
+    hasConfig: true
     shell: ec-perl
     parameters:
       - name: projectKey
@@ -205,7 +224,7 @@ procedures:
 
   - name: DisablePlan
     description: Disables build plan.
-    hasConfig: true # configuration field will be generated automatically
+    hasConfig: true
     shell: ec-perl
     parameters:
       - name: projectKey
@@ -221,7 +240,7 @@ procedures:
 
   - name: TriggerDeployment
     description: Runs deployment plan.
-    hasConfig: true # configuration field will be generated automatically
+    hasConfig: true
     shell: ec-perl
     parameters:
       - name: deploymentProjectName
@@ -273,7 +292,7 @@ procedures:
 
   - name: GetDeploymentProjectsForPlan
     description: Requests and returns list of all deployment projects linked to this build plan.
-    hasConfig: true # configuration field will be generated automatically
+    hasConfig: true
     shell: ec-perl
     parameters:
       - name: projectKey

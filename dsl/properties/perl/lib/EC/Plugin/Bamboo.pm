@@ -117,7 +117,7 @@ sub REST_doRequest {
     my $result = $response->decoded_content();
     if ($self->{restDecode}) {
         $result = eval {&{$self->{restDecode}}($result)};
-        if ($@){
+        if ($@) {
             logWarning("Failed to decode response content: $@.");
         }
     }
@@ -251,8 +251,7 @@ sub getPlanRuns {
 
     $stepResult->apply();
 }
-# Auto-generated method for the procedure RunPlan/RunPlan
-# Add your code into this method and it will be called when step runs
+
 sub runPlan {
     my ($self, $params, $stepResult) = @_;
     $self->init($params);
@@ -265,7 +264,15 @@ sub runPlan {
     my %queueRequestParams = (
         executeAllStages => 'true'
     );
-    $queueRequestParams{customRevision} = $params->{branch} if $params->{branch};
+
+    # Additional parameter
+    if ($params->{additionalBuildVariables}) {
+        my $buildParams = parse_key_value_pairs($params->{additionalBuildVariables});
+        $queueRequestParams{$_} = $buildParams->{$_} for (keys %$buildParams);
+    }
+
+    # Custom revision
+    $queueRequestParams{customRevision} = $params->{customRevision} if $params->{customRevision};
 
     my $queueRequestPath = "/queue/$params->{projectKey}-$params->{planKey}";
 
@@ -274,14 +281,13 @@ sub runPlan {
         errorHook => {
             # Concurrent limit will cause 400
             default => sub {
-               my (undef, $response, $decoded) = @_;
-               return $self->defaultErrorHandler($response, $decoded, $stepResult);
+                my (undef, $response, $decoded) = @_;
+                return $self->defaultErrorHandler($response, $decoded, $stepResult);
             }
         }
     });
-    if (!$queueResponse) {
+    if (!defined $queueResponse) {
         logDebug("Empty queueResponse. Assuming it was handled by errorHook");
-        return unless $queueResponse;
     }
 
     my $buildNumber = $queueResponse->{buildNumber};
@@ -297,7 +303,7 @@ sub runPlan {
 
         my $waited = 0;
         my $sleepTime = 5;
-        my $finished;
+        my $finished = 0;
         while (!$finished && $waited <= $params->{waitTimeout}) {
             # Request status
             my $status = $self->REST_doRequest('GET', $statusRequestPath, {}, undef, {
@@ -305,19 +311,19 @@ sub runPlan {
                 errorHook => { 404 => sub {return { finished => 'true' }} }
             });
 
-            # Check status (this could be moved to 404 handler, but this way is clearer)
+            # Check status (this could be moved to 404 handler, but this way it is clearer)
             if ($status->{finished}) {
                 $finished = 1;
                 # Updating progress property
-                $stepResult->setJobStepSummary("Completed: 100%. Requesting build result.");
+                $stepResult->setJobStepSummary("Build is finished. Requesting build result.");
                 $stepResult->applyAndFlush();
                 logInfo("Build finished");
                 last;
             }
 
-            logInfo("Current Stage: '". ($status->{currentStage} || 'Not available yet') ."'. "
-                . "Approximate Completed: $status->{progress}{prettyTimeRemainingLong}. "
-                . "Time remaining: '$status->{progress}{percentageCompletedPretty}'"
+            logInfo("Current Stage: '" . ($status->{currentStage} || 'Not available yet') . "'. "
+                . "Approximate Completed: $status->{progress}{percentageCompletedPretty}. "
+                . "$status->{progress}{prettyTimeRemainingLong}"
             );
 
             # Updating progress property
@@ -329,7 +335,7 @@ sub runPlan {
             sleep $sleepTime;
         }
 
-        if (!$finished) {
+        if ($finished == 0) {
             $stepResult->setJobStepOutcome('warning');
             $stepResult->setJobStepSummary('Exceeded the wait timeout while waiting for the build to finish.');
             $stepResult->setJobSummary('Exceeded the wait timeout while waiting for the build to finish.');
@@ -353,11 +359,19 @@ sub runPlan {
         $stepResult->apply();
         return;
     }
-
-    if ($infoToSave->{finished} && !$infoToSave->{successful}) {
+    # Failed build
+    elsif ($infoToSave->{finished} && !$infoToSave->{successful}) {
         $stepResult->setJobStepOutcome('warning');
         $stepResult->setJobSummary("Build was not finished successfully");
         $stepResult->setJobStepSummary('Build was not finished successfully');
+        $stepResult->apply();
+        return;
+    }
+    # Build that was not started
+    elsif (!$infoToSave->{finished} && $infoToSave->{buildState} eq 'Unknown'){
+        $stepResult->setJobStepOutcome('warning');
+        $stepResult->setJobSummary("Build was not started.");
+        $stepResult->setJobStepSummary('Build was not started (probably because of compilation errors)');
         $stepResult->apply();
         return;
     }
@@ -575,7 +589,6 @@ sub saveResultProperties {
             # TODO: remove when ECPDF-44 resolved
             $value ||= '0E0';
 
-
             logDebug("Saving property '$property' with value '$value'");
             $stepResult->setOutcomeProperty($property, $value);
         }
@@ -644,6 +657,29 @@ sub transformToProperties {
     }
 
     return \%result;
+}
+
+sub parse_key_value_pairs {
+    my ($raw_attributes) = @_;
+
+    my %pairs = ();
+
+    # Parse given attributes
+    eval {
+        # Splitting by both '\n' and ';#;#;#' (Flow UI will send \\\n)
+        my @attributes = split(/\n|(?:;#){3}/, $raw_attributes);
+        foreach my $attribute_pair (@attributes) {
+            my ($name, $value) = split('=', $attribute_pair, 2);
+            $pairs{$name} = $value;
+        }
+        1;
+    };
+    if ($@) {
+        logError("Failed to parse custom attributes : $@");
+        return 0;
+    };
+
+    return \%pairs;
 }
 
 1;

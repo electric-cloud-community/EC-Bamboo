@@ -1,7 +1,10 @@
 package com.electriccloud.plugin.spec
 
 import com.electriccloud.plugins.annotations.Sanity
-import spock.lang.*
+import spock.lang.IgnoreRest
+import spock.lang.Shared
+import spock.lang.Stepwise
+import spock.lang.Unroll
 
 @Stepwise
 class RunPlan extends PluginTestHelper {
@@ -10,26 +13,43 @@ class RunPlan extends PluginTestHelper {
     static String projectName = "EC-Specs $procedureName"
 
     static def procedureParams = [
-            config             : '',
-            projectKey         : '',
-            planKey            : '',
-            waitForBuild       : '',
-            waitTimeout        : '',
-            resultFormat       : '',
-            resultPropertySheet: ''
+            config                  : '',
+            projectKey              : '',
+            planKey                 : '',
+            customRevision          : '',
+            additionalBuildVariables: '',
+            waitForBuild            : '',
+            waitTimeout             : '',
+            resultFormat            : '',
+            resultPropertySheet     : ''
     ]
 
-    static bambooProjects = [
+    static def bambooProjects = [
             valid     : 'PROJECT',
             unexisting: "__UNEXISTING__",
             empty     : ''
     ]
 
-    static bambooPlans = [
-            valid     : 'PLAN',
-            failing   : 'FAILING',
-            unexisting: "__UNEXISTING__",
-            empty     : ''
+    static def bambooPlans = [
+            valid       : 'PLAN',
+            failing     : 'FAIL',
+            timeout     : 'LONG',
+            parametrized: 'PARAMS',
+            unexisting  : "__UNEXISTING__",
+            empty       : ''
+    ]
+
+    static def revisions = [
+            valid     : 'master',
+            valid_hash: '9b75c7ffe8a787cf8f5b879638946ed4be29f2b3',
+            mailformed: 'MAILFORMED',
+            unexisting: 'unexisiting'
+    ]
+
+    static def buildParameters = [
+            valid              : "bamboo.variable.TEST_MESSAGE=hello\nbamboo.variable.FAIL_MESSAGE=Expected failure",
+            valid_flow_fallback: "bamboo.variable.TEST_MESSAGE=hello;#;#;#bamboo.variable.FAIL_MESSAGE=Expected failure",
+            timeout            : "bamboo.variable.TEST_MESSAGE=hello\nbamboo.variable.SLEEP_TIME=35"
     ]
 
     static defaultResultPropertyPath = 'runResult'
@@ -87,7 +107,6 @@ class RunPlan extends PluginTestHelper {
                 projectKey         : project,
                 planKey            : plan,
                 waitForBuild       : waitForBuild,
-                waitTimeout        : '',
                 resultFormat       : resultFormat,
                 resultPropertySheet: resultPropertySheet
         ]
@@ -125,28 +144,25 @@ class RunPlan extends PluginTestHelper {
         caseId       | waitForBuild | resultFormat    | resultPropertyPath
         'CHANGEME_1' | 0            | 'json'          | ''
         'CHANGEME_2' | 1            | 'propertySheet' | ''
-
-
     }
 
-    @Sanity
     @Unroll
     def "#caseId. RunPlan - Negative"() {
         given:
-        def project = bambooProjects[projectKey]
+        def project = bambooProjects['valid']
         def plan = bambooPlans[planKey]
 
-        def resultFormat = 'propertySheet'
-        def resultPropertyPath = defaultResultPropertyPath
-
+        def resultFormat = 'none'
         def procedureParams = [
-                config             : CONFIG_NAME,
-                projectKey         : project,
-                planKey            : plan,
-                waitForBuild       : waitForBuild,
-                waitTimeout        : waitTimeout,
-                resultFormat       : resultFormat,
-                resultPropertySheet: resultPropertySheet
+                config                  : CONFIG_NAME,
+                projectKey              : project,
+                planKey                 : plan,
+                customRevision          : '',
+                additionalBuildVariables: '',
+                waitForBuild            : waitForBuild,
+                waitTimeout             : waitTimeout,
+                resultFormat            : resultFormat,
+                resultPropertySheet     : resultPropertySheet
         ]
 
         when:
@@ -155,23 +171,92 @@ class RunPlan extends PluginTestHelper {
         then:
         println(getJobLink(result.jobId))
         assert result.outcome == expectedOutcome
-        assert getJobProperty("/myJob/steps/RunProcedure/steps/$procedureName/summary", result.jobId) =~ expectedSummary
-//        assert getJobUpperStepSummary(result.jobId) =~ expectedSummary
-
-        // TODO: Check logs
-//        if (project) {
-//            assert result.logs =~ /Found project: '$project'/
-//        }
-
+        assert getJobStepSummary(procedureName, result.jobId) =~ expectedSummary
 
         where:
-        caseId       | projectKey | planKey      | waitForBuild | waitTimeout | expectedOutcome | expectedSummary
+        caseId       | planKey      | waitForBuild | waitTimeout | expectedOutcome | expectedSummary
         // Unexisiting plan key
-        'CHANGEME_3' | 'valid'    | 'unexisting' | 0            | ''          | 'error'         | 'not found'
+        'CHANGEME_3' | 'unexisting' | 0            | 0           | 'error'         | 'not found'
         // Timeout
-        'CHANGEME_4' | 'valid'    | 'valid'      | 1            | 1           | 'warning'       | 'Exceeded the wait timeout'
-        // TODO: run build that will fail
-//        'CHANGEME_4' | 'valid'    | 'failing'       | 1            | 300           | 'warning'       | 'bla-bla-bla'
+        'CHANGEME_4' | 'timeout'    | 1            | 1           | 'warning'       | 'Exceeded the wait timeout'
+        // Failing
+        'CHANGEME_5' | 'failing'    | 1            | 0           | 'warning'       | 'Build was not finished successfully'
+    }
+
+    @Unroll
+    def "#caseId. RunPlan - Custom revisions"() {
+        given:
+        def project = bambooProjects['valid']
+        def plan = bambooPlans['valid']
+        def revision = revisions[customRevision]
+
+        def procedureParams = [
+                config                  : CONFIG_NAME,
+                projectKey              : project,
+                planKey                 : plan,
+                customRevision          : revision,
+                additionalBuildVariables: '',
+                waitForBuild            : 1,
+                waitTimeout             : 0,
+                resultFormat            : 'none',
+                resultPropertySheet     : resultPropertySheet
+        ]
+
+        when:
+        def result = runProcedure(projectName, procedureName, procedureParams)
+
+        then:
+        println(getJobLink(result.jobId))
+        assert result.outcome == expectedOutcome
+        assert getJobStepSummary(procedureName, result.jobId) =~ expectedSummary
+
+        where:
+        caseId       | customRevision | expectedOutcome | expectedSummary
+        'CHANGEME_6' | 'valid'        | 'success'       | 'Build result information saved to the properties'
+        'CHANGEME_7' | 'valid_hash'   | 'success'       | 'Build result information saved to the properties'
+        'CHANGEME_8' | 'mailformed'   | 'warning'       | 'Build was not started'
+        'CHANGEME_9' | 'unexisting'   | 'warning'       | 'Build was not started'
+    }
+
+    @Unroll
+    def "#caseId. RunPlan - Additional Parameters"() {
+        given:
+        def project = bambooProjects['valid']
+        def plan = bambooPlans['parametrized']
+
+        def additionalBuildVariables = buildParameters[parametersCase]
+        assert additionalBuildVariables
+
+        def procedureParams = [
+                config                  : CONFIG_NAME,
+                projectKey              : project,
+                planKey                 : plan,
+                customRevision          : '',
+                additionalBuildVariables: additionalBuildVariables,
+                waitForBuild            : 1,
+                waitTimeout             : 15,
+                resultFormat            : 'none',
+                resultPropertySheet     : resultPropertySheet
+        ]
+
+        when:
+        def result = runProcedure(projectName, procedureName, procedureParams)
+
+        then:
+        println(getJobLink(result.jobId))
+        assert result.outcome == expectedOutcome
+        assert getJobStepSummary(procedureName, result.jobId) =~ expectedSummary
+
+        cleanup:
+        if (parametersCase == 'timeout') {
+            println("Waiting for the build to finish")
+            Thread.sleep(30 * 1000)
+        }
+        where:
+        caseId        | parametersCase        | expectedOutcome | expectedSummary
+        'CHANGEME_10' | 'valid'               | 'warning'       | 'Build was not finished successfully'
+        'CHANGEME_11' | 'valid_flow_fallback' | 'warning'       | 'Build was not finished successfully'
+        'CHANGEME_12' | 'timeout'             | 'warning'       | 'Exceeded the wait timeout'
     }
 
 }

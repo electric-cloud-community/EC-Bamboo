@@ -24,8 +24,32 @@
     <type>entry</type>
     <property>planKey</property>
     <required>1</required>
-    <documentation>Short name of plan to get details.</documentation>
+    <documentation>Short key of plan to run.</documentation>
     <label>Plan Key:</label>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>customRevision</property>
+    <required>0</required>
+    <documentation>Run a build against a custom branch (revision).</documentation>
+    <label>Custom Revision:</label>
+  </formElement>
+  <formElement>
+    <type>textarea</type>
+    <property>additionalBuildVariables</property>
+    <required>0</required>
+    <htmlDocumentation>Additional variables for this Run specified as name-value pairs, with 1 pair per line. &lt;br/&gt;If not specified, the default variables for the definition will be used. &lt;br/&gt;Example: &lt;br/&gt;
+  &lt;b&gt;bamboo.variable.system.debug=true&lt;/b&gt; &lt;br/&gt;
+  &lt;b&gt;bamboo.variable.BuildConfiguration=debug&lt;/b&gt; &lt;br/&gt;
+  &lt;b&gt;bamboo.variable.BuildPlatform=x64&lt;/b&gt; &lt;br/&gt;
+ Variables defined in Bamboo as global variables or plan variables MUST be prefixed with bamboo.variable ie. bamboo.variable.myVariable=valueForMyVariable
+</htmlDocumentation>
+    <label>Additional Variables:</label>
+    <collection>1</collection>
+    <collectionEntrySeparator>;#;#;#</collectionEntrySeparator>
+    <collectionName>Parameter name</collectionName>
+    <collectionValue>Parameter value</collectionValue>
+    <collectionValueSeparator>=</collectionValueSeparator>
   </formElement>
   <formElement>
     <type>checkbox</type>

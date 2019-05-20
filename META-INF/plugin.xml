@@ -6,7 +6,7 @@
   <category>Build</category>
   <description>CloudBees Flow Plugin for Atlassian Bamboo</description>
   <configure>ec_config</configure>
-  <version>1.5.0</version>
+  <version>1.5.0.0</version>
   <authorUrl>http://www.electric-cloud.com/support</authorUrl>
   <help>help.xml</help>
   <depends min='1.4.1'>EC-PluginManager</depends>
