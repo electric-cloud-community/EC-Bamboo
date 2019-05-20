@@ -5,13 +5,13 @@ use base qw/ECPDF/;
 use Data::Dumper;
 # Feel free to use new libraries here, e.g. use File::Temp;
 
-use ECPDF::Log;
-use ECPDF::Helpers qw/bailOut/;
+use FlowPDF::Log;
+use FlowPDF::Helpers qw/bailOut/;
 use JSON qw/decode_json/;
 
 # Service function that is being used to set some metadata for a plugin.
 sub pluginInfo {
-    $ECPDF::Log::LOG_TO_PROPERTY = '/myJob/debug_logs';
+    FlowPDF::Log::setLogToProperty('/myJob/debug_logs');
 
     return {
         pluginName      => '@PLUGIN_KEY@',
@@ -24,7 +24,7 @@ sub pluginInfo {
 sub init {
     my ($self, $params) = @_;
 
-    my ECPDF::Context $context = $self->getContext();
+    my FlowPDF::Context $context = $self->getContext();
     my $config_values = $context->getConfigValues($params->{config});
 
     # Will add
@@ -58,7 +58,7 @@ sub REST_newRequest {
 
     my $config = $self->config();
 
-    my ECPDF::Client::REST $rest = $self->{restClient};
+    my FlowPDF::Client::REST $rest = $self->{restClient};
 
     my $path_base = $config->getRequiredParameter('endpoint')->getValue();
     if ($self->{restAPIBase}) {
@@ -106,7 +106,7 @@ sub REST_newRequest {
 sub REST_doRequest {
     my ($self, $method, $path, $query_params, $content, $params) = @_;
 
-    my ECPDF::Client::REST $rest = $self->{restClient};
+    my FlowPDF::Client::REST $rest = $self->{restClient};
 
     my HTTP::Request $request = $self->REST_newRequest($method, $path, $query_params, $content);
     logTrace("Request", $request);
@@ -150,7 +150,7 @@ sub REST_doRequest {
 sub getAllPlans {
     my ECPDF $self = shift;
     my $params = shift;
-    my ECPDF::StepResult $stepResult = shift;
+    my FlowPDF::StepResult $stepResult = shift;
     $self->init($params);
 
     # Setting default parameters
