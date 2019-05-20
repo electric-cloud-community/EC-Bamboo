@@ -9,9 +9,12 @@ procedure 'RunPlan', description: 'Runs build plan by plan key and project key.'
 
     }
 
-    formalOutputParameter 'planKeys',
-        description: 'List of comma-separated plan keys.'
-// === procedure_autogen ends, checksum: 686f4ac060e9a77c24933423c3681ddf ===
+    formalOutputParameter 'buildResultKey',
+        description: 'Composite key for the Run Result.'
+
+    formalOutputParameter 'buildUrl',
+        description: 'Link to the result page.'
+// === procedure_autogen ends, checksum: b6ffeb4ff8a2b29a43924d4aa191f6b7 ===
 // Do not update the code above the line
 // procedure properties declaration can be placed in here, like
 // property 'property name', value: "value"

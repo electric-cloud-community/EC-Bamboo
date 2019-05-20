@@ -233,4 +233,8 @@ class PluginTestHelper extends PluginSpockTestSupport {
         return result
     }
 
+    String getJobStepSummary(String procedureName, String jobId){
+       return getJobProperty("/myJob/steps/RunProcedure/steps/$procedureName/summary", jobId)
+    }
+
 }

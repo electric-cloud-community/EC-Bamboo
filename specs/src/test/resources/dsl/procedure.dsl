@@ -11,7 +11,6 @@ project projName, {
         params.each { k, defaultValue ->
             formalParameter k, defaultValue: defaultValue, {
                 type = 'textarea'
-                expansionDeferred: true
             }
         }
 

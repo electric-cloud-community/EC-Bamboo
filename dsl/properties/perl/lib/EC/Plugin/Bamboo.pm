@@ -36,7 +36,7 @@ sub init {
     $self->{restDecode} = sub {
         my ($response_content) = @_;
         my $result = eval {JSON::decode_json($response_content)};
-        if ($@) {
+        if (defined $@ && $@ ne '') {
             $self->exit_with_error("Error while decoding JSON: $@. Got: $response_content");
         }
         return $result;
@@ -76,7 +76,7 @@ sub REST_newRequest {
         $config->getRequiredParameter('credential')->getSecretValue()
     );
 
-    if ($query_params) {
+    if (defined $query_params && ref $query_params eq 'HASH') {
         $request->uri->query_form(%$query_params);
     }
 
@@ -104,24 +104,40 @@ sub REST_newRequest {
 }
 
 sub REST_doRequest {
-    my ($self, $path, $query_params, $content) = @_;
+    my ($self, $method, $path, $query_params, $content, $params) = @_;
 
     my ECPDF::Client::REST $rest = $self->{restClient};
 
-    my HTTP::Request $request = $self->REST_newRequest('GET', $path, $query_params, $content);
+    my HTTP::Request $request = $self->REST_newRequest($method, $path, $query_params, $content);
     logTrace("Request", $request);
 
     my HTTP::Response $response = $rest->doRequest($request);
     logTrace("Response", $response);
 
-    if (!$response->is_success) {
-        logDebug("Requested " . $request->uri);
-        $self->exit_with_error("Error while performing request. " . $response->status_line);
-    }
-
     my $result = $response->decoded_content();
     if ($self->{restDecode}) {
-        $result = &{$self->{restDecode}}($result);
+        $result = eval {&{$self->{restDecode}}($result)};
+        if (defined $@ && $@ ne '') {
+            $self->exit_with_error("Failed to decode response content: $@.");
+        }
+    }
+
+    if (!$response->is_success) {
+        # Error handling
+        if ($params->{errorHook}) {
+            if ($params->{errorHook}{$response->code()}) {
+                return &{$params->{errorHook}{$response->code()}}($self, $response, $result);
+            }
+            elsif ($params->{errorHook}{default}) {
+                return &{$params->{errorHook}{default}}($self, $response, $result);
+            }
+            # Else proceed with usual logic
+        }
+
+        if (!$params->{ignoreErrors}) {
+            logDebug("Requested " . $request->uri);
+            $self->exit_with_error("Error while performing request. " . $response->status_line);
+        }
     }
 
     return $result;
@@ -143,7 +159,7 @@ sub getAllPlans {
     # Requesting and formatting information
     my @infoToSave = ();
     if (!$params->{projectKey}) {
-        my $response = $self->REST_doRequest('/project', { expand => 'projects.project.plans.plan' });
+        my $response = $self->REST_doRequest('GET', '/project', { expand => 'projects.project.plans.plan' });
         for my $project (@{$response->{projects}{project}}) {
             logInfo("Found project: '$project->{key}'");
 
@@ -154,7 +170,7 @@ sub getAllPlans {
         }
     }
     else {
-        my $response = $self->REST_doRequest('/project/' . $params->{projectKey}, { expand => 'plans.plan' });
+        my $response = $self->REST_doRequest('GET', '/project/' . $params->{projectKey}, { expand => 'plans.plan' });
         logInfo("Found project: '$response->{key}'");
         for my $plan (@{$response->{plans}{plan}}) {
             logInfo("Found plan: '$plan->{key}'");
@@ -235,28 +251,137 @@ sub getPlanRuns {
 
     $stepResult->apply();
 }
-# Auto-generated method for the procedure RunPlan/RunPlan
-# Add your code into this method and it will be called when step runs
+
 sub runPlan {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
+    my ($self, $params, $stepResult) = @_;
+    $self->init($params);
 
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
+    # Setting default values
+    $params->{waitTimeout} ||= 300;
+    $params->{resultFormat} ||= 'json';
+    $params->{resultPropertySheet} ||= '/myJob/runResult';
 
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
+    my %queueRequestParams = (
+        executeAllStages => 'true'
+    );
 
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
+    # Additional parameter
+    if ($params->{additionalBuildVariables}) {
+        my $buildParams = parseKeyValuePairs($params->{additionalBuildVariables});
+        $queueRequestParams{$_} = $buildParams->{$_} for (keys %$buildParams);
+    }
 
+    # Custom revision
+    $queueRequestParams{customRevision} = $params->{customRevision} if $params->{customRevision};
+
+    my $queueRequestPath = "/queue/$params->{projectKey}-$params->{planKey}";
+
+    # Perform request to run the build
+    my $queueResponse = $self->REST_doRequest('POST', $queueRequestPath, \%queueRequestParams, undef, {
+        errorHook => {
+            # Concurrent limit will cause 400
+            default => sub {
+                my (undef, $response, $decoded) = @_;
+                return $self->defaultErrorHandler($response, $decoded, $stepResult);
+            }
+        }
+    });
+    if (!defined $queueResponse) {
+        logDebug("Empty queueResponse. Assuming it was handled by errorHook");
+    }
+
+    my $buildNumber = $queueResponse->{buildNumber};
+    logInfo("Build Number: $buildNumber.\nBuild Result Key: $queueResponse->{buildResultKey}.");
+
+    # TODO: set Flow URL property
+
+    $stepResult->setOutputParameter('buildUrl', $queueResponse->{link}{href});
+    $stepResult->setOutputParameter('buildResultKey', $queueResponse->{buildResultKey});
+
+    if ($params->{waitForBuild}) {
+        my $statusRequestPath = '/result/status/' . $queueResponse->{buildResultKey};
+
+        my $waited = 0;
+        my $sleepTime = 5;
+        my $finished = 0;
+        while (!$finished && $waited <= $params->{waitTimeout}) {
+            # Request status
+            my $status = $self->REST_doRequest('GET', $statusRequestPath, {}, undef, {
+                # Request will return 404 if build is not running
+                errorHook => { 404 => sub {return { finished => 'true' }} }
+            });
+
+            # Check status (this could be moved to 404 handler, but this way it is clearer)
+            if ($status->{finished}) {
+                $finished = 1;
+                # Updating progress property
+                $stepResult->setJobStepSummary("Build is finished. Requesting build result.");
+                $stepResult->applyAndFlush();
+                logInfo("Build finished");
+                last;
+            }
+
+            logInfo("Current Stage: '" . ($status->{currentStage} || 'Not available yet') . "'. "
+                . "Approximate Completed: $status->{progress}{percentageCompletedPretty}. "
+                . "$status->{progress}{prettyTimeRemainingLong}"
+            );
+
+            # Updating progress property
+            $stepResult->setJobStepSummary("Approximate Completed: $status->{progress}{percentageCompletedPretty}");
+            $stepResult->applyAndFlush();
+
+            logInfo("Waiting $sleepTime second(s) before requesting the status again.");
+            $waited += $sleepTime;
+            sleep $sleepTime;
+        }
+
+        if ($finished == 0) {
+            $stepResult->setJobStepOutcome('warning');
+            $stepResult->setJobStepSummary('Exceeded the wait timeout while waiting for the build to finish.');
+            $stepResult->setJobSummary('Exceeded the wait timeout while waiting for the build to finish.');
+            $stepResult->apply();
+            return;
+        }
+    }
+
+    # Get build info
+    #/result/{projectKey}-{buildKey}-{buildNumber : ([0-9]+)|(latest)}?expand&favourite&start-index&max-results
+    my $buildInfo = $self->REST_doRequest('GET', "/result/$queueResponse->{buildResultKey}");
+    my $infoToSave = planBuildToShortInfo($buildInfo);
+
+    # Save properties
+    $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $infoToSave);
+
+    if (!$params->{waitForBuild}) {
+        $stepResult->setJobStepOutcome('success');
+        $stepResult->setJobSummary("Build was successfully added to a queue.");
+        $stepResult->setJobStepSummary('Build was successfully added to a queue.');
+        $stepResult->apply();
+        return;
+    }
+    # Failed build
+    elsif ($infoToSave->{finished} && !$infoToSave->{successful}) {
+        $stepResult->setJobStepOutcome('warning');
+        $stepResult->setJobSummary("Build was not finished successfully");
+        $stepResult->setJobStepSummary('Build was not finished successfully');
+        $stepResult->apply();
+        return;
+    }
+    # Build that was not started
+    elsif (!$infoToSave->{finished} && $infoToSave->{buildState} eq 'Unknown'){
+        $stepResult->setJobStepOutcome('warning');
+        $stepResult->setJobSummary("Build was not started.");
+        $stepResult->setJobStepSummary('Build was not started (probably because of compilation errors)');
+        $stepResult->apply();
+        return;
+    }
+
+    $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobSummary("Build result information saved to the properties");
+    $stepResult->setJobStepSummary('Build result information saved to the properties');
     $stepResult->apply();
 }
+
 # Auto-generated method for the procedure EnablePlan/EnablePlan
 # Add your code into this method and it will be called when step runs
 sub enablePlan {
@@ -347,6 +472,22 @@ sub getDeploymentProjectsForPlan {
 }
 ## === step ends ===
 
+sub defaultErrorHandler {
+    my ($self, $response, $decoded, $stepResult) = @_;
+
+    if (!$decoded || !$decoded->{message}) {
+        $decoded->{message} = 'No specific error message was returned. Check logs for details';
+        logError($response->decoded_content || 'No content returned');
+    }
+
+    $stepResult->setJobStepOutcome('error');
+    $stepResult->setJobStepSummary($decoded->{message});
+    $stepResult->setJobSummary('Failed to start the build.');
+    $stepResult->apply();
+
+    return;
+}
+
 sub planToShortInfo {
     my ($plan) = @_;
     my @oneToOne = qw/
@@ -378,15 +519,57 @@ sub planToShortInfo {
     return \%shortInfo;
 }
 
+sub planBuildToShortInfo {
+    my ($buildInfo) = @_;
+
+    my @oneToOne = qw/
+        key
+        buildNumber
+        buildState
+        finished
+        successful
+        lifeCycleState
+
+        planName
+        projectName
+
+        vcsRevisionKey
+
+        buildTestSummary
+        successfulTestCount
+        failedTestCount
+        skippedTestCount
+        quarantinedTestCount
+
+        buildStartedTime
+        buildCompletedTime
+    /;
+
+    my %result = (
+        url     => $buildInfo->{link}{href},
+        planKey => $buildInfo->{plan}{key},
+    );
+
+    if ($buildInfo->{artifacts}{size}) {
+        $result{artifacts} = $buildInfo->{artifacts}{artifact};
+    }
+
+    for (@oneToOne) {
+        $result{$_} = $buildInfo->{$_};
+    }
+
+    return \%result;
+}
+
 sub saveResultProperties {
-    my ($self, $stepResult, $resultFormat, $resultProperty, $result, $transformSub) = @_;
+    my ($self, $stepResult, $resultFormat, $resultProperty, $result) = @_;
 
     if ($resultFormat eq 'none') {
         logInfo("Will not save the results. 'Do Not Save The Result' was chosen for Result Format.");
         return;
     }
 
-    if (!$resultProperty) {
+    if (!defined $resultProperty || $resultProperty eq '') {
         bailOut("No result property was supplied to saveResultProperties()");
     }
 
@@ -401,8 +584,13 @@ sub saveResultProperties {
 
         for my $property (keys %$properties) {
             my $value = $properties->{$property};
+
+
+            # TODO: remove when ECPDF-44 resolved
+            $value ||= '0E0';
+
             logDebug("Saving property '$property' with value '$value'");
-            $stepResult->setOutcomeProperty($property, $properties->{$property});
+            $stepResult->setOutcomeProperty($property, $value);
         }
     }
 
@@ -469,6 +657,29 @@ sub transformToProperties {
     }
 
     return \%result;
+}
+
+sub parseKeyValuePairs {
+    my ($rawAttributes) = @_;
+
+    my %pairs = ();
+
+    # Parse given attributes
+    eval {
+        # Splitting by both '\n' and ';#;#;#' (Flow UI will send \\\n) - CEV-21967
+        my @attributes = split(/\n|(?:;#){3}/, $rawAttributes);
+        foreach my $attributePair (@attributes) {
+            my ($name, $value) = split('=', $attributePair, 2);
+            $pairs{$name} = $value;
+        }
+        1;
+    };
+    if (defined $@ && $@ ne '') {
+        logError("Failed to parse custom attributes : $@");
+        return 0;
+    };
+
+    return \%pairs;
 }
 
 1;
