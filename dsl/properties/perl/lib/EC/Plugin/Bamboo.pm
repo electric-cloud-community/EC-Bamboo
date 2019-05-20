@@ -580,10 +580,7 @@ sub saveResultProperties {
 
         for my $property (keys %$properties) {
             my $value = $properties->{$property};
-
-
-            # TODO: remove when ECPDF-44 resolved
-            $value ||= '0E0';
+            next if (!$value && $value ne '0');
 
             logDebug("Saving property '$property' with value '$value'");
             $stepResult->setOutcomeProperty($property, $value);
