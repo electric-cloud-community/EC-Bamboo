@@ -1,7 +1,7 @@
 package EC::Plugin::Bamboo;
 use strict;
 use warnings;
-use base qw/ECPDF/;
+use base qw/FlowPDF/;
 use Data::Dumper;
 # Feel free to use new libraries here, e.g. use File::Temp;
 
@@ -148,7 +148,7 @@ sub REST_doRequest {
 
 =cut
 sub getAllPlans {
-    my ECPDF $self = shift;
+    my FlowPDF $self = shift;
     my $params = shift;
     my FlowPDF::StepResult $stepResult = shift;
     $self->init($params);
