@@ -36,7 +36,7 @@ sub init {
     $self->{restDecode} = sub {
         my ($response_content) = @_;
         my $result = eval {JSON::decode_json($response_content)};
-        if ($@) {
+        if (defined $@ && $@ ne '') {
             $self->exit_with_error("Error while decoding JSON: $@. Got: $response_content");
         }
         return $result;
@@ -76,7 +76,7 @@ sub REST_newRequest {
         $config->getRequiredParameter('credential')->getSecretValue()
     );
 
-    if ($query_params) {
+    if (defined $query_params && ref $query_params eq 'HASH') {
         $request->uri->query_form(%$query_params);
     }
 
@@ -117,8 +117,8 @@ sub REST_doRequest {
     my $result = $response->decoded_content();
     if ($self->{restDecode}) {
         $result = eval {&{$self->{restDecode}}($result)};
-        if ($@) {
-            logWarning("Failed to decode response content: $@.");
+        if (defined $@ && $@ ne '') {
+            $self->exit_with_error("Failed to decode response content: $@.");
         }
     }
 
@@ -267,7 +267,7 @@ sub runPlan {
 
     # Additional parameter
     if ($params->{additionalBuildVariables}) {
-        my $buildParams = parse_key_value_pairs($params->{additionalBuildVariables});
+        my $buildParams = parseKeyValuePairs($params->{additionalBuildVariables});
         $queueRequestParams{$_} = $buildParams->{$_} for (keys %$buildParams);
     }
 
@@ -562,14 +562,14 @@ sub planBuildToShortInfo {
 }
 
 sub saveResultProperties {
-    my ($self, $stepResult, $resultFormat, $resultProperty, $result, $transformSub) = @_;
+    my ($self, $stepResult, $resultFormat, $resultProperty, $result) = @_;
 
     if ($resultFormat eq 'none') {
         logInfo("Will not save the results. 'Do Not Save The Result' was chosen for Result Format.");
         return;
     }
 
-    if (!$resultProperty) {
+    if (!defined $resultProperty || $resultProperty eq '') {
         bailOut("No result property was supplied to saveResultProperties()");
     }
 
@@ -659,22 +659,22 @@ sub transformToProperties {
     return \%result;
 }
 
-sub parse_key_value_pairs {
-    my ($raw_attributes) = @_;
+sub parseKeyValuePairs {
+    my ($rawAttributes) = @_;
 
     my %pairs = ();
 
     # Parse given attributes
     eval {
-        # Splitting by both '\n' and ';#;#;#' (Flow UI will send \\\n)
-        my @attributes = split(/\n|(?:;#){3}/, $raw_attributes);
-        foreach my $attribute_pair (@attributes) {
-            my ($name, $value) = split('=', $attribute_pair, 2);
+        # Splitting by both '\n' and ';#;#;#' (Flow UI will send \\\n) - CEV-21967
+        my @attributes = split(/\n|(?:;#){3}/, $rawAttributes);
+        foreach my $attributePair (@attributes) {
+            my ($name, $value) = split('=', $attributePair, 2);
             $pairs{$name} = $value;
         }
         1;
     };
-    if ($@) {
+    if (defined $@ && $@ ne '') {
         logError("Failed to parse custom attributes : $@");
         return 0;
     };

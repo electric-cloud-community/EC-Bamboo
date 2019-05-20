@@ -47,6 +47,7 @@ class RunPlan extends PluginTestHelper {
     ]
 
     static def buildParameters = [
+            // Here effective is only second parameter, so we can check parser too
             valid              : "bamboo.variable.TEST_MESSAGE=hello\nbamboo.variable.FAIL_MESSAGE=Expected failure",
             valid_flow_fallback: "bamboo.variable.TEST_MESSAGE=hello;#;#;#bamboo.variable.FAIL_MESSAGE=Expected failure",
             timeout            : "bamboo.variable.TEST_MESSAGE=hello\nbamboo.variable.SLEEP_TIME=35"
