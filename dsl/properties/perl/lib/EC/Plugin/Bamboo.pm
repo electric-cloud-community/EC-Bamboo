@@ -7,6 +7,8 @@ use Data::Dumper;
 
 use FlowPDF::Log;
 use FlowPDF::Helpers qw/bailOut/;
+use EC::Plugin::REST;
+
 use JSON qw/decode_json/;
 
 # Service function that is being used to set some metadata for a plugin.
@@ -25,124 +27,31 @@ sub init {
     my ($self, $params) = @_;
 
     my FlowPDF::Context $context = $self->getContext();
-    my $config_values = $context->getConfigValues($params->{config});
+    my $configValues = $context->getConfigValues($params->{config});
 
     # Will add
-    $self->{_config} = $config_values;
+    $self->{_config} = $configValues;
 
-    $self->{restClient} = $context->newRESTClient();
-    $self->{restAPIBase} = '/rest/api/latest/';
-    $self->{restEncode} = \&JSON::encode_json;
-    $self->{restDecode} = sub {
-        my ($response_content) = @_;
-        my $result = eval {JSON::decode_json($response_content)};
-        if (defined $@ && $@ ne '') {
-            $self->exit_with_error("Error while decoding JSON: $@. Got: $response_content");
+    $self->{restClient} = EC::Plugin::REST->new($configValues, {
+        APIBase     => '/rest/api/latest/',
+        contentType => 'json',
+        errorHook   => {
+            default => sub {
+                return $self->defaultErrorHandler(@_)
+            }
         }
-        return $result;
-    };
-
-    $self->{restHeaders} = { 'Accept' => 'application/json' };
-
+    });
 }
 
 sub config {return shift->{_config}};
+
+#@returns EC::Plugin::REST
+sub client {return shift->{restClient}};
 
 sub exit_with_error {
     my ($self, $error) = @_;
     bailOut($error);
 }
-
-sub REST_newRequest {
-    my ($self, $method, $path, $query_params, $content, $params) = @_;
-
-    my $config = $self->config();
-
-    my FlowPDF::Client::REST $rest = $self->{restClient};
-
-    my $path_base = $config->getRequiredParameter('endpoint')->getValue();
-    if ($self->{restAPIBase}) {
-        $path_base .= $self->{restAPIBase}
-    }
-    $path_base =~ s|/$||;
-
-    if (!$path =~ /^\//) {
-        $path = '/' . $path;
-    }
-
-    my HTTP::Request $request = $rest->newRequest($method, $path_base . $path);
-    $request->authorization_basic(
-        $config->getRequiredParameter('credential')->getUserName(),
-        $config->getRequiredParameter('credential')->getSecretValue()
-    );
-
-    if (defined $query_params && ref $query_params eq 'HASH') {
-        $request->uri->query_form(%$query_params);
-    }
-
-    if ($content && $self->{restEncode}) {
-        my $encoded = &{$self->{restEncode}}($content);
-        $request->content($encoded);
-    }
-
-    if ($self->{restHeaders}) {
-        while (my ($name, $value) = each %{$self->{restHeaders}}) {
-            $request->header($name, $value);
-        }
-    }
-
-    if ($self->{restRequestHook}) {
-        eval {
-            $request = &{$self->{restRequestHook}}($request);
-            1;
-        } or do {
-            $self->exit_with_error("Request hook failed: $@") unless ref $request;
-        };
-    }
-
-    return $request;
-}
-
-sub REST_doRequest {
-    my ($self, $method, $path, $query_params, $content, $params) = @_;
-
-    my FlowPDF::Client::REST $rest = $self->{restClient};
-
-    my HTTP::Request $request = $self->REST_newRequest($method, $path, $query_params, $content);
-    logTrace("Request", $request);
-
-    my HTTP::Response $response = $rest->doRequest($request);
-    logTrace("Response", $response);
-
-    my $result = $response->decoded_content();
-    if ($self->{restDecode}) {
-        $result = eval {&{$self->{restDecode}}($result)};
-        if (defined $@ && $@ ne '') {
-            $self->exit_with_error("Failed to decode response content: $@.");
-        }
-    }
-
-    if (!$response->is_success) {
-        # Error handling
-        if ($params->{errorHook}) {
-            if ($params->{errorHook}{$response->code()}) {
-                return &{$params->{errorHook}{$response->code()}}($self, $response, $result);
-            }
-            elsif ($params->{errorHook}{default}) {
-                return &{$params->{errorHook}{default}}($self, $response, $result);
-            }
-            # Else proceed with usual logic
-        }
-
-        if (!$params->{ignoreErrors}) {
-            logDebug("Requested " . $request->uri);
-            $self->exit_with_error("Error while performing request. " . $response->status_line);
-        }
-    }
-
-    return $result;
-}
-
 
 =head2 getAllPlans
 
@@ -159,7 +68,7 @@ sub getAllPlans {
     # Requesting and formatting information
     my @infoToSave = ();
     if (!$params->{projectKey}) {
-        my $response = $self->REST_doRequest('GET', '/project', { expand => 'projects.project.plans.plan' });
+        my $response = $self->client->get('/project', { expand => 'projects.project.plans.plan' });
         for my $project (@{$response->{projects}{project}}) {
             logInfo("Found project: '$project->{key}'");
 
@@ -170,7 +79,7 @@ sub getAllPlans {
         }
     }
     else {
-        my $response = $self->REST_doRequest('GET', '/project/' . $params->{projectKey}, { expand => 'plans.plan' });
+        my $response = $self->client->get('/project/' . $params->{projectKey}, { expand => 'plans.plan' });
         logInfo("Found project: '$response->{key}'");
         for my $plan (@{$response->{plans}{plan}}) {
             logInfo("Found plan: '$plan->{key}'");
@@ -207,51 +116,6 @@ sub getAllPlans {
     $stepResult->apply();
 }
 
-# Auto-generated method for the procedure GetPlanDetails/GetPlanDetails
-# Add your code into this method and it will be called when step runs
-sub getPlanDetails {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
-# Auto-generated method for the procedure GetPlanRuns/GetPlanRuns
-# Add your code into this method and it will be called when step runs
-sub getPlanRuns {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
-
 sub runPlan {
     my ($self, $params, $stepResult) = @_;
     $self->init($params);
@@ -277,10 +141,10 @@ sub runPlan {
     my $queueRequestPath = "/queue/$params->{projectKey}-$params->{planKey}";
 
     # Perform request to run the build
-    my $queueResponse = $self->REST_doRequest('POST', $queueRequestPath, \%queueRequestParams, undef, {
+    my $queueResponse = $self->client->post($queueRequestPath, \%queueRequestParams, undef, {
         errorHook => {
             # Concurrent limit will cause 400
-            default => sub {
+            400 => sub {
                 my (undef, $response, $decoded) = @_;
                 return $self->defaultErrorHandler($response, $decoded, $stepResult);
             }
@@ -301,14 +165,16 @@ sub runPlan {
     if ($params->{waitForBuild}) {
         my $statusRequestPath = '/result/status/' . $queueResponse->{buildResultKey};
 
+        # Request will return 404 if build is not running
+        my $errorHook = { 404 => sub {return { finished => 'true' }} };
+
         my $waited = 0;
         my $sleepTime = 5;
         my $finished = 0;
         while (!$finished && $waited <= $params->{waitTimeout}) {
             # Request status
-            my $status = $self->REST_doRequest('GET', $statusRequestPath, {}, undef, {
-                # Request will return 404 if build is not running
-                errorHook => { 404 => sub {return { finished => 'true' }} }
+            my $status = $self->client->get($statusRequestPath, {}, undef, {
+                errorHook => $errorHook
             });
 
             # Check status (this could be moved to 404 handler, but this way it is clearer)
@@ -345,7 +211,7 @@ sub runPlan {
 
     # Get build info
     #/result/{projectKey}-{buildKey}-{buildNumber : ([0-9]+)|(latest)}?expand&favourite&start-index&max-results
-    my $buildInfo = $self->REST_doRequest('GET', "/result/$queueResponse->{buildResultKey}");
+    my $buildInfo = $self->client->get("/result/$queueResponse->{buildResultKey}");
     my $infoToSave = planBuildToShortInfo($buildInfo);
 
     # Save properties
@@ -378,104 +244,18 @@ sub runPlan {
     $stepResult->apply();
 }
 
-# Auto-generated method for the procedure EnablePlan/EnablePlan
-# Add your code into this method and it will be called when step runs
-sub enablePlan {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
-# Auto-generated method for the procedure DisablePlan/DisablePlan
-# Add your code into this method and it will be called when step runs
-sub disablePlan {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
-# Auto-generated method for the procedure TriggerDeployment/TriggerDeployment
-# Add your code into this method and it will be called when step runs
-sub triggerDeployment {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
-# Auto-generated method for the procedure GetDeploymentProjectsForPlan/GetDeploymentProjectsForPlan
-# Add your code into this method and it will be called when step runs
-sub getDeploymentProjectsForPlan {
-    my ($pluginObject) = @_;
-    my $context = $pluginObject->newContext();
-    print "Current context is: ", $context->getRunContext(), "\n";
-    my $params = $context->getStepParameters();
-    print Dumper $params;
-
-    my $configValues = $context->getConfigValues();
-    print Dumper $configValues;
-
-    my $stepResult = $context->newStepResult();
-    print "Created stepresult\n";
-    $stepResult->setJobStepOutcome('warning');
-    print "Set stepResult\n";
-
-    $stepResult->setJobSummary("See, this is a whole job summary");
-    $stepResult->setJobStepSummary('And this is a job step summary');
-
-    $stepResult->apply();
-}
-## === step ends ===
-
 sub defaultErrorHandler {
-    my ($self, $response, $decoded, $stepResult) = @_;
+    my FlowPDF $self = shift;
+    my ($response, $decoded) = @_;
+
+    logDebug(Dumper \@_);
 
     if (!$decoded || !$decoded->{message}) {
         $decoded->{message} = 'No specific error message was returned. Check logs for details';
         logError($response->decoded_content || 'No content returned');
     }
 
+    my $stepResult = $self->getContext()->newStepResult();
     $stepResult->setJobStepOutcome('error');
     $stepResult->setJobStepSummary($decoded->{message});
     $stepResult->setJobSummary("Error happened while performing the operation: '$decoded->{message}'");
@@ -586,8 +366,6 @@ sub saveResultProperties {
             $stepResult->setOutcomeProperty($property, $value);
         }
     }
-
-
 
     return;
 }
