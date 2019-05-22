@@ -74,7 +74,7 @@ sub getAllPlans {
 
             for my $plan (@{$project->{plans}{plan}}) {
                 logInfo("Found plan: '$plan->{key}'");
-                push(@infoToSave, planToShortInfo($plan));
+                push(@infoToSave, _planToShortInfo($plan));
             }
         }
     }
@@ -83,7 +83,7 @@ sub getAllPlans {
         logInfo("Found project: '$response->{key}'");
         for my $plan (@{$response->{plans}{plan}}) {
             logInfo("Found plan: '$plan->{key}'");
-            push(@infoToSave, planToShortInfo($plan));
+            push(@infoToSave, _planToShortInfo($plan));
         }
     }
 
@@ -145,7 +145,7 @@ sub getPlanDetails {
 
     logInfo("Found plan: '$response->{key}'");
 
-    my $infoToSave = planToShortInfo($response, [ 'stages' ]);
+    my $infoToSave = _planToShortInfo($response, [ 'stages' ]);
 
     # Save to a properties
     $self->saveResultProperties(
@@ -163,6 +163,79 @@ sub getPlanDetails {
     $stepResult->setJobStepOutcome('success');
     $stepResult->setJobStepSummary('Plans found: ' . $infoToSave->{key});
     $stepResult->setJobSummary("Info about $planKey was saved to property(ies)");
+
+    $stepResult->apply();
+}
+
+
+=head2 getPlanRuns
+
+=cut
+sub getPlanRuns {
+    my FlowPDF $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    # Setting default parameters
+    $params->{resultPropertySheet} ||= '/myJob/plans';
+
+    my $planKey = "$params->{projectKey}-$params->{planKey}";
+    my %requestParameters = (
+        expand => 'results.result',
+    );
+
+    if (defined $params->{buildState} && $params->{buildState} ne 'All'){
+        $requestParameters{buildstate} = $params->{buildState};
+    }
+
+    # Requesting and formatting information
+    my @infoToSave = ();
+    my $response = $self->client->get("/result/$planKey", \%requestParameters, undef, {
+        errorHook => {
+            404 => sub {
+                $stepResult->setJobStepOutcome('warning');
+                $stepResult->setJobSummary("Plan '$planKey' was not found.");
+                $stepResult->setJobStepSummary("Plan '$planKey' was not found.");
+                return;
+            }
+        }
+    });
+    return unless defined $response;
+
+    for my $buildResult (@{$response->{results}{result}}) {
+        logInfo("Found build result: '$buildResult->{key}'");
+        push(@infoToSave, _planBuildResultToShortInfo($buildResult));
+    }
+
+    # When have no information
+    if (!@infoToSave) {
+        $stepResult->setJobStepOutcome('warning');
+        $stepResult->setJobSummary("No results found for plan");
+        $stepResult->setJobStepSummary("No results found for plan");
+        return
+    }
+
+    # Save to a properties
+    $self->saveResultProperties(
+        $stepResult,
+        $params->{resultFormat},
+        $params->{resultPropertySheet},
+        \@infoToSave
+    );
+    logInfo("Plan run(s) information was saved to properties.");
+
+    # Saving outcome properties and parameters
+    my $buildKeysStr = join(', ', map {$_->{key}} @infoToSave);
+    $stepResult->setOutputParameter('resultKeys', $buildKeysStr);
+
+    # Look for the latest key
+    my @sortedKeys = sort map {$_->{key}} @infoToSave;
+    $stepResult->setOutputParameter('latestResultKey', $sortedKeys[$#sortedKeys]);
+
+    $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobStepSummary('Plan run(s) information was saved to properties.');
+    $stepResult->setJobSummary('Plan run(s) information was saved to properties.');
 
     $stepResult->apply();
 }
@@ -263,7 +336,7 @@ sub runPlan {
     # Get build info
     #/result/{projectKey}-{buildKey}-{buildNumber : ([0-9]+)|(latest)}?expand&favourite&start-index&max-results
     my $buildInfo = $self->client->get("/result/$queueResponse->{buildResultKey}");
-    my $infoToSave = planBuildToShortInfo($buildInfo);
+    my $infoToSave = _planBuildResultToShortInfo($buildInfo);
 
     # Save properties
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $infoToSave);
@@ -315,7 +388,7 @@ sub defaultErrorHandler {
     return;
 }
 
-sub planToShortInfo {
+sub _planToShortInfo {
     my ($plan, $expanded) = @_;
     my @oneToOne = qw/
         key
@@ -365,7 +438,7 @@ sub planToShortInfo {
     return \%shortInfo;
 }
 
-sub planBuildToShortInfo {
+sub _planBuildResultToShortInfo {
     my ($buildInfo) = @_;
 
     my @oneToOne = qw/

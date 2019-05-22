@@ -49,6 +49,6 @@
     <required>0</required>
     <documentation>Property sheet to store the results.</documentation>
     <label>Result Property Sheet:</label>
-    <value>/myJob/plan/</value>
+    <value>/myJob/plan</value>
   </formElement>
 </editor>

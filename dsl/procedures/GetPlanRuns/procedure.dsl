@@ -9,9 +9,12 @@ procedure 'GetPlanRuns', description: 'Returns information about build plan runs
 
     }
 
-    formalOutputParameter 'planKeys',
-        description: 'List of comma-separated plan keys.'
-// === procedure_autogen ends, checksum: 741d02be4c0718ac6a9af85045005707 ===
+    formalOutputParameter 'resultKeys',
+        description: 'List of comma-separated plan build result keys.'
+
+    formalOutputParameter 'latestResultKey',
+        description: 'Key for the latest build run.'
+// === procedure_autogen ends, checksum: 5e68ecf518fad4eb20d519f8d47f3050 ===
 // Do not update the code above the line
 // procedure properties declaration can be placed in here, like
 // property 'property name', value: "value"
