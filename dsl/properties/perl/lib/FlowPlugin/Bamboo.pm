@@ -408,6 +408,26 @@ sub enablePlan {
     $stepResult->apply();
 }
 
+sub disablePlan {
+    my FlowPDF $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    my $planKey = "$params->{projectKey}-$params->{planKey}";
+
+    my $result = $self->client->delete("/plan/$planKey/enable");
+    return if (!defined $result || $result ne '1');
+
+    my $summary = "Plan '$planKey' was disabled.";
+
+    logInfo($summary);
+    $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobStepSummary($summary);
+    $stepResult->setJobSummary($summary);
+    $stepResult->apply();
+}
+
 sub _planToShortInfo {
     my ($plan, $expanded) = @_;
     my @oneToOne = qw/
