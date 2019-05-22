@@ -112,8 +112,12 @@ sub _call {
         return $self->processRequestError($response, $params);
     }
 
-    my $result = $response->decoded_content();
-    return $self->decodeOrDie($result);
+    my $responseContent = $response->decoded_content();
+    if ($responseContent eq '' ){
+        return 1;
+    }
+
+    return $self->decodeOrDie($responseContent);
 }
 
 sub processRequestError {
@@ -134,22 +138,20 @@ sub processRequestError {
     # 5. Bail out (moved to method to allow override)
 
     my $handlerSub;
-    if (exists $requestParams->{errorHook}) {
-        if (exists $requestParams->{errorHook}{$errorCode}) {
-            $handlerSub = $requestParams->{errorHook}{$errorCode};
-        }
-        elsif (exists $self->{errorHook}{$errorCode}) {
-            $handlerSub = $self->{errorHook}{$errorCode};
-        }
-        elsif (exists $requestParams->{errorHook}{default}) {
-            $handlerSub = $requestParams->{errorHook}{default};
-        }
-        elsif (exists $self->{errorHook}{default}) {
-            $handlerSub = $self->{errorHook}{default};
-        }
-        else {
-            $handlerSub = \&defaultErrorHandler;
-        }
+    if (exists $requestParams->{errorHook}{$errorCode}) {
+        $handlerSub = $requestParams->{errorHook}{$errorCode};
+    }
+    elsif (exists $self->{errorHook}{$errorCode}) {
+        $handlerSub = $self->{errorHook}{$errorCode};
+    }
+    elsif (exists $requestParams->{errorHook}{default}) {
+        $handlerSub = $requestParams->{errorHook}{default};
+    }
+    elsif (exists $self->{errorHook}{default}) {
+        $handlerSub = $self->{errorHook}{default};
+    }
+    else {
+        $handlerSub = \&defaultErrorHandler;
     }
 
     # Trying to parse the response
@@ -179,7 +181,7 @@ sub buildRequest {
     my FlowPDF::Client::REST $rest = $self->{restClient};
 
     my $queryParams = $params->{queryParams};
-    $self->logger->trace("Query parameters: ", $queryParams);
+    $self->logger->trace("Query parameters: ", $queryParams) if defined $queryParams;
     my $requestContent = $params->{content};
 
     # Making a copy to allow adding request specific headers

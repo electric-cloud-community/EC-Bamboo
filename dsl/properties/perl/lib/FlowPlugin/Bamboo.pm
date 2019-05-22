@@ -185,7 +185,7 @@ sub getPlanRuns {
         expand => 'results.result',
     );
 
-    if (defined $params->{buildState} && $params->{buildState} ne 'All'){
+    if (defined $params->{buildState} && $params->{buildState} ne 'All') {
         $requestParameters{buildstate} = $params->{buildState};
     }
 
@@ -386,6 +386,26 @@ sub defaultErrorHandler {
     $stepResult->apply();
 
     return;
+}
+
+sub enablePlan {
+    my FlowPDF $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    my $planKey = "$params->{projectKey}-$params->{planKey}";
+
+    my $result = $self->client->post("/plan/$planKey/enable");
+    return if (!defined $result || $result ne '1');
+
+    my $summary = "Plan '$planKey' was enabled.";
+
+    logInfo($summary);
+    $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobStepSummary($summary);
+    $stepResult->setJobSummary($summary);
+    $stepResult->apply();
 }
 
 sub _planToShortInfo {
