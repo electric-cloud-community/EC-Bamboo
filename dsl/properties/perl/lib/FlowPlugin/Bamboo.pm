@@ -116,6 +116,57 @@ sub getAllPlans {
     $stepResult->apply();
 }
 
+
+=head2 getPlanDetails
+
+=cut
+sub getPlanDetails {
+    my FlowPDF $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    # Setting default parameters
+    $params->{resultPropertySheet} ||= '/myJob/plan';
+
+    my $planKey = "$params->{projectKey}-$params->{planKey}";
+
+    my $response = $self->client->get("/plan/$planKey", { expand => 'stages.stage' }, undef, {
+        errorHook => {
+            404 => sub {
+                $stepResult->setJobStepOutcome('warning');
+                $stepResult->setJobSummary("Plan '$planKey' was not found");
+                $stepResult->setJobStepSummary("Plan '$planKey' was not found");
+                return;
+            }
+        }
+    });
+    return unless defined $response;
+
+    logInfo("Found plan: '$response->{key}'");
+
+    my $infoToSave = planToShortInfo($response, [ 'stages' ]);
+
+    # Save to a properties
+    $self->saveResultProperties(
+        $stepResult,
+        $params->{resultFormat},
+        $params->{resultPropertySheet},
+        $infoToSave
+    );
+
+    # Saving outcome properties and parameters
+    $stepResult->setOutputParameter('planKeys', $infoToSave->{key});
+
+    logInfo("Plan(s) information was saved to properties.");
+
+    $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobStepSummary('Plans found: ' . $infoToSave->{key});
+    $stepResult->setJobSummary("Info about $planKey was saved to property(ies)");
+
+    $stepResult->apply();
+}
+
 sub runPlan {
     my ($self, $params, $stepResult) = @_;
     $self->init($params);
@@ -265,7 +316,7 @@ sub defaultErrorHandler {
 }
 
 sub planToShortInfo {
-    my ($plan) = @_;
+    my ($plan, $expanded) = @_;
     my @oneToOne = qw/
         key
         name
@@ -291,6 +342,25 @@ sub planToShortInfo {
 
     $shortInfo{url} = $plan->{link}{href};
     $shortInfo{stagesSize} = $plan->{stages}{size};
+
+    if (defined $expanded && ref $expanded eq 'ARRAY') {
+        for my $section (@$expanded) {
+
+            if ($section eq 'stages' && $plan->{stages}{size} > 0) {
+                # Create copy and remove nested keys
+                my @stages = @{$plan->{stages}{stage}};
+                for my $stage (@stages) {
+                    for my $k (keys %$stage) {
+                        delete $stage->{$k} if ref $stage->{$k};
+                    }
+                }
+                # Save cleaned result
+                $shortInfo{stages} = \@stages;
+                $shortInfo{stageNames} = join(', ', map {"'$_->{name}'"} @stages);
+            }
+
+        }
+    }
 
     return \%shortInfo;
 }
