@@ -49,10 +49,12 @@ class PluginTestHelper extends PluginSpockTestSupport {
     }
 
     static String getURL() { getAssertedEnvVariable("BAMBOO_URL") }
+
     static String getUsername() { getAssertedEnvVariable("BAMBOO_USERNAME") }
+
     static String getPassword() { getAssertedEnvVariable("BAMBOO_PASSWORD") }
 
-    static String getResourceName(){
+    static String getResourceName() {
         return 'local'
     }
 
@@ -61,9 +63,9 @@ class PluginTestHelper extends PluginSpockTestSupport {
         def parametersString = parameters
                 .findAll { k, v -> v != null }
                 .collect { k, v ->
-            v = ((String) v).replace('\'', '\\\'')
-            "$k: '''$v'''"
-        }.join(', ')
+                    v = ((String) v).replace('\'', '\\\'')
+                    "$k: '''$v'''"
+                }.join(', ')
 
         def code = """
             runProcedure(
@@ -136,7 +138,7 @@ class PluginTestHelper extends PluginSpockTestSupport {
         assert result.jobId
 
         waitUntil {
-            jobCompleted result.jobId
+            jobCompleted((String) result.jobId)
         }
         def logs = getJobLogs(result.jobId)
         def outcome = jobStatus(result.jobId).outcome
@@ -144,6 +146,11 @@ class PluginTestHelper extends PluginSpockTestSupport {
         logger.debug("Logs: $logs")
         logger.debug("Outcome: $outcome")
         [logs: logs, outcome: outcome, jobId: result.jobId]
+    }
+
+    def jobCompleted(String jobId) {
+        def res = dsl("waitForCompletion jobId:'$jobId'",null,[timeout:900])
+        return true
     }
 
     def getStepSummary(def jobId, def stepName) {
@@ -233,8 +240,8 @@ class PluginTestHelper extends PluginSpockTestSupport {
         return result
     }
 
-    String getJobStepSummary(String procedureName, String jobId){
-       return getJobProperty("/myJob/steps/RunProcedure/steps/$procedureName/summary", jobId)
+    String getJobStepSummary(String procedureName, String jobId) {
+        return getJobProperty("/myJob/steps/RunProcedure/steps/$procedureName/summary", jobId)
     }
 
 }

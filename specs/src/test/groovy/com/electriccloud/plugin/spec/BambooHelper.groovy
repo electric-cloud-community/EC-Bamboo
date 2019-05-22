@@ -54,6 +54,15 @@ class BambooHelper extends PluginTestHelper {
         return properties['result']
     }
 
+    def enablePlan(String projectKey, String planKey) {
+        def result = _runProcedure('EnablePlan', [
+                config    : CONFIG_NAME,
+                projectKey: projectKey,
+                planKey   : planKey,
+        ])
+        assert result.outcome == 'success'
+    }
+
     def _runProcedure(String procedureName, Map parameters) {
         println("Running procedure $procedureName with params: " + objectToJson(parameters))
         // Create map for procedure import
