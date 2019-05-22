@@ -7,7 +7,7 @@ use Data::Dumper;
 
 use FlowPDF::Log;
 use FlowPDF::Helpers qw/bailOut/;
-use EC::Plugin::REST;
+use FlowPlugin::REST;
 
 use JSON qw/decode_json/;
 
@@ -32,7 +32,7 @@ sub init {
     # Will add
     $self->{_config} = $configValues;
 
-    $self->{restClient} = EC::Plugin::REST->new($configValues, {
+    $self->{restClient} = FlowPlugin::REST->new($configValues, {
         APIBase     => '/rest/api/latest/',
         contentType => 'json',
         errorHook   => {
@@ -45,7 +45,7 @@ sub init {
 
 sub config {return shift->{_config}};
 
-#@returns EC::Plugin::REST
+#@returns FlowPlugin::REST
 sub client {return shift->{restClient}};
 
 sub exit_with_error {

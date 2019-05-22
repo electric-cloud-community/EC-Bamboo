@@ -1,4 +1,4 @@
-package EC::Plugin::REST;
+package FlowPlugin::REST;
 use strict;
 use warnings FATAL => 'all';
 
