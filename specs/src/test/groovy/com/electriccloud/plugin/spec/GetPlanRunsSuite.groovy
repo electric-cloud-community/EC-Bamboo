@@ -57,8 +57,7 @@ class GetPlanRunsSuite extends BambooHelper {
         ])
 
         // Need at least one run in this plan
-        // TODO: deal with the timeout issues
-//        runPlan(bambooProjects['valid'], bambooPlans['valid'], [waitForBuild: 1])
+        runPlan(bambooProjects['valid'], bambooPlans['valid'], [waitForBuild: 1])
     }
 
     def doCleanupSpec() {

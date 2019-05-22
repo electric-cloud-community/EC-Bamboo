@@ -47,6 +47,7 @@ class DisablePlanSuite extends BambooHelper {
     }
 
     def doCleanupSpec() {
+        enablePlan(bambooProjects['valid'], bambooPlans['valid'])
         deleteConfiguration(PLUGIN_NAME, config)
         conditionallyDeleteProject(projectName)
     }
