@@ -1,4 +1,4 @@
-package EC::Plugin::Bamboo;
+package FlowPlugin::Bamboo;
 use strict;
 use warnings;
 use base qw/FlowPDF/;

@@ -114,7 +114,7 @@ use FlowPDF::ContextFactory;
 use FlowPDF::ComponentManager;
 
 
-our $VERSION = '1.1.0';
+our $VERSION = '1.1.1';
 
 # TODO: Explain this later.
 BEGIN {
