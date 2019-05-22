@@ -162,6 +162,7 @@ sub processRequestError {
         }
     }
 
+    die "Empty error handler" unless defined $handlerSub;
     return &$handlerSub($response, $parsed);
 }
 

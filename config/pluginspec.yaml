@@ -7,7 +7,7 @@ version: 1.5.0
 author: CloudBees
 authorUrl: http://www.electric-cloud.com/support
 supportLevel: 10
-metadata: { ecSupportLevel: 10 }
+metafile: { ecSupportLevel: 10 }
 category: Build
 
 # This is a declaration for the plugin configuration
@@ -78,7 +78,7 @@ procedures:
         documentation: Property sheet to store the results. Each plan will be saved under a separate property (property sheet). Additionally, the planKeys property will contain comma-separated plan keys.
         type: entry
         required: false
-        value: /myJob/plans/
+        value: /myJob/plans
     outputParameters: {planKeys: 'List of comma-separated plan keys'}
 
   - name: GetPlanDetails
@@ -108,7 +108,7 @@ procedures:
         documentation: Property sheet to store the results.
         type: entry
         required: false
-        value: /myJob/plan/
+        value: /myJob/plan
 
   - name: GetPlanRuns
     description: Returns information about build plan runs byt project key and plan key.
@@ -125,6 +125,13 @@ procedures:
         documentation: Short name of plan to get details.
         type: entry
         required: true
+      - name: buildState
+        label: Build State Filter
+        documentation: Get only plan runs with this state
+        type: select
+        options: [{ name: 'All', value: 'All' }, { name: 'Successful', value: 'Successful' }, { name: 'Failed', value: 'Failed' }, { name: 'Unknown', value: 'Unknown' }]
+        value: All
+        required: false
       - name: resultFormat
         label: Result Format
         documentation: Format to save the results.
@@ -135,10 +142,13 @@ procedures:
       - name: resultPropertySheet
         label: Result Property Sheet
         documentation: Property sheet to store the results. Each plan run will be saved under a separate property (property sheet). Additionally, the planKeys property will contain comma-separated plan keys.
-        value: /myJob/planRuns/
+        value: /myJob/resultKeys
         type: entry
         required: false
-    outputParameters: {planKeys: 'List of comma-separated plan keys.'}
+    outputParameters: {
+      resultKeys: "List of comma-separated plan build result keys.",
+      latestResultKey: 'Key for the latest build run.'
+    }
 
   - name: RunPlan
     description: Runs build plan by plan key and project key.

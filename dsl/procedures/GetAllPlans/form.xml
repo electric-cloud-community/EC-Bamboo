@@ -46,6 +46,6 @@
     <required>0</required>
     <documentation>Property sheet to store the results. Each plan will be saved under a separate property (property sheet). Additionally, the planKeys property will contain comma-separated plan keys.</documentation>
     <label>Result Property Sheet:</label>
-    <value>/myJob/plans/</value>
+    <value>/myJob/plans</value>
   </formElement>
 </editor>

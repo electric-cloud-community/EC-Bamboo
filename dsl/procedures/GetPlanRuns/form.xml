@@ -29,6 +29,30 @@
   </formElement>
   <formElement>
     <type>select</type>
+    <property>buildState</property>
+    <required>0</required>
+    <documentation>Get only plan runs with this state</documentation>
+    <label>Build State Filter:</label>
+    <option>
+      <name>All</name>
+      <value>All</value>
+    </option>
+    <option>
+      <name>Successful</name>
+      <value>Successful</value>
+    </option>
+    <option>
+      <name>Failed</name>
+      <value>Failed</value>
+    </option>
+    <option>
+      <name>Unknown</name>
+      <value>Unknown</value>
+    </option>
+    <value>All</value>
+  </formElement>
+  <formElement>
+    <type>select</type>
     <property>resultFormat</property>
     <required>0</required>
     <documentation>Format to save the results.</documentation>
@@ -53,6 +77,6 @@
     <required>0</required>
     <documentation>Property sheet to store the results. Each plan run will be saved under a separate property (property sheet). Additionally, the planKeys property will contain comma-separated plan keys.</documentation>
     <label>Result Property Sheet:</label>
-    <value>/myJob/planRuns/</value>
+    <value>/myJob/resultKeys</value>
   </formElement>
 </editor>
