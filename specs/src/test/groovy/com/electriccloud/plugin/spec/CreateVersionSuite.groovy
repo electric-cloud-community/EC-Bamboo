@@ -169,7 +169,7 @@ class CreateVersionSuite extends BambooHelper {
         where:
         caseId       | deploymentProject | planBuild    | versionName | expectedOutcome | expectedSummary
         'CHANGEME_3' | 'unexisting'      | 'valid'      | 'valid'     | 'error'         | "Can't find deployment project with name"
-        'CHANGEME_4' | 'valid'           | 'unexisting' | 'existing'  | 'warning'       | 'Unable to find result number'
+        'CHANGEME_4' | 'valid'           | 'unexisting' | 'valid'     | 'warning'       | 'Unable to find result number'
         'CHANGEME_5' | 'valid'           | 'valid'      | 'existing'  | 'warning'       | 'This release version is already in use'
     }
 
