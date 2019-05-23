@@ -158,9 +158,9 @@ class CreateVersionSuite extends BambooHelper {
 
         where:
         caseId       | deploymentProject | planBuild    | versionName         | expectedOutcome | expectedSummary
-        'CHANGEME_1' | 'unexisting'      | 'valid'      | ''                  | 'error'         | ''
-        'CHANGEME_2' | 'valid'           | 'valid'      | existingVersionName | 'warning'       | 'This release version is already in use'
-        'CHANGEME_3' | 'unexisting'      | 'unexisting' | ''                  | 'error'         | ''
+        'CHANGEME_3' | 'unexisting'      | 'valid'      | ''                  | 'error'         | ''
+        'CHANGEME_4' | 'valid'           | 'valid'      | existingVersionName | 'warning'       | 'This release version is already in use'
+        'CHANGEME_5' | 'unexisting'      | 'unexisting' | ''                  | 'error'         | ''
     }
 
 
