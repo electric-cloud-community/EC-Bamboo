@@ -27,4 +27,32 @@
     <documentation>Short name of plan.</documentation>
     <label>Plan Key:</label>
   </formElement>
+  <formElement>
+    <type>select</type>
+    <property>resultFormat</property>
+    <required>0</required>
+    <documentation>Format to save the results.</documentation>
+    <label>Result Format:</label>
+    <option>
+      <name>JSON</name>
+      <value>json</value>
+    </option>
+    <option>
+      <name>Property Sheet</name>
+      <value>propertysheet</value>
+    </option>
+    <option>
+      <name>Do not save the result</name>
+      <value>none</value>
+    </option>
+    <value>json</value>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>resultPropertySheet</property>
+    <required>0</required>
+    <documentation>Property sheet to store the results.</documentation>
+    <label>Result Property Sheet:</label>
+    <value>/myJob/deploymentProjectKeys</value>
+  </formElement>
 </editor>

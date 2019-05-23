@@ -1,20 +1,18 @@
 package com.electriccloud.plugin.spec
 
 import com.electriccloud.plugins.annotations.Sanity
+import spock.lang.IgnoreRest
 import spock.lang.Shared
-import spock.lang.Stepwise
 import spock.lang.Unroll
 
-@Stepwise
-class GetPlanRunsSuite extends BambooHelper {
-    static procedureName = 'GetPlanRuns'
-    static projectName = "EC-Specs GetPlanRuns"
+class GetDeploymentProjectsForPlanSuite extends PluginTestHelper {
+    static procedureName = 'GetDeploymentProjectsForPlan'
+    static projectName = "EC-Specs GetDeploymentProjectsForPlan"
 
     static def procedureParams = [
             config             : '',
             projectKey         : '',
             planKey            : '',
-            buildState         : '',
             resultFormat       : '',
             resultPropertySheet: ''
     ]
@@ -26,24 +24,32 @@ class GetPlanRunsSuite extends BambooHelper {
     ]
 
     static def bambooPlans = [
-            valid       : 'PLAN',
-            failing     : 'FAIL',
-            timeout     : 'LONG',
-            parametrized: 'PARAMS',
-            unexisting  : "__UNEXISTING__",
-            empty       : ''
+            valid            : 'PLAN',
+            failing          : 'FAIL',
+            timeout          : 'LONG',
+            parametrized     : 'PARAMS',
+            unexisting       : "__UNEXISTING__",
+            empty            : '',
+            withoutDeployment: 'FAIL'
     ]
 
-    static defaultResultPropertyPath = 'planRuns'
+    static def deploymentProjects = [
+            'Deployment Project': [
+                    id  : '1048577',
+                    key : '1048577',
+                    plan: 'PROJECT-PLAN'
+            ]
+    ]
 
-    // Procedure parameters
+    static defaultResultPropertyPath = 'deploymentProjects'
+
     String config = CONFIG_NAME
-    @Shared
-    String projectKey, planKey, buildState, resultFormat, resultPropertySheet
 
-    // Test variables
     @Shared
-    String resultPropertyPath
+    String projectKey, planKey, resultFormat, resultPropertySheet
+
+    @Shared
+    String resultPropertyPath, projectCase, planCase
 
     def doSetupSpec() {
         createConfiguration(CONFIG_NAME)
@@ -55,9 +61,6 @@ class GetPlanRunsSuite extends BambooHelper {
                 resourceName : getResourceName(),
                 params       : procedureParams,
         ])
-
-        // Need at least one run in this plan
-        runPlan(bambooProjects['valid'], bambooPlans['valid'], [waitForBuild: 1])
     }
 
     def doCleanupSpec() {
@@ -67,7 +70,7 @@ class GetPlanRunsSuite extends BambooHelper {
 
     @Sanity
     @Unroll
-    def "#caseId. GetPlanRuns - Sanity - positive"() {
+    def "#caseId. GetDeploymentProjectsForPlan - Sanity - positive"() {
         given:
 
         projectKey = bambooProjects['valid']
@@ -79,11 +82,11 @@ class GetPlanRunsSuite extends BambooHelper {
             resultPropertySheet = '/myJob/' + resultPropertyPath
         }
 
+
         def procedureParams = [
-                config             : CONFIG_NAME,
+                config             : config,
                 projectKey         : projectKey,
                 planKey            : planKey,
-                buildState         : 'All',
                 resultFormat       : resultFormat,
                 resultPropertySheet: resultPropertySheet
         ]
@@ -95,16 +98,38 @@ class GetPlanRunsSuite extends BambooHelper {
         println(getJobLink(result.jobId))
         assert result.outcome == 'success'
 
+
+
+        // Check properties
         if (resultFormat == 'propertySheet') {
-            // Check properties
+
             def properties = getJobProperties(result.jobId)
-            def resultProperties = properties[resultPropertyPath]
-            assert resultProperties['keys'] =~ projectKey
+            def projects = properties[resultPropertyPath]
+
+            // Check we have all deployment projects for plan
+            deploymentProjects.each({ name, deploymentProps ->
+                String planKey = projectKey + '-' + planKey
+                if (deploymentProps['plan'] != planKey) {
+                    return true
+                }
+                assert result.logs =~ /Found deployment project: $name/
+                assert projects[deploymentProps['key']]
+            })
+        }
+        else {
+            // Check we have all deployment projects for plan
+            deploymentProjects.each({ name, deploymentProps ->
+                String planKey = projectKey + '-' + planKey
+                if (deploymentProps['plan'] != planKey) {
+                    return true
+                }
+                assert result.logs =~ /Found deployment project: $name/
+            })
         }
 
+        // Check output parameters
         def outputParameters = getJobOutputParameters(result.jobId, 1)
-        assert outputParameters['resultKeys'] =~ projectKey
-        assert outputParameters['latestResultKey'] =~ projectKey
+        assert outputParameters['deploymentProjectKeys']
 
         where:
         caseId       | resultFormat    | resultPropertyPath
@@ -113,16 +138,16 @@ class GetPlanRunsSuite extends BambooHelper {
     }
 
     @Unroll
-    def "#caseId. GetPlanRuns - Sanity - negative"() {
+    def "#caseId. GetDeploymentProjectsForPlan - Sanity - negative"() {
         given:
-        resultFormat = 'none'
-        resultPropertyPath = ''
+
+        projectKey = bambooProjects[projectCase]
+        planKey = bambooPlans[planCase]
 
         def procedureParams = [
-                config             : CONFIG_NAME,
+                config             : config,
                 projectKey         : projectKey,
                 planKey            : planKey,
-                buildState         : buildState,
                 resultFormat       : resultFormat,
                 resultPropertySheet: resultPropertySheet
         ]
@@ -133,16 +158,12 @@ class GetPlanRunsSuite extends BambooHelper {
         then:
         println(getJobLink(result.jobId))
         assert result.outcome == expectedOutcome
-
-        if (expectedSummary) {
-            assert getJobStepSummary(procedureName, result.jobId) =~ expectedSummary
-        }
+        assert getJobStepSummary(procedureName, result.jobId) =~ expectedSummary
 
         where:
-        caseId       | projectKey                   | planKey                   | buildState   | expectedOutcome | expectedSummary
-        'CHANGEME_2' | bambooProjects['valid']      | bambooPlans['unexisting'] | 'All'        | 'warning'       | "Plan '$projectKey-$planKey' was not found"
-        'CHANGEME_2' | bambooProjects['unexisting'] | bambooPlans['valid']      | 'All'        | 'warning'       | "Plan '$projectKey-$planKey' was not found"
-        'CHANGEME_2' | bambooProjects['valid']      | bambooPlans['failing']    | 'Successful' | 'warning'       | "No results found for plan"
+        caseId       | projectCase | planCase            | expectedOutcome | expectedSummary
+        'CHANGEME_3' | 'valid'     | 'withoutDeployment' | 'warning'       | 'No deployment projects found for '
+        'CHANGEME_4' | 'valid'     | 'unexisting'        | 'warning'       | 'No deployment projects found for'
     }
 
 }
