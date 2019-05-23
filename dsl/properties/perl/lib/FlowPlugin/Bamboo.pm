@@ -284,6 +284,92 @@ sub getPlanRuns {
     $stepResult->apply();
 }
 
+sub createVersion {
+    my FlowPDF $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    $params->{resultPropertySheet} ||= '/myJob/version';
+
+    if (!$params->{versionName} && !$params->{requestVersionName}) {
+        bailOut("Either 'Version Name' or 'Request Version Name?' should be specified.")
+    }
+
+    # Stripping plan key from the build result key [PROJECT-PLAN]-22
+    my ($project, $plan, $buildNum) = split('-', $params->{planBuildKey});
+    my $planKey = join('-', $project, $plan);
+    logInfo("Plan key : $planKey");
+
+    my $deployProjectsRefs = $self->client->get("/deploy/project/forPlan", { planKey => $planKey });
+    return if (!defined $deployProjectsRefs);
+
+    # Filtering one that have same name
+    my ($deploymentProject) = grep {$_->{name} eq $params->{deploymentProjectName}} @$deployProjectsRefs;
+    if (!defined $deploymentProject) {
+        logInfo("Found deployment projects: " . join(', ', map {$_->{name}} @$deployProjectsRefs));
+        $stepResult->setJobStepOutcome('error');
+        $stepResult->setJobSummary("Can't get deployment project id");
+        $stepResult->setJobStepSummary(
+            "Can't find deployment project with name '$params->{deploymentProjectName}' for plan '$planKey'"
+        );
+        return;
+    }
+    my $deploymentProjectId = $deploymentProject->{id};
+    if (!$params->{versionName} && $params->{requestVersionName}) {
+        my $nextVersionRequest = $self->client->get("/deploy/projectVersioning/$deploymentProjectId/nextVersion", {
+            # Can't see any difference with/without this but as we have it, let's specify
+            resultKey => $params->{planBuildKey}
+        });
+        $params->{versionName} = $nextVersionRequest->{nextVersionName};
+    }
+
+    my $createVersionResponse = $self->client->post("/deploy/project/$deploymentProjectId/version", undef,
+        # Content
+        {
+            planResultKey => $params->{planBuildKey},
+            name          => $params->{versionName}
+        },
+        {
+            errorHook => {
+                400 => sub {
+                    my ($response, $decoded) = @_;
+                    my $summaryError = 'Bad request';
+                    if ($decoded->{errors} && ref $decoded->{errors} eq 'ARRAY' && @{$decoded->{errors}}) {
+                        $summaryError = join("\n", @{$decoded->{errors}});
+                    }
+                    elsif ($decoded->{fieldErrors} && ref $decoded->{fieldErrors} eq 'HASH') {
+                        $summaryError = "Bad request values:";
+                        for my $badField (keys %{$decoded->{fieldErrors}}) {
+                            $summaryError .= "\n $badField : "
+                                . join("\n", @{$decoded->{fieldErrors}{$badField}});
+                        }
+                    }
+                    $stepResult->setJobStepOutcome('warning');
+                    $stepResult->setJobStepSummary($summaryError);
+                    $stepResult->setJobSummary("Error happened when was creating a version");
+                    return;
+                }
+            }
+        }
+    );
+    return unless defined $createVersionResponse;
+
+    logInfo("Created version: $params->{versionName}");
+
+    my $shortInfo = _versionToShortInfo($createVersionResponse);
+
+    $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $shortInfo);
+    $stepResult->setOutputParameter('version', $params->{versionName});
+
+    my $summary = "Created version: $params->{versionName}";
+    $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobStepSummary($summary);
+    $stepResult->setJobSummary($summary);
+
+    return;
+}
+
 sub runPlan {
     my FlowPDF $self = shift;
     my $params = shift;
@@ -590,6 +676,23 @@ sub _deploymentProjectToShortInfo {
         });
     }
     $result{environments} = \@environments;
+
+    return \%result;
+}
+
+sub _versionToShortInfo {
+    my ($version) = @_;
+
+    my @oneToOne = qw/
+        id
+        name
+        creatorDisplayName
+        planBranchName
+        creationDate
+    /;
+
+    my %result = ();
+    $result{$_} = $version->{$_} for @oneToOne;
 
     return \%result;
 }

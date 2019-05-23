@@ -1,0 +1,77 @@
+<!--
+    This form is generated automatically from the parameters pluginspec.
+    Please not not edit this file manually as it will be regenerated.
+-->
+<editor>
+  <help>/commander/pages/@PLUGIN_NAME@/help?s=Administration&amp;amp;ss=Plugins#CreateVersion</help>
+  <formElement>
+    <type>entry</type>
+    <property>config</property>
+    <configuration>1</configuration>
+    <propertyReference>/plugins/@PLUGIN_NAME@/project/ec_plugin_cfgs</propertyReference>
+    <required>1</required>
+    <documentation>Previously defined configuration for the plugin</documentation>
+    <label>Configuration Name:</label>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>deploymentProjectName</property>
+    <required>1</required>
+    <documentation>Name of the deployment project where version will be created.</documentation>
+    <label>Deployment Project Name:</label>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>planBuildKey</property>
+    <required>1</required>
+    <documentation>Identifier of the Plan Build result. e.g. 'PROJECT-PLAN-22'</documentation>
+    <label>Plan Build Key:</label>
+  </formElement>
+  <formElement>
+    <type>checkbox</type>
+    <property>requestVersionName</property>
+    <required>0</required>
+    <documentation>Request name for the next version from the deployment project.</documentation>
+    <label>Request Version Name?:</label>
+    <checkedValue>1</checkedValue>
+    <initiallyChecked>false</initiallyChecked>
+    <uncheckedValue>0</uncheckedValue>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>versionName</property>
+    <required>0</required>
+    <documentation>Name for new version to create. e.g. 'release-22'.</documentation>
+    <label>Version Name:</label>
+    <condition>${requestVersionName} == 0</condition>
+    <dependsOn>requestVersionName</dependsOn>
+  </formElement>
+  <formElement>
+    <type>select</type>
+    <property>resultFormat</property>
+    <required>0</required>
+    <documentation>Format to save the results.</documentation>
+    <label>Result Format:</label>
+    <option>
+      <name>JSON</name>
+      <value>json</value>
+    </option>
+    <option>
+      <name>Property Sheet</name>
+      <value>propertysheet</value>
+    </option>
+    <option>
+      <name>Do not save the result</name>
+      <value>none</value>
+    </option>
+    <value>json</value>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>resultPropertySheet</property>
+    <required>0</required>
+    <documentation>Result property sheet to save created version properties.</documentation>
+    <label>Result Property Sheet:</label>
+    <value>/myJob/version</value>
+  </formElement>
+</editor>

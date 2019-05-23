@@ -23,7 +23,7 @@ class BambooHelper extends PluginTestHelper {
         println("Running build for $projectKey-$planKey")
         def result = _runProcedure('RunPlan', procedureParameters)
 
-        if (parameters['waitForBuild']) {
+        if (!parameters['waitForBuild']) {
             println("Waiting 60 seconds for build to finish")
             sleep(60 * 1000)
         }

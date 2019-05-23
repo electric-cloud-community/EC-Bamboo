@@ -332,3 +332,50 @@ procedures:
     outputParameters: {
       deploymentProjectKeys : 'List of comma-separated deployment project keys for the plan',
     }
+
+  - name: CreateVersion
+    description: Creates new version (release) from the successful build result
+    hasConfig: true
+    shell: ec-perl
+    parameters:
+      - name: deploymentProjectName
+        label: Deployment Project Name
+        documentation: Name of the deployment project where version will be created.
+        type: entry
+        required: true
+      - name: planBuildKey
+        label: Plan Build Key
+        documentation: Identifier of the Plan Build result. e.g. 'PROJECT-PLAN-22'
+        type: entry
+        required: true
+      - name: requestVersionName
+        label: Request Version Name?
+        documentation: Request name for the next version from the deployment project.
+        type: checkbox
+        initiallyChecked: false
+        checkedValue: 1
+        uncheckedValue: 0
+        required: false
+      - name: versionName
+        label: Version Name
+        documentation: Name for new version to create. e.g. 'release-22'.
+        type: entry
+        required: false
+        dependsOn: requestVersionName
+        condition: ${requestVersionName} == 0
+      - name: resultFormat
+        label: Result Format
+        documentation: Format to save the results.
+        type: select
+        required: false
+        value: json
+        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet'}, { name: 'Do not save the result', value: 'none' }]
+      - name: resultPropertySheet
+        label: Result Property Sheet
+        documentation: Result property sheet to save created version properties.
+        value: /myJob/version
+        type: entry
+        required: false
+    outputParameters: {
+      version: 'Name of the created version.'
+    }

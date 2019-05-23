@@ -170,7 +170,7 @@ sub processRequestError {
 
 sub defaultErrorHandler {
     my ($self, $response) = @_;
-    $self->logger->trace("Received response with error", $response);
+    $self->logger->debug("Received response with error", $response);
     bailOut("Error received in response");
 }
 
@@ -203,7 +203,7 @@ sub buildRequest {
         $headers{'Content-Type'} = $self->{contentHeader};
     }
 
-    while (my ($name, $value) = each %{$self->{headers}}) {
+    while (my ($name, $value) = each %headers) {
         $request->header($name, $value);
     }
 
