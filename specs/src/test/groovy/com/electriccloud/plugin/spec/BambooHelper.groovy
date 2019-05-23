@@ -20,11 +20,11 @@ class BambooHelper extends PluginTestHelper {
             procedureParameters[k] = v
         }
 
-        println("Running build for $projectKey-$planKey")
+        logger.info("Running build for $projectKey-$planKey")
         def result = _runProcedure('RunPlan', procedureParameters)
 
         if (!parameters['waitForBuild']) {
-            println("Waiting 60 seconds for build to finish")
+            logger.info("Waiting 60 seconds for build to finish")
             sleep(60 * 1000)
         }
 
@@ -64,8 +64,25 @@ class BambooHelper extends PluginTestHelper {
         assert result.outcome == 'success'
     }
 
+    def createVersion(String deploymentProjectName, String buildResultKey, String version = randomize('release')) {
+        def procedureParams = [
+                config               : CONFIG_NAME,
+                deploymentProjectName: deploymentProjectName,
+                planBuildKey         : buildResultKey,
+                requestVersionName   : '',
+                versionName          : version,
+                resultFormat         : 'propertySheet',
+                resultPropertySheet  : '/myJob/result'
+        ]
+
+        def result = _runProcedure('CreateVersion', procedureParams)
+
+        def properties = getJobProperties(result.jobId)
+        return properties['result']
+    }
+
     def _runProcedure(String procedureName, Map parameters) {
-        println("Running procedure $procedureName with params: " + objectToJson(parameters))
+        logger.debug("Running procedure $procedureName with params: " + objectToJson(parameters))
         // Create map for procedure import
         def procedureParams = [:]
         parameters.each { k, v ->

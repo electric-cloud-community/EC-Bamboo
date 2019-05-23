@@ -332,24 +332,7 @@ sub createVersion {
         },
         {
             errorHook => {
-                400 => sub {
-                    my ($response, $decoded) = @_;
-                    my $summaryError = 'Bad request';
-                    if ($decoded->{errors} && ref $decoded->{errors} eq 'ARRAY' && @{$decoded->{errors}}) {
-                        $summaryError = join("\n", @{$decoded->{errors}});
-                    }
-                    elsif ($decoded->{fieldErrors} && ref $decoded->{fieldErrors} eq 'HASH') {
-                        $summaryError = "Bad request values:";
-                        for my $badField (keys %{$decoded->{fieldErrors}}) {
-                            $summaryError .= "\n $badField : "
-                                . join("\n", @{$decoded->{fieldErrors}{$badField}});
-                        }
-                    }
-                    $stepResult->setJobStepOutcome('warning');
-                    $stepResult->setJobStepSummary($summaryError);
-                    $stepResult->setJobSummary("Error happened when was creating a version");
-                    return;
-                }
+                400 => sub {return $self->detailedErrorHandler(@_)}
             }
         }
     );
@@ -517,6 +500,29 @@ sub defaultErrorHandler {
     $stepResult->setJobSummary("Error happened while performing the operation: '$decoded->{message}'");
     $stepResult->apply();
 
+    return;
+}
+
+sub detailedErrorHandler {
+    my ($self, $response, $decoded) = @_;
+
+    my $summaryError = 'Request errors: ';
+
+    if ($decoded->{errors} && ref $decoded->{errors} eq 'ARRAY' && @{$decoded->{errors}}) {
+        $summaryError .= join("\n", @{$decoded->{errors}});
+    }
+
+    if ($decoded->{fieldErrors} && ref $decoded->{fieldErrors} eq 'HASH') {
+        for my $badField (keys %{$decoded->{fieldErrors}}) {
+            $summaryError .= "\n $badField : " . join("\n", @{$decoded->{fieldErrors}{$badField}});
+        }
+    }
+
+    my FlowPDF::StepResult $stepResult = $self->getContext()->newStepResult();
+    $stepResult->setJobStepOutcome('warning');
+    $stepResult->setJobStepSummary($summaryError);
+    $stepResult->setJobSummary("Received error while performing the request.");
+    $stepResult->apply();
     return;
 }
 

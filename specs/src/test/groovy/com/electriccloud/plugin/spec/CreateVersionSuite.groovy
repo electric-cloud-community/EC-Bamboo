@@ -1,7 +1,6 @@
 package com.electriccloud.plugin.spec
 
 import com.electriccloud.plugins.annotations.Sanity
-import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Unroll
 
@@ -37,8 +36,9 @@ class CreateVersionSuite extends BambooHelper {
 
     @Shared
     static def buildRunSuccessful
+
     @Shared
-    static String existingVersionName = 'release-1'
+    static String existingVersionName
 
     String config = CONFIG_NAME
 
@@ -131,9 +131,19 @@ class CreateVersionSuite extends BambooHelper {
         deploymentProjectName = project['name']
         if (planBuild == 'valid') {
             planBuildKey = buildRunSuccessful['key']
+        } else if (planBuild == 'unexisting') {
+            planBuildKey = "PROJECT-PLAN-0"
         }
-        else if (planBuild == 'unexisting'){
-            planBuildKey = "PROJECT-PLAN-9999"
+
+        if (versionName == 'existing') {
+            if (!existingVersionName) {
+                def newVersion = createVersion(
+                        deploymentProjects['valid']['name'],
+                        (String) buildRunSuccessful['key']
+                )
+                existingVersionName = newVersion['name']
+            }
+            versionName = existingVersionName
         }
 
         def procedureParams = [
@@ -157,10 +167,10 @@ class CreateVersionSuite extends BambooHelper {
         }
 
         where:
-        caseId       | deploymentProject | planBuild    | versionName         | expectedOutcome | expectedSummary
-        'CHANGEME_3' | 'unexisting'      | 'valid'      | ''                  | 'error'         | ''
-        'CHANGEME_4' | 'valid'           | 'valid'      | existingVersionName | 'warning'       | 'This release version is already in use'
-        'CHANGEME_5' | 'unexisting'      | 'unexisting' | ''                  | 'error'         | ''
+        caseId       | deploymentProject | planBuild    | versionName | expectedOutcome | expectedSummary
+        'CHANGEME_3' | 'unexisting'      | 'valid'      | 'valid'     | 'error'         | "Can't find deployment project with name"
+        'CHANGEME_4' | 'valid'           | 'unexisting' | 'existing'  | 'warning'       | 'Unable to find result number'
+        'CHANGEME_5' | 'valid'           | 'valid'      | 'existing'  | 'warning'       | 'This release version is already in use'
     }
 
 
