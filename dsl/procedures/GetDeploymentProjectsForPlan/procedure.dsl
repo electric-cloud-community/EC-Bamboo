@@ -8,7 +8,10 @@ procedure 'GetDeploymentProjectsForPlan', description: 'Requests and returns lis
         shell = 'ec-perl'
 
     }
-// === procedure_autogen ends, checksum: 14fe7b8b55ba6fb1d4852d5f4f02432a ===
+
+    formalOutputParameter 'deploymentProjectKeys',
+        description: 'List of comma-separated deployment project keys for the plan'
+// === procedure_autogen ends, checksum: 8715b3d8a032cab2b0ddff060c12dd56 ===
 // Do not update the code above the line
 // procedure properties declaration can be placed in here, like
 // property 'property name', value: "value"

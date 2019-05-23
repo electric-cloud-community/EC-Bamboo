@@ -11,8 +11,8 @@ class BambooHelper extends PluginTestHelper {
                 planKey            : planKey,
                 waitForBuild       : 0,
                 waitTimeout        : 300,
-                resultFormat       : 'none',
-                resultPropertySheet: ''
+                resultFormat       : 'propertySheet',
+                resultPropertySheet: '/myJob/result'
         ]
 
         // Replace the specified parameters
@@ -30,7 +30,8 @@ class BambooHelper extends PluginTestHelper {
 
         assert result.outcome == 'success'
 
-        return result
+        def properties = getJobProperties(result.jobId)
+        return properties['result']
     }
 
     def getPlanRuns(String projectKey, String planKey, Map parameters = [:]) {

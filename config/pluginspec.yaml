@@ -316,3 +316,19 @@ procedures:
         documentation: Short name of plan.
         type: entry
         required: true
+      - name: resultFormat
+        label: Result Format
+        documentation: Format to save the results.
+        type: select
+        required: false
+        value: json
+        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet'}, { name: 'Do not save the result', value: 'none' }]
+      - name: resultPropertySheet
+        label: Result Property Sheet
+        documentation: Property sheet to store the results.
+        value: /myJob/deploymentProjectKeys
+        type: entry
+        required: false
+    outputParameters: {
+      deploymentProjectKeys : 'List of comma-separated deployment project keys for the plan',
+    }

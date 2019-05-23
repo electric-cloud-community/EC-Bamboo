@@ -167,6 +167,50 @@ sub getPlanDetails {
     $stepResult->apply();
 }
 
+sub getDeploymentProjectsForPlan {
+    my FlowPDF $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    $params->{resultPropertySheet} ||= '/myJob/deploymentProjects';
+
+    my $planKey = "$params->{projectKey}-$params->{planKey}";
+
+    # Get list of plans
+    my $deployProjectsRefs = $self->client->get("/deploy/project/forPlan", { planKey => $planKey });
+    return if (!defined $deployProjectsRefs);
+
+    # Result is array ref of { id => '', name => '' }
+    my @infoToSave = ();
+    for my $deployRef (@$deployProjectsRefs) {
+        logInfo("Found deployment project: " . $deployRef->{name});
+
+        # Get details for each plan
+        my $deploymentProjectId = $deployRef->{id};
+        my $deploymentProjectInfo = $self->client->get("/deploy/project/$deploymentProjectId");
+        push(@infoToSave, _deploymentProjectToShortInfo($deploymentProjectInfo));
+    }
+
+    if (!@infoToSave) {
+        $stepResult->setJobStepOutcome("warning");
+        $stepResult->setJobStepSummary("No deployment projects found for plan: $planKey");
+        $stepResult->setJobSummary("No deployment projects found for plan: $planKey");
+        return;
+    }
+
+    $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, \@infoToSave);
+
+    my @deplomentProjectKeys = map {$_->{key}} @infoToSave;
+    $stepResult->setOutputParameter('deploymentProjectKeys', join(', ', @deplomentProjectKeys));
+
+    my $summary = "Deployment projects info saved to properties.";
+    logInfo($summary);
+    $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobStepSummary($summary);
+    $stepResult->setJobSummary("Found " . (scalar @infoToSave) . " deployment project(s).");
+    $stepResult->apply();
+}
 
 =head2 getPlanRuns
 
@@ -241,7 +285,9 @@ sub getPlanRuns {
 }
 
 sub runPlan {
-    my ($self, $params, $stepResult) = @_;
+    my FlowPDF $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
     $self->init($params);
 
     # Setting default values
@@ -379,7 +425,7 @@ sub defaultErrorHandler {
         logError($response->decoded_content || 'No content returned');
     }
 
-    my $stepResult = $self->getContext()->newStepResult();
+    my FlowPDF::StepResult $stepResult = $self->getContext()->newStepResult();
     $stepResult->setJobStepOutcome('error');
     $stepResult->setJobStepSummary($decoded->{message});
     $stepResult->setJobSummary("Error happened while performing the operation: '$decoded->{message}'");
@@ -448,13 +494,12 @@ sub _planToShortInfo {
         isBuilding
     /;
 
-    my %shortInfo = ();
-    for (@oneToOne) {
-        $shortInfo{$_} = $plan->{$_};
-    }
+    my %shortInfo = (
+        url        => $plan->{link}{href},
+        stagesSize => $plan->{stages}{size},
+    );
 
-    $shortInfo{url} = $plan->{link}{href};
-    $shortInfo{stagesSize} = $plan->{stages}{size};
+    $shortInfo{$_} = $plan->{$_} for (@oneToOne);
 
     if (defined $expanded && ref $expanded eq 'ARRAY') {
         for my $section (@$expanded) {
@@ -513,9 +558,38 @@ sub _planBuildResultToShortInfo {
         $result{artifacts} = $buildInfo->{artifacts}{artifact};
     }
 
-    for (@oneToOne) {
-        $result{$_} = $buildInfo->{$_};
+    $result{$_} = $buildInfo->{$_} for (@oneToOne);
+
+    return \%result;
+}
+
+sub _deploymentProjectToShortInfo {
+    my ($deploymentProject) = @_;
+
+    my @oneToOne = qw/
+        id
+        name
+    /;
+
+    my %result = (
+        key     => $deploymentProject->{key}{key},
+        planKey => $deploymentProject->{planKey}{key},
+    );
+
+    $result{$_} = $deploymentProject->{$_} for @oneToOne;
+
+    my @environments = ();
+    for my $env (@{$deploymentProject->{environments}}) {
+        push(@environments, {
+            id                  => $env->{id},
+            key                 => $env->{key}{key},
+            name                => $env->{name},
+            deploymentProjectId => $env->{deploymentProjectId},
+            position            => $env->{position},
+            configurationState  => $env->{configurationState}
+        });
     }
+    $result{environments} = \@environments;
 
     return \%result;
 }
@@ -549,6 +623,8 @@ sub saveResultProperties {
             $stepResult->setOutcomeProperty($property, $value);
         }
     }
+
+    $stepResult->apply();
 
     return;
 }
