@@ -63,6 +63,7 @@ sub getAllPlans {
     $self->init($params);
 
     # Setting default parameters
+    $params->{resultFormat} ||= 'json';
     $params->{resultPropertySheet} ||= '/myJob/plans';
 
     # Requesting and formatting information
@@ -127,6 +128,7 @@ sub getPlanDetails {
     $self->init($params);
 
     # Setting default parameters
+    $params->{resultFormat} ||= 'json';
     $params->{resultPropertySheet} ||= '/myJob/plan';
 
     my $planKey = "$params->{projectKey}-$params->{planKey}";
@@ -173,6 +175,7 @@ sub getDeploymentProjectsForPlan {
     my FlowPDF::StepResult $stepResult = shift;
     $self->init($params);
 
+    $params->{resultFormat} ||= 'json';
     $params->{resultPropertySheet} ||= '/myJob/deploymentProjects';
 
     my $planKey = "$params->{projectKey}-$params->{planKey}";
@@ -222,6 +225,7 @@ sub getPlanRuns {
     $self->init($params);
 
     # Setting default parameters
+    $params->{resultFormat} ||= 'json';
     $params->{resultPropertySheet} ||= '/myJob/plans';
 
     my $planKey = "$params->{projectKey}-$params->{planKey}";
@@ -290,6 +294,7 @@ sub createVersion {
     my FlowPDF::StepResult $stepResult = shift;
     $self->init($params);
 
+    $params->{resultFormat} ||= 'json';
     $params->{resultPropertySheet} ||= '/myJob/version';
 
     if (!$params->{versionName} && !$params->{requestVersionName}) {
@@ -389,9 +394,7 @@ sub runPlan {
             }
         }
     });
-    if (!defined $queueResponse) {
-        logDebug("Empty queueResponse. Assuming it was handled by errorHook");
-    }
+    return unless (defined $queueResponse);
 
     my $buildNumber = $queueResponse->{buildNumber};
     logInfo("Build Number: $buildNumber.\nBuild Result Key: $queueResponse->{buildResultKey}.");
@@ -441,10 +444,9 @@ sub runPlan {
         }
 
         if ($finished == 0) {
-            $stepResult->setJobStepOutcome('warning');
-            $stepResult->setJobStepSummary('Exceeded the wait timeout while waiting for the build to finish.');
-            $stepResult->setJobSummary('Exceeded the wait timeout while waiting for the build to finish.');
-            return;
+            return $self->finishStepWith($stepResult, 'error',
+                'Exceeded the wait timeout while waiting for the build to finish.'
+            );
         }
     }
 
@@ -457,29 +459,171 @@ sub runPlan {
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $infoToSave);
 
     if (!$params->{waitForBuild}) {
-        $stepResult->setJobStepOutcome('success');
-        $stepResult->setJobSummary("Build was successfully added to a queue.");
-        $stepResult->setJobStepSummary('Build was successfully added to a queue.');
-        return;
+        return $self->finishStepWith('success', 'Build was successfully added to a queue.');
     }
     # Failed build
     elsif ($infoToSave->{finished} && !$infoToSave->{successful}) {
-        $stepResult->setJobStepOutcome('warning');
-        $stepResult->setJobSummary("Build was not finished successfully");
-        $stepResult->setJobStepSummary('Build was not finished successfully');
-        return;
+        return $self->finishStepWith($stepResult, 'warning', 'Build was not finished successfully');
     }
     # Build that was not started
     elsif (!$infoToSave->{finished} && $infoToSave->{buildState} eq 'Unknown') {
-        $stepResult->setJobStepOutcome('warning');
-        $stepResult->setJobSummary("Build was not started.");
-        $stepResult->setJobStepSummary('Build was not started (probably because of compilation errors)');
-        return;
+        return $self->finishStepWith($stepResult, 'warning',
+            "Build was not started.",
+            'Build was not started (probably because of compilation errors)'
+        );
     }
 
     $stepResult->setJobStepOutcome('success');
     $stepResult->setJobSummary("Build result information saved to the properties");
     $stepResult->setJobStepSummary('Build result information saved to the properties');
+    $stepResult->apply();
+}
+
+sub triggerDeployment {
+    my FlowPDF $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    $params->{waitTimeout} ||= 300;
+    $params->{resultFormat} ||= 'json';
+    $params->{resultPropertySheet} ||= '/myJob/deploymentResult';
+
+    # Get deployment project
+    my $allProjects = $self->client->get('/deploy/project/all');
+    return unless defined $allProjects;
+
+    my ($project) = grep {$_->{name} eq $params->{deploymentProjectName}} @$allProjects;
+    if (!defined $project) {
+        return $self->finishStepWith($stepResult, 'error', "Can't find deployment project '$params->{deploymentProjectName}'.");
+    }
+    logTrace("Project", $project);
+
+    # Get environment
+    my ($environment) = grep {$_->{name} eq $params->{deploymentEnvironmentName}} @{$project->{environments}};
+    if (!defined $environment) {
+        return $self->finishStepWith($stepResult, 'error', "Can't find environment '$params->{deploymentEnvironmentName}'.");
+    }
+    logTrace("Environment", $environment);
+
+    # Get version id from the deployment project
+    my $allVersions = $self->client->get("/deploy/project/$project->{id}/versions");
+    my ($version) = grep {$_->{name} eq $params->{deploymentVersionName}} @{$allVersions->{versions}};
+    if (!defined $version) {
+        return $self->finishStepWith($stepResult, 'error', "Can't find version '$params->{deploymentVersionName}'.");
+    }
+    logTrace("Version", $version);
+
+    # Trigger deployment
+    my $triggerDeploymentResponse = $self->client->post('/queue/deployment', {
+        environmentId => $environment->{id},
+        versionId     => $version->{id}
+    });
+    return unless defined $triggerDeploymentResponse;
+
+    my $deploymentResultId = $triggerDeploymentResponse->{deploymentResultId};
+    logInfo("Deployment Result Key: $deploymentResultId");
+
+    if ($params->{waitForDeployment}) {
+        $stepResult->setJobStepSummary("Waiting for the deployment to finish.");
+        $stepResult->applyAndFlush();
+
+        my $waited = 0;
+        my $sleepTime = 5;
+        my $finished = 0;
+        while (!$finished && $waited <= $params->{waitTimeout}) {
+            # Request status
+            my $status = $self->client->get("/deploy/result/$deploymentResultId");
+            if ($status->{lifeCycleState} eq 'FINISHED') {
+                $finished = 1;
+                # Updating progress property
+                $stepResult->setJobStepSummary("Deployment is finished. Requesting result.");
+                $stepResult->applyAndFlush();
+                logInfo("Build finished");
+                last;
+            }
+
+            logInfo("Waiting $sleepTime second(s) before requesting the status again.");
+            $waited += $sleepTime;
+            sleep $sleepTime;
+        }
+
+        if ($finished == 0) {
+            $stepResult->setJobStepOutcome('error');
+            $stepResult->setJobStepSummary('Exceeded the wait timeout while waiting for the deployment to finish.');
+            $stepResult->setJobSummary('Exceeded the wait timeout while waiting for the deployment to finish.');
+            return;
+        }
+    }
+
+    my $deploymentResult = $self->client->get("/deploy/result/$deploymentResultId");
+    my $shortInfo = _deploymentResultToShortInfo($deploymentResult);
+
+    $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $shortInfo);
+
+    $stepResult->setOutputParameter('deploymentResultKey', $deploymentResultId);
+    $stepResult->setOutputParameter('deploymentResultUrl',
+        $params->{endpoint} . '/deploy/viewDeploymentResult.action?deploymentResultId=' . $deploymentResultId
+    );
+
+    if (!$params->{waitForDeployment}) {
+        $stepResult->setJobStepOutcome('success');
+        $stepResult->setJobSummary("Deployment was successfully added to a queue.");
+        $stepResult->setJobStepSummary('Deployment was successfully added to a queue.');
+        return;
+    }
+
+    # Failed deployment
+    if ($params->{waitForDeployment} && $shortInfo->{deploymentState} ne 'SUCCESS') {
+        $stepResult->setJobStepOutcome('warning');
+        $stepResult->setJobStepSummary("Deployment was not finished successfully.");
+        $stepResult->setJobSummary("Deployment was not finished successfully.");
+        return;
+    }
+
+    $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobSummary("Deployment result information saved to the properties.");
+    $stepResult->setJobStepSummary('Deployment result information saved to the properties.');
+    $stepResult->apply();
+}
+
+sub enablePlan {
+    my FlowPDF $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    my $planKey = "$params->{projectKey}-$params->{planKey}";
+
+    my $result = $self->client->post("/plan/$planKey/enable");
+    return if (!defined $result || $result ne '1');
+
+    my $summary = "Plan '$planKey' was enabled.";
+
+    logInfo($summary);
+    $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobStepSummary($summary);
+    $stepResult->setJobSummary($summary);
+    $stepResult->apply();
+}
+
+sub disablePlan {
+    my FlowPDF $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    my $planKey = "$params->{projectKey}-$params->{planKey}";
+
+    my $result = $self->client->delete("/plan/$planKey/enable");
+    return if (!defined $result || $result ne '1');
+
+    my $summary = "Plan '$planKey' was disabled.";
+
+    logInfo($summary);
+    $stepResult->setJobStepOutcome('success');
+    $stepResult->setJobStepSummary($summary);
+    $stepResult->setJobSummary($summary);
     $stepResult->apply();
 }
 
@@ -526,44 +670,19 @@ sub detailedErrorHandler {
     return;
 }
 
-sub enablePlan {
-    my FlowPDF $self = shift;
-    my $params = shift;
-    my FlowPDF::StepResult $stepResult = shift;
-    $self->init($params);
+sub finishStepWith {
+    my ($self, $stepResult, $outcome, $jobStepSummary, $jobSummary) = @_;
+    $jobSummary ||= $jobStepSummary;
 
-    my $planKey = "$params->{projectKey}-$params->{planKey}";
+    logError("Finishing with: $jobStepSummary");
+    logTrace("Finish initiated by:" . join(', ', caller()));
 
-    my $result = $self->client->post("/plan/$planKey/enable");
-    return if (!defined $result || $result ne '1');
+    $stepResult->setJobStepOutcome($outcome);
+    $stepResult->setJobStepSummary($jobStepSummary);
+    $stepResult->setJobSummary($jobSummary);
 
-    my $summary = "Plan '$planKey' was enabled.";
-
-    logInfo($summary);
-    $stepResult->setJobStepOutcome('success');
-    $stepResult->setJobStepSummary($summary);
-    $stepResult->setJobSummary($summary);
     $stepResult->apply();
-}
-
-sub disablePlan {
-    my FlowPDF $self = shift;
-    my $params = shift;
-    my FlowPDF::StepResult $stepResult = shift;
-    $self->init($params);
-
-    my $planKey = "$params->{projectKey}-$params->{planKey}";
-
-    my $result = $self->client->delete("/plan/$planKey/enable");
-    return if (!defined $result || $result ne '1');
-
-    my $summary = "Plan '$planKey' was disabled.";
-
-    logInfo($summary);
-    $stepResult->setJobStepOutcome('success');
-    $stepResult->setJobStepSummary($summary);
-    $stepResult->setJobSummary($summary);
-    $stepResult->apply();
+    exit 0;
 }
 
 sub _planToShortInfo {
@@ -686,6 +805,27 @@ sub _deploymentProjectToShortInfo {
     return \%result;
 }
 
+sub _deploymentResultToShortInfo {
+    my ($deploymentResult) = @_;
+
+    my @oneToOne = qw/
+        deploymentState
+        deploymentVersionName
+        lifeCycleState
+        id
+    /;
+
+    my %result = (
+        key       => $deploymentResult->{key}{key},
+        agentId   => $deploymentResult->{agent}{id},
+        agentName => $deploymentResult->{agent}{name}
+    );
+
+    $result{$_} = $deploymentResult->{$_} for @oneToOne;
+
+    return \%result;
+}
+
 sub _versionToShortInfo {
     my ($version) = @_;
 
@@ -705,6 +845,10 @@ sub _versionToShortInfo {
 
 sub saveResultProperties {
     my ($self, $stepResult, $resultFormat, $resultProperty, $result) = @_;
+
+    if (!defined $resultFormat) {
+        bailOut("No result format was supplied to saveResultProperties()");
+    }
 
     if ($resultFormat eq 'none') {
         logInfo("Will not save the results. 'Do Not Save The Result' was chosen for Result Format.");

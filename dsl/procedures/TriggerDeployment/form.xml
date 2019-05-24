@@ -37,7 +37,7 @@
   <formElement>
     <type>checkbox</type>
     <property>waitForDeployment</property>
-    <required>1</required>
+    <required>0</required>
     <documentation>If checked, procedure will sequentually request for the state of Deployment until it is finished.</documentation>
     <label>Wait For Deployment:</label>
     <checkedValue>1</checkedValue>

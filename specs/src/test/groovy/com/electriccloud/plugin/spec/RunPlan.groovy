@@ -179,7 +179,7 @@ class RunPlan extends PluginTestHelper {
         // Unexisiting plan key
         'CHANGEME_3' | 'unexisting' | 0            | 0           | 'error'         | 'not found'
         // Timeout
-        'CHANGEME_4' | 'timeout'    | 1            | 1           | 'warning'       | 'Exceeded the wait timeout'
+        'CHANGEME_4' | 'timeout'    | 1            | 1           | 'error'       | 'Exceeded the wait timeout'
         // Failing
         'CHANGEME_5' | 'failing'    | 1            | 0           | 'warning'       | 'Build was not finished successfully'
     }
