@@ -459,7 +459,7 @@ sub runPlan {
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $infoToSave);
 
     if (!$params->{waitForBuild}) {
-        return $self->finishStepWith('success', 'Build was successfully added to a queue.');
+        return $self->finishStepWith($stepResult, 'success', 'Build was successfully added to a queue.');
     }
     # Failed build
     elsif ($infoToSave->{finished} && !$infoToSave->{successful}) {
