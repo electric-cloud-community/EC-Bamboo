@@ -276,7 +276,7 @@ procedures:
         initiallyChecked: true
         checkedValue: 1
         uncheckedValue: 0
-        required: true
+        required: false
       - name: waitTimeout
         label: Wait Timeout
         documentation: Maximum time to wait for the deployment to be finished.
@@ -297,8 +297,8 @@ procedures:
         type: entry
         required: false
     outputParameters: {
-      deploymentKeys: 'List of comma-separated deployment result keys.',
-      resultURL: 'URL to the deployment result report.'
+      deploymentResultKey: 'Key of the deployment result.',
+      deploymentResultUrl: 'URL to the deployment result report.'
     }
 
   - name: GetDeploymentProjectsForPlan

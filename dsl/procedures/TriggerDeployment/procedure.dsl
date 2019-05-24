@@ -9,12 +9,12 @@ procedure 'TriggerDeployment', description: 'Runs deployment plan.', {
 
     }
 
-    formalOutputParameter 'deploymentKeys',
-        description: 'List of comma-separated deployment result keys.'
+    formalOutputParameter 'deploymentResultKey',
+        description: 'Key of the deployment result.'
 
-    formalOutputParameter 'resultURL',
+    formalOutputParameter 'deploymentResultUrl',
         description: 'URL to the deployment result report.'
-// === procedure_autogen ends, checksum: 53593fedd214edc8e83eaf951df733f1 ===
+// === procedure_autogen ends, checksum: be97d85d7dbe38bf9f92c5bdacf34eea ===
 // Do not update the code above the line
 // procedure properties declaration can be placed in here, like
 // property 'property name', value: "value"
