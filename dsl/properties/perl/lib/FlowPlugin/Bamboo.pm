@@ -642,6 +642,22 @@ sub checkConnection {
     return $userInfo->{name} eq $configValues->getParameter('credential')->getUserName();
 }
 
+sub collectReportingData {
+    my FlowPlugin::Bamboo $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    # Get Build Runs for the project
+    #/result/{projectKey}?expand&favourite&label&issueKey&includeAllStates&continuable&buildstate&start-index&max-results
+
+    # Get Build Runs for the plan of a project
+    #/result/{projectKey}-{buildKey}?expand&favourite&label&issueKey&includeAllStates&continuable&buildstate&start-index&max-results
+
+    # Get Latest Build Run
+    # /result/{projectKey}-{buildKey}-{buildNumber : ([0-9]+)|(latest)}?expand&favourite&start-index&max-results
+}
+
 
 sub defaultErrorHandler {
     my FlowPDF $self = shift;

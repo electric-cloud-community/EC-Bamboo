@@ -1,0 +1,50 @@
+<!--
+    This form is generated automatically from the parameters pluginspec.
+    Please not not edit this file manually as it will be regenerated.
+-->
+<editor>
+  <help>/commander/pages/@PLUGIN_NAME@/help?s=Administration&amp;amp;ss=Plugins#CollectReportingData</help>
+  <formElement>
+    <type>entry</type>
+    <property>config</property>
+    <configuration>1</configuration>
+    <propertyReference>/plugins/@PLUGIN_NAME@/project/ec_plugin_cfgs</propertyReference>
+    <required>1</required>
+    <documentation>Previously defined configuration for the plugin</documentation>
+    <label>Configuration Name:</label>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>projectKey</property>
+    <required>1</required>
+    <documentation>Project key (short name) of project that contains build plan.</documentation>
+    <label>Project Key:</label>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>planKey</property>
+    <required>1</required>
+    <documentation>Short name of plan to get details.</documentation>
+    <label>Plan Key:</label>
+  </formElement>
+  <formElement>
+    <type>checkbox</type>
+    <property>preview</property>
+    <required>0</required>
+    <documentation>If checked, no data will be sent to the reporting system. Use this option to preview gathered data.</documentation>
+    <label>Preview:</label>
+    <checkedValue>1</checkedValue>
+    <initiallyChecked>false</initiallyChecked>
+    <uncheckedValue>0</uncheckedValue>
+  </formElement>
+  <formElement>
+    <type>checkbox</type>
+    <property>debugLevel</property>
+    <required>0</required>
+    <documentation>If checked, the log level will be set to "Debug".</documentation>
+    <label>Debug:</label>
+    <checkedValue>1</checkedValue>
+    <initiallyChecked>false</initiallyChecked>
+    <uncheckedValue>0</uncheckedValue>
+  </formElement>
+</editor>
