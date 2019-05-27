@@ -17,8 +17,8 @@ class ConfigurationSuite extends PluginTestHelper {
     String config
     @Shared
     String endpoint
-    @Shared
-    String checkConnection
+//    @Shared
+//    String checkConnection
     @Shared
     String debugLevel
     @Shared
@@ -84,7 +84,7 @@ class ConfigurationSuite extends PluginTestHelper {
         def creds = credentials[credentialCase]
         def params = [
                 endpoint       : endpoints.correct,
-                checkConnection: checkConnection,
+//                checkConnection: checkConnection,
                 debugLevel     : debugLevel,
                 desc           : desc
         ]
@@ -101,11 +101,11 @@ class ConfigurationSuite extends PluginTestHelper {
         deleteConfiguration(PLUGIN_NAME, config)
 
         where:
-        caseId       | checkConnection | credentialCase | debugLevel | desc          | expectedOutcome
+        caseId       |  credentialCase | debugLevel | desc          | expectedOutcome
         //Just Required fields
-        'CHANGEME_1' | '0'             | 'correct'      | 'Info'     | descs.empty   | 'success'
+        'CHANGEME_1' | 'correct'      | 'Info'     | descs.empty   | 'success'
         //All fields
-        'CHANGEME_2' | '1'             | 'correct'      | 'Trace'    | descs.correct | 'success'
+//        'CHANGEME_2' | 'correct'      | 'Trace'    | descs.correct | 'success'
     }
 
 }
