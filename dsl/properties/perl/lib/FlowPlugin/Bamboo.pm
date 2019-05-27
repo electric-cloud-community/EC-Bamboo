@@ -48,11 +48,6 @@ sub config {return shift->{_config}};
 #@returns FlowPlugin::REST
 sub client {return shift->{restClient}};
 
-sub exit_with_error {
-    my ($self, $error) = @_;
-    bailOut($error);
-}
-
 =head2 getAllPlans
 
 =cut
@@ -382,7 +377,8 @@ sub runPlan {
     # Custom revision
     $queueRequestParams{customRevision} = $params->{customRevision} if $params->{customRevision};
 
-    my $queueRequestPath = "/queue/$params->{projectKey}-$params->{planKey}";
+    my $planKey = "$params->{projectKey}-$params->{planKey}";
+    my $queueRequestPath = "/queue/$planKey";
 
     # Perform request to run the build
     my $queueResponse = $self->client->post($queueRequestPath, \%queueRequestParams, undef, {
@@ -399,8 +395,11 @@ sub runPlan {
     my $buildNumber = $queueResponse->{buildNumber};
     logInfo("Build Number: $buildNumber.\nBuild Result Key: $queueResponse->{buildResultKey}.");
 
-    # TODO: set Flow URL property
+    my $bambooResultURL = $params->{endpoint}
+        . "/chain/result/viewChainResult.action?"
+        . "planKey=$planKey&buildNumber=$buildNumber";
 
+    $stepResult->setOutcomeProperty("/myJob/report-urls/View Build Report", $bambooResultURL);
     $stepResult->setOutputParameter('buildUrl', $queueResponse->{link}{href});
     $stepResult->setOutputParameter('buildResultKey', $queueResponse->{buildResultKey});
 
@@ -561,10 +560,13 @@ sub triggerDeployment {
 
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $shortInfo);
 
+    my $bambooResultURL = $params->{endpoint}
+        . '/deploy/viewDeploymentResult.action?deploymentResultId=' . $deploymentResultId;
+
+    $stepResult->setOutcomeProperty("/myJob/report-urls/View Deployment Report", $bambooResultURL);
+
     $stepResult->setOutputParameter('deploymentResultKey', $deploymentResultId);
-    $stepResult->setOutputParameter('deploymentResultUrl',
-        $params->{endpoint} . '/deploy/viewDeploymentResult.action?deploymentResultId=' . $deploymentResultId
-    );
+    $stepResult->setOutputParameter('deploymentResultUrl', $bambooResultURL);
 
     if (!$params->{waitForDeployment}) {
         $stepResult->setJobStepOutcome('success');
@@ -626,6 +628,20 @@ sub disablePlan {
     $stepResult->setJobSummary($summary);
     $stepResult->apply();
 }
+
+sub checkConnection {
+    my ($self, $configValues) = @_;
+
+    my $client = FlowPlugin::REST->new($configValues, {
+        APIBase     => '/rest/api/latest/',
+        contentType => 'json'
+    });
+
+    my $userInfo = $client->get('/currentUser');
+
+    return $userInfo->{name} eq $configValues->getParameter('credential')->getUserName();
+}
+
 
 sub defaultErrorHandler {
     my FlowPDF $self = shift;

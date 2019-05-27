@@ -36,12 +36,12 @@ configuration:
       userNameLabel: Username
       required: true
       passwordLabel: Password
-    - name: checkConnection
-      label: Check Connection?
-      type: checkbox
-      checkedValue: true
-      uncheckedValue: false
-      initiallyChecked: 1
+#    - name: checkConnection
+#      label: Check Connection?
+#      type: checkbox
+#      checkedValue: true
+#      uncheckedValue: false
+#      initiallyChecked: 1
     - name: debugLevel
       label: Debug Level
       type: select

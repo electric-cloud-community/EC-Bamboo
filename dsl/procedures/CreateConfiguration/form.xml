@@ -38,14 +38,6 @@
     <userNameLabel>Username</userNameLabel>
   </formElement>
   <formElement>
-    <type>checkbox</type>
-    <property>checkConnection</property>
-    <label>Check Connection?:</label>
-    <checkedValue>true</checkedValue>
-    <initiallyChecked>1</initiallyChecked>
-    <uncheckedValue>false</uncheckedValue>
-  </formElement>
-  <formElement>
     <type>select</type>
     <property>debugLevel</property>
     <required>0</required>

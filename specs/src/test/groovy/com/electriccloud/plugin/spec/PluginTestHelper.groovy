@@ -19,7 +19,7 @@ class PluginTestHelper extends PluginSpockTestSupport {
         String password = BAMBOO_PASSWORD
         String endpoint = BAMBOO_URL
 
-        String checkConnection = 1
+//        String checkConnection = 1
 
         if (System.getenv('RECREATE_CONFIG')) {
             props.recreate = true
@@ -33,7 +33,7 @@ class PluginTestHelper extends PluginSpockTestSupport {
                         endpoint       : endpoint,
                         credential     : 'credential',
                         debugLevel     : 3,
-                        checkConnection: checkConnection,
+//                        checkConnection: checkConnection,
                 ],
                 username,
                 password,
@@ -157,7 +157,6 @@ class PluginTestHelper extends PluginSpockTestSupport {
         assert jobId
         def summary
         def property = "/myJob/jobSteps/$stepName/summary"
-        println "Trying to get the summary for Procedure: checkConnection, property: $property, jobId: $jobId"
         try {
             summary = getJobProperty(property, jobId)
         } catch (Throwable e) {
@@ -227,7 +226,6 @@ class PluginTestHelper extends PluginSpockTestSupport {
                     desc             : '${params.desc}',
                     endpoint         : '${params.endpoint}',
                     debugLevel       : '${params.debugLevel}',
-                    checkConnection  : '${params.checkConnection}',
                     credential       : 'credential',
                 ]
             )
