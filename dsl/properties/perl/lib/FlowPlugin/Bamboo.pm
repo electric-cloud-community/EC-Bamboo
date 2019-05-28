@@ -225,7 +225,8 @@ sub getPlanRuns {
 
     my $planKey = "$params->{projectKey}-$params->{planKey}";
     my %requestParameters = (
-        expand => 'results.result',
+        expand        => 'results.result',
+        'max-results' => 0
     );
 
     if (defined $params->{buildState} && $params->{buildState} ne 'All') {
@@ -648,16 +649,95 @@ sub collectReportingData {
     my FlowPDF::StepResult $stepResult = shift;
     $self->init($params);
 
-    # Get Build Runs for the project
-    #/result/{projectKey}?expand&favourite&label&issueKey&includeAllStates&continuable&buildstate&start-index&max-results
+    if ($params->{debugLevel}) {
+        FlowPDF::Log::setLogLevel(FlowPDF::Log::DEBUG);
+    }
 
-    # Get Build Runs for the plan of a project
-    #/result/{projectKey}-{buildKey}?expand&favourite&label&issueKey&includeAllStates&continuable&buildstate&start-index&max-results
+    my $reporting = FlowPDF::ComponentManager->loadComponent('FlowPlugin::Bamboo::Reporting', {
+        reportObjectTypes => [ 'build' ],
+        initialRetrievalCount => $params->{initialRecordsCount},
 
-    # Get Latest Build Run
-    # /result/{projectKey}-{buildKey}-{buildNumber : ([0-9]+)|(latest)}?expand&favourite&start-index&max-results
+        metadataUniqueKey => $params->{buildNumber},
+        payloadKeys       => [ 'buildStartedTime' ]
+    }, $self);
+
+    $reporting->CollectReportingData();
 }
 
+# Get Build Runs for the plan of a project
+# /result/{projectKey}-{buildKey}?expand&start-index&max-results
+sub getBuildRuns {
+    my ($self, $projectKey, $planKey, $parameters) = @_;
+
+    # Adding plan key if given
+    my $requestKey = $projectKey . ($planKey ? '-' . $planKey : '');
+    my $requestPath = '/result/' . $requestKey;
+
+    my $limit = 0;
+    if (defined $parameters->{maxResults}) {
+        $limit = $parameters->{maxResults};
+    }
+
+    my $buildResults = $self->client->get($requestPath, { expand => 'results.result', 'max-results' => $limit });
+    my @result = map {_planBuildResultToShortInfo($_)} @{$buildResults->{results}{result}};
+
+    return \@result;
+}
+
+sub getBuildRunsAfter {
+    my ($self, $projectKey, $planKey, $parameters) = @_;
+
+    my @results = ();
+
+    # Adding plan key if given
+    my $requestKey = $projectKey . ($planKey ? '-' . $planKey : '');
+    my $requestPath = '/result/' . $requestKey;
+
+    # Will load this count of results at once
+    my $requestPackSize = 25;
+
+    my %requestParams = (
+        expand        => 'results.result',
+        'max-results' => $requestPackSize,
+        'start-index' => 0
+    );
+
+    my $reachedGivenTime = 0;
+    my $haveMoreResults = 1;
+
+    while (!$reachedGivenTime && $haveMoreResults) {
+        my $buildResults = $self->client->get($requestPath, \%requestParams);
+
+        # If returned less results that we requested, than there are no more updates to request
+        $haveMoreResults = $buildResults->{size} >= $requestPackSize;
+
+        for my $buildResult (@{$buildResults->{results}{result}}) {
+            my $parsed = _planBuildResultToShortInfo($buildResult);
+
+            if ($self->compareISODates($parsed->{buildStartedTime}, $parameters->{afterTime}) > 0) {
+                $reachedGivenTime = 1;
+                last;
+            }
+
+            push @results, $parsed;
+        }
+
+        # Request next pack
+        $requestParams{'start-index'} += $requestPackSize;
+    }
+
+    return \@results;
+}
+
+# 2019-05-28T11:14:06.894Z
+sub compareISODates {
+    my ($self, $date1, $date2) = @_;
+
+    $date1 =~ s/[^0-9]//g;
+    $date2 =~ s/[^0-9]//g;
+
+    return $date1 <=> $date2;
+}
 
 sub defaultErrorHandler {
     my FlowPDF $self = shift;
@@ -790,6 +870,7 @@ sub _planBuildResultToShortInfo {
 
         buildStartedTime
         buildCompletedTime
+        buildReason
     /;
 
     my %result = (
