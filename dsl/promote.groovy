@@ -24,6 +24,7 @@ def stepsWithAttachedCredentials = [
 [procedureName: "GetDeploymentProjectsForPlan", stepName: "GetDeploymentProjectsForPlan"],
 [procedureName: "CreateVersion", stepName: "CreateVersion"],
 [procedureName: "CollectReportingData", stepName: "CollectReportingData"],
+[procedureName: "ValidateCRDParams", stepName: "ValidateCRDParams"],
 // === steps with credentials ends ===
 // Please do not remove the line above, it marks the place for the new steps
 // The code above will be updated automatically as you add more procedures into your plugin
@@ -51,14 +52,21 @@ project pluginName, {
             }
         }
     }
-    // Place your custom project-level properties in here, like
-    // property 'myPropName', {
-    //     value = 'some value'
-    // }
-    // or
-    // property 'myPropName', {
-    //     property 'second level', value: 1
-    // }
+
+    property 'ec_dsl_libraries_path', value: 'libs'
+    property 'ec_devops_insight', {
+        property 'build', {
+            property 'source', value: 'Bamboo'
+            property 'operations', {
+                property 'createDOISDataSource', {
+                    property 'procedureName', value: 'ValidateCRDParams'
+                }
+                property 'modifyDOISDataSource', {
+                    property 'procedureName', value: 'ValidateCRDParams'
+                }
+            }
+        }
+    }
 }
 
 // Copy existing plugin configurations from the previous

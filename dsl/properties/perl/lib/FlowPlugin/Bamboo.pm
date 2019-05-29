@@ -225,7 +225,7 @@ sub getPlanRuns {
 
     my $planKey = "$params->{projectKey}-$params->{planKey}";
     my %requestParameters = (
-        expand        => 'results.result',
+        expand        => 'results.result.artifacts,results.result.labels',
         'max-results' => 0
     );
 
@@ -249,7 +249,7 @@ sub getPlanRuns {
 
     for my $buildResult (@{$response->{results}{result}}) {
         logInfo("Found build result: '$buildResult->{key}'");
-        push(@infoToSave, _planBuildResultToShortInfo($buildResult));
+        push(@infoToSave, _planBuildResultToShortInfo($buildResult, ['artifacts', 'labels']));
     }
 
     # When have no information
@@ -452,8 +452,10 @@ sub runPlan {
 
     # Get build info
     #/result/{projectKey}-{buildKey}-{buildNumber : ([0-9]+)|(latest)}?expand&favourite&start-index&max-results
-    my $buildInfo = $self->client->get("/result/$queueResponse->{buildResultKey}");
-    my $infoToSave = _planBuildResultToShortInfo($buildInfo);
+    my $buildInfo = $self->client->get("/result/$queueResponse->{buildResultKey}", {
+        expand => 'results.result.artifacts,results.result.labels'
+    });
+    my $infoToSave = _planBuildResultToShortInfo($buildInfo, ['artifacts', 'labels']);
 
     # Save properties
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $infoToSave);
@@ -697,7 +699,7 @@ sub getBuildRunsAfter {
     my $requestPackSize = 25;
 
     my %requestParams = (
-        expand        => 'results.result',
+        expand        => 'results.result.labels',
         'max-results' => $requestPackSize,
         'start-index' => 0
     );
@@ -712,7 +714,7 @@ sub getBuildRunsAfter {
         $haveMoreResults = $buildResults->{size} >= $requestPackSize;
 
         for my $buildResult (@{$buildResults->{results}{result}}) {
-            my $parsed = _planBuildResultToShortInfo($buildResult);
+            my $parsed = _planBuildResultToShortInfo($buildResult, ['labels']);
 
             if ($self->compareISODates($parsed->{buildStartedTime}, $parameters->{afterTime}) > 0) {
                 $reachedGivenTime = 1;
@@ -847,7 +849,7 @@ sub _planToShortInfo {
 }
 
 sub _planBuildResultToShortInfo {
-    my ($buildInfo) = @_;
+    my ($buildInfo, $expanded) = @_;
 
     my @oneToOne = qw/
         key
@@ -870,6 +872,7 @@ sub _planBuildResultToShortInfo {
 
         buildStartedTime
         buildCompletedTime
+        buildDurationInSeconds
         buildReason
     /;
 
@@ -878,8 +881,15 @@ sub _planBuildResultToShortInfo {
         planKey => $buildInfo->{plan}{key},
     );
 
-    if ($buildInfo->{artifacts}{size}) {
-        $result{artifacts} = $buildInfo->{artifacts}{artifact};
+    if (defined $expanded && ref $expanded eq 'ARRAY') {
+        for my $section (@$expanded) {
+            if ($section eq 'labels' && $buildInfo->{labels}{size} > 0) {
+                $result{labels} = join (', ', map { $_->{name} } @{$buildInfo->{labels}});
+            }
+            elsif ($section eq 'artifacts' && $buildInfo->{artifacts}{size}){
+                $result{artifacts} = $buildInfo->{artifacts}{artifact};
+            }
+        }
     }
 
     $result{$_} = $buildInfo->{$_} for (@oneToOne);

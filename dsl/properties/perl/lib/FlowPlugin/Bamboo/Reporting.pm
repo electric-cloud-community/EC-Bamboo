@@ -13,31 +13,37 @@ sub buildDataset {
     my ($records) = @_;
 
     my FlowPDF::Component::EF::Reporting::Dataset $dataset = $self->newDataset([ 'build' ]);
-    my $params = $bamboo->getContext()->getRuntimeParameters();
+    my FlowPDF::Context $context = $bamboo->getContext();
+    my $params = $context->getRuntimeParameters();
 
     # Adding from the end of the list
     for my $row ( reverse @$records ) {
 
-        my $data = $dataset->newData({
+        my %payload = (
+            source              => 'Bamboo',
+            pluginName          => '@PLUGIN_NAME@',
+            projectName         => $context->retrieveCurrentProjectName(),
+            releaseName         => $params->{releaseName},
+            releaseUri          => _buildRunBuildURL($params),
+            releaseProjectName  => $params->{releaseProjectName},
+            pluginConfiguration => $params->{config},
+            baseDrilldownUrl    => $params->{baseDrilldownUrl},
+            buildNumber         => $row->{buildNumber},
+            timestamp           => $row->{buildStartedTime},
+            endTime             => $row->{buildCompletedTime},
+            startTime           => $row->{buildStartedTime},
+            buildStatus         => $row->{buildState},
+            launchedBy          => 'N/A',
+            jobName             => $row->{key},
+            duration            => $row->{buildDurationInSeconds},
+            tags                => $row->{labels},
+            sourceUrl           => $row->{url},
+        );
+
+        $dataset->newData({
             reportObjectType => 'build',
+            values           => \%payload
         });
-
-        # TODO: check fields
-
-        $row->{sourceUrl} = $row->{url};
-        $row->{pluginConfiguration} = $params->{config};
-        $row->{startTime} = $row->{buildStartedTime};
-        $row->{endTime} = $row->{buildCompletedTime};
-        $row->{documentId} = $row->{url};
-        $row->{buildStatus} = $row->{buildState};
-
-        # hardcode
-        $row->{launchedBy} = 'admin';
-
-        for my $k (keys %$row) {
-            next if ref $row->{$k};
-            $data->addValue($k => $row->{$k});
-        }
 
         # if ($params->{retrieveTestResults}) {
         #     logInfo("Test results retrieval is enabled");
@@ -70,6 +76,15 @@ sub buildDataset {
     return $dataset;
 }
 
+sub _buildRunBuildURL {
+    my ($params, $buildInfo) = @_;
+    my $drilldownURL = $params->{baseDrilldownUrl};
+    $drilldownURL ||= $params->{endpoint};
+
+    $drilldownURL =~ s|/+$||;
+    return $drilldownURL . '/browse/' . $buildInfo->{key};
+}
+
 sub getRecordsAfter {
     my FlowPlugin::Bamboo::Reporting $self = shift;
     my FlowPlugin::Bamboo $bamboo = shift;
@@ -82,7 +97,7 @@ sub getRecordsAfter {
 
     my $records = $bamboo->getBuildRuns($params->{projectKey}, $params->{planKey}, {
         maxResults => 0,
-        afterTime  => $metadataValues->{buildStartedTime}
+        afterTime  => $metadataValues->{startTime}
     });
 
     logDebug("Records after GetRecordsAfter", Dumper $records);
@@ -124,7 +139,7 @@ sub compareMetadata {
 
     my FlowPlugin::Bamboo $pluginObject = $self->getPluginObject();
 
-    return $pluginObject->compareISODates($value1->{buildStartedTime}, $value2->{buildStartedTime});
+    return $pluginObject->compareISODates($value1->{startTime}, $value2->{startTime});
 }
 
 1;

@@ -3,7 +3,8 @@ ecpluginbuilder
 .idea
 *.iml
 .DS_Store
-build
+/build
+/specs/build
 bin
 /temp
 /.assets

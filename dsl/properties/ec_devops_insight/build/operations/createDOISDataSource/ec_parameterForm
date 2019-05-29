@@ -1,0 +1,60 @@
+<!--
+
+     Copyright 2019 CloudBees Flow, Inc.
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+
+-->
+<editor>
+    <formElement>
+        <type>entry</type>
+        <label>Configuration Name:</label>
+        <property>configName</property>
+        <required>1</required>
+        <documentation>Previously defined configuration for the plugin</documentation>
+        <configuration>1</configuration>
+        <propertyReference>/plugins/@PLUGIN_NAME@/project/ec_plugin_cfgs</propertyReference>
+    </formElement>
+    <formElement>
+      <type>entry</type>
+      <property>projectKey</property>
+      <required>1</required>
+      <documentation>Project key (short name) of project that contains build plan.</documentation>
+      <label>Project Key:</label>
+    </formElement>
+    <formElement>
+      <type>entry</type>
+      <property>planKey</property>
+      <required>0</required>
+      <documentation>Short name of plan to get details. Might be simply planKey or composite planKey-jobKey.</documentation>
+      <label>Plan Key:</label>
+    </formElement>
+    <formElement>
+      <type>entry</type>
+      <property>initialRetrievalCount</property>
+      <required>0</required>
+      <documentation>Count of old builds to retrieve from server on the first run. If omited it will be set to 10.</documentation>
+      <label>Initial Count:</label>
+      <value>10</value>
+    </formElement>
+    <formElement>
+        <type>entry</type>
+        <label>Polling Frequency:</label>
+        <property>frequency</property>
+        <required>1</required>
+        <documentation>
+            Polling frequency (in minutes) for retrieving defects from JIRA.
+        </documentation>
+        <value>30</value>
+    </formElement>
+</editor>

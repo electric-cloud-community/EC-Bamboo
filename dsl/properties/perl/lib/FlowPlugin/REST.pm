@@ -213,16 +213,23 @@ sub buildRequest {
 sub buildRequestPath {
     my ($self, $path) = @_;
 
-    my $pathBase = $self->{endpoint};
-    if ($self->{APIBase}) {
-        $pathBase .= $self->{APIBase}
-    }
-    $pathBase =~ s|/$||;
-    if (!$path =~ /^\//) {
-        $path = '/' . $path;
+    my $endpoint = $self->{endpoint};
+    my $apiPath = $self->{APIBase};
+
+    $endpoint =~ s|/+$||g;
+    $path =~ s|^/+||g;
+
+    if (defined $apiPath && $apiPath ne '') {
+        $endpoint =~ s|/+$||g;
+        $apiPath =~ s|^/+||g;
+
+        $endpoint .= '/' . $apiPath
     }
 
-    return $pathBase . $path;
+    $endpoint =~ s|/+$||g;
+    $path =~ s|^/+||g;
+
+    return $endpoint . '/' . $path;
 }
 
 sub authorizeRequest {

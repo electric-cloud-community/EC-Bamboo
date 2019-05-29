@@ -28,6 +28,27 @@
     <label>Plan Key:</label>
   </formElement>
   <formElement>
+    <type>textarea</type>
+    <property>transformScript</property>
+    <htmlDocumentation>Allows user to provide perl script for payload customization.
+This method will be invoked by plugin with 2 parameters. 1st parameter is context object, 2nd is payload object.
+Method should be named "transform", and should return payload object. In this example myTimestamp field will be added to payload object:
+&lt;pre&gt;
+  sub transform {
+      my ($context, $payload) = @_;
+      $payload-&gt;{myTimestamp} = $context-&gt;one();
+      return $payload;
+  }
+  sub one {
+      my ($context) = @_;
+      return time();
+  }
+&lt;/pre&gt;
+</htmlDocumentation>
+    <documentation>Perl code to transform report payload.</documentation>
+    <label>Transformation script:</label>
+  </formElement>
+  <formElement>
     <type>entry</type>
     <property>initialRetrievalCount</property>
     <required>0</required>
@@ -68,5 +89,19 @@
     <checkedValue>1</checkedValue>
     <initiallyChecked>false</initiallyChecked>
     <uncheckedValue>0</uncheckedValue>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>releaseName</property>
+    <required>0</required>
+    <documentation>DevOpsInsightServer datasource specific field.</documentation>
+    <label>Release Name:</label>
+  </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>releaseProjectName</property>
+    <required>0</required>
+    <documentation>DevOpsInsightServer datasource specific field.</documentation>
+    <label>Release Project Name:</label>
   </formElement>
 </editor>
