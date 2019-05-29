@@ -1,6 +1,7 @@
 // This procedure.dsl was generated automatically
 // === procedure_autogen starts ===
 procedure 'ValidateCRDParams', description: 'Validates collect reporting data params.', {
+    property 'standardStepPicker', 'false'
 
     step 'ValidateCRDParams', {
         description = ''
