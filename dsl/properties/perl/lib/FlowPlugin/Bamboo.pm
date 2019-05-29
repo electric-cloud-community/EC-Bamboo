@@ -666,6 +666,24 @@ sub collectReportingData {
     $reporting->CollectReportingData();
 }
 
+sub validateCRDParams {
+    my FlowPlugin::Bamboo $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    my @required = qw/config projectKey/;
+
+    for my $param (@required){
+        bailOut("Parameter $params is mandatory") unless $params->{$param};
+    }
+
+    $stepResult->setJobSummary('success');
+    $stepResult->setJobStepOutcome('Parameters check passed');
+
+    exit 0;
+}
+
 # Get Build Runs for the plan of a project
 # /result/{projectKey}-{buildKey}?expand&start-index&max-results
 sub getBuildRuns {
