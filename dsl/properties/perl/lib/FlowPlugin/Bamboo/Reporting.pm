@@ -18,7 +18,6 @@ sub buildDataset {
 
     # Adding from the end of the list
     for my $row ( reverse @$records ) {
-
         my %payload = (
             source              => 'Bamboo',
             pluginName          => '@PLUGIN_NAME@',
@@ -39,6 +38,13 @@ sub buildDataset {
             tags                => $row->{labels} || '',
             sourceUrl           => $row->{url},
         );
+
+        for (keys %payload) {
+            if (!defined $payload{$_}) {
+                logWarning("Payload parameter '$_' don't have a value and will not be sent.");
+                delete $payload{$_};
+            }
+        }
 
         $dataset->newData({
             reportObjectType => 'build',

@@ -656,10 +656,10 @@ sub collectReportingData {
     }
 
     my $reporting = FlowPDF::ComponentManager->loadComponent('FlowPlugin::Bamboo::Reporting', {
-        reportObjectTypes => [ 'build' ],
+        reportObjectTypes     => [ 'build' ],
         initialRetrievalCount => $params->{initialRecordsCount},
-        metadataUniqueKey => $params->{buildNumber},
-        payloadKeys       => [ 'startTime' ]
+        metadataUniqueKey     => $params->{buildNumber},
+        payloadKeys           => [ 'startTime' ]
     }, $self);
 
     $reporting->CollectReportingData();
@@ -672,7 +672,6 @@ sub validateCRDParams {
     $self->init($params);
 
     my @required = qw/config projectKey/;
-
     for my $param (@required){
         bailOut("Parameter $params is mandatory") unless $params->{$param};
     }
