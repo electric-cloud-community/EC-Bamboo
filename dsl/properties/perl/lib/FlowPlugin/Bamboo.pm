@@ -225,7 +225,8 @@ sub getPlanRuns {
 
     my $planKey = "$params->{projectKey}-$params->{planKey}";
     my %requestParameters = (
-        expand => 'results.result',
+        expand        => 'results.result.artifacts,results.result.labels',
+        'max-results' => 0
     );
 
     if (defined $params->{buildState} && $params->{buildState} ne 'All') {
@@ -248,7 +249,7 @@ sub getPlanRuns {
 
     for my $buildResult (@{$response->{results}{result}}) {
         logInfo("Found build result: '$buildResult->{key}'");
-        push(@infoToSave, _planBuildResultToShortInfo($buildResult));
+        push(@infoToSave, _planBuildResultToShortInfo($buildResult, ['artifacts', 'labels']));
     }
 
     # When have no information
@@ -451,8 +452,10 @@ sub runPlan {
 
     # Get build info
     #/result/{projectKey}-{buildKey}-{buildNumber : ([0-9]+)|(latest)}?expand&favourite&start-index&max-results
-    my $buildInfo = $self->client->get("/result/$queueResponse->{buildResultKey}");
-    my $infoToSave = _planBuildResultToShortInfo($buildInfo);
+    my $buildInfo = $self->client->get("/result/$queueResponse->{buildResultKey}", {
+        expand => 'results.result.artifacts,results.result.labels'
+    });
+    my $infoToSave = _planBuildResultToShortInfo($buildInfo, ['artifacts', 'labels']);
 
     # Save properties
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $infoToSave);
@@ -642,6 +645,125 @@ sub checkConnection {
     return $userInfo->{name} eq $configValues->getParameter('credential')->getUserName();
 }
 
+sub collectReportingData {
+    my FlowPlugin::Bamboo $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    if ($params->{debugLevel}) {
+        FlowPDF::Log::setLogLevel(FlowPDF::Log::DEBUG);
+    }
+
+    my $requestKey = $params->{projectKey} . ($params->{planKey} ? '-' . $params->{planKey} : '');
+
+    my $reporting = FlowPDF::ComponentManager->loadComponent('FlowPlugin::Bamboo::Reporting', {
+        reportObjectTypes     => [ 'build' ],
+        initialRetrievalCount => $params->{initialRecordsCount},
+        metadataUniqueKey     => $requestKey,
+        payloadKeys           => [ 'startTime' ]
+    }, $self);
+
+    $reporting->CollectReportingData();
+}
+
+sub validateCRDParams {
+    my FlowPlugin::Bamboo $self = shift;
+    my $params = shift;
+    my FlowPDF::StepResult $stepResult = shift;
+    $self->init($params);
+
+    my @required = qw/config projectKey/;
+    for my $param (@required){
+        bailOut("Parameter $params is mandatory") unless $params->{$param};
+    }
+
+    $stepResult->setJobSummary('success');
+    $stepResult->setJobStepOutcome('Parameters check passed');
+
+    exit 0;
+}
+
+# Get Build Runs for the plan of a project
+# /result/{projectKey}-{buildKey}?expand&start-index&max-results
+sub getBuildRuns {
+    my ($self, $projectKey, $planKey, $parameters) = @_;
+
+    # Adding plan key if given
+    my $requestKey = $projectKey . ($planKey ? '-' . $planKey : '');
+    my $requestPath = '/result/' . $requestKey;
+
+    my $limit = 0;
+    if (defined $parameters->{maxResults}) {
+        $limit = $parameters->{maxResults};
+    }
+
+    my $buildResults = $self->client->get($requestPath, { expand => 'results.result', 'max-results' => $limit });
+    return unless defined $buildResults;
+
+    my @result = map {_planBuildResultToShortInfo($_)} @{$buildResults->{results}{result}};
+
+    return \@result;
+}
+
+sub getBuildRunsAfter {
+    my ($self, $projectKey, $planKey, $parameters) = @_;
+    my $afterTime = $parameters->{afterTime};
+
+    my @results = ();
+
+    # Adding plan key if given
+    my $requestKey = $projectKey . ($planKey ? '-' . $planKey : '');
+    my $requestPath = '/result/' . $requestKey;
+
+    # Will load this count of results at once
+    my $requestPackSize = 25;
+
+    my %requestParams = (
+        expand        => 'results.result.labels',
+        'max-results' => $requestPackSize,
+        'start-index' => 0
+    );
+
+    my $reachedGivenTime = 0;
+    my $haveMoreResults = 1;
+
+    while (!$reachedGivenTime && $haveMoreResults) {
+        my $buildResults = $self->client->get($requestPath, \%requestParams);
+        return unless defined $buildResults;
+
+        # If returned less results that we requested, than there are no more updates to request
+        $haveMoreResults = $buildResults->{results}{size} >= $requestPackSize;
+
+        for my $buildResult (@{$buildResults->{results}{result}}) {
+            my $parsed = _planBuildResultToShortInfo($buildResult, ['labels']);
+
+            if ($self->compareISODateTimes($afterTime, $parsed->{buildStartedTime}) > 0) {
+                $reachedGivenTime = 1;
+                last;
+            }
+
+            push @results, $parsed;
+        }
+
+        # Request next pack
+        $requestParams{'start-index'} += $requestPackSize;
+    }
+
+    return \@results;
+}
+
+# 2019-05-28T11:14:06.894Z
+sub compareISODateTimes {
+    my ($self, $date1, $date2) = @_;
+
+    $date1 =~ s/[^0-9]//g;
+    $date2 =~ s/[^0-9]//g;
+
+    logDebug("Comparing: $date1 > $date2 = ", $date1 <=> $date2);
+
+    return $date1 <=> $date2;
+}
 
 sub defaultErrorHandler {
     my FlowPDF $self = shift;
@@ -751,7 +873,7 @@ sub _planToShortInfo {
 }
 
 sub _planBuildResultToShortInfo {
-    my ($buildInfo) = @_;
+    my ($buildInfo, $expanded) = @_;
 
     my @oneToOne = qw/
         key
@@ -774,6 +896,8 @@ sub _planBuildResultToShortInfo {
 
         buildStartedTime
         buildCompletedTime
+        buildDurationInSeconds
+        buildReason
     /;
 
     my %result = (
@@ -781,8 +905,15 @@ sub _planBuildResultToShortInfo {
         planKey => $buildInfo->{plan}{key},
     );
 
-    if ($buildInfo->{artifacts}{size}) {
-        $result{artifacts} = $buildInfo->{artifacts}{artifact};
+    if (defined $expanded && ref $expanded eq 'ARRAY') {
+        for my $section (@$expanded) {
+            if ($section eq 'labels' && $buildInfo->{labels}{size} > 0) {
+                $result{labels} = join (', ', map { $_->{name} } @{$buildInfo->{labels}});
+            }
+            elsif ($section eq 'artifacts' && $buildInfo->{artifacts}{size}){
+                $result{artifacts} = $buildInfo->{artifacts}{artifact};
+            }
+        }
     }
 
     $result{$_} = $buildInfo->{$_} for (@oneToOne);
@@ -886,7 +1017,7 @@ sub saveResultProperties {
 
         for my $property (keys %$properties) {
             my $value = $properties->{$property};
-            next if (!$value && $value ne '0');
+            next unless (defined $value);
 
             logDebug("Saving property '$property' with value '$value'");
             $stepResult->setOutcomeProperty($property, $value);

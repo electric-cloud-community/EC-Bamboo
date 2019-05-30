@@ -171,7 +171,7 @@ class RunPlan extends PluginTestHelper {
         then:
         println(getJobLink(result.jobId))
         assert result.outcome == expectedOutcome
-        assert getJobStepSummary(procedureName, result.jobId) =~ expectedSummary
+        assert getProcedureJobStepSummary(procedureName, result.jobId) =~ expectedSummary
 
         where:
         caseId       | planKey      | waitForBuild | waitTimeout | expectedOutcome | expectedSummary
@@ -208,7 +208,7 @@ class RunPlan extends PluginTestHelper {
         then:
         println(getJobLink(result.jobId))
         assert result.outcome == expectedOutcome
-        assert getJobStepSummary(procedureName, result.jobId) =~ expectedSummary
+        assert getProcedureJobStepSummary(procedureName, result.jobId) =~ expectedSummary
 
         where:
         caseId       | customRevision | expectedOutcome | expectedSummary
@@ -245,7 +245,7 @@ class RunPlan extends PluginTestHelper {
         then:
         println(getJobLink(result.jobId))
         assert result.outcome == expectedOutcome
-        assert getJobStepSummary(procedureName, result.jobId) =~ expectedSummary
+        assert getProcedureJobStepSummary(procedureName, result.jobId) =~ expectedSummary
 
         cleanup:
         if (parametersCase == 'timeout') {

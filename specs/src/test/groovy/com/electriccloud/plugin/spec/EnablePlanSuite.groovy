@@ -1,7 +1,6 @@
 package com.electriccloud.plugin.spec
 
 import com.electriccloud.plugins.annotations.Sanity
-import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Unroll
 
@@ -96,7 +95,7 @@ class EnablePlanSuite extends BambooHelper {
         assert result.outcome == expectedOutcome
 
         // Check logs
-        getJobStepSummary(procedureName, result.jobId)
+        getProcedureJobStepSummary(procedureName, result.jobId)
 
         where:
         caseId       | config      | projectKey              | planKey                   | expectedOutcome | expectedSummary

@@ -29,10 +29,10 @@ class PluginTestHelper extends PluginSpockTestSupport {
                 PLUGIN_NAME,
                 configName,
                 [
-                        desc           : 'Spec tests configuration',
-                        endpoint       : endpoint,
-                        credential     : 'credential',
-                        debugLevel     : 3,
+                        desc      : 'Spec tests configuration',
+                        endpoint  : endpoint,
+                        credential: 'credential',
+                        debugLevel: 3,
 //                        checkConnection: checkConnection,
                 ],
                 username,
@@ -58,19 +58,40 @@ class PluginTestHelper extends PluginSpockTestSupport {
         return 'local'
     }
 
-    def runProcedure(String projectName, String procedureName, Map parameters) {
+    def stringifyParameters(Map parameters) {
+        return parameters
         // Skip undefined values
-        def parametersString = parameters
                 .findAll { k, v -> v != null }
                 .collect { k, v ->
                     v = ((String) v).replace('\'', '\\\'')
                     "$k: '''$v'''"
                 }.join(', ')
+    }
+
+    def runProcedure(String projectName, String procedureName, Map parameters) {
+        def parametersString = stringifyParameters(parameters)
 
         def code = """
             runProcedure(
                 projectName: '$projectName',
                 procedureName: '$procedureName',
+                actualParameter: [
+                    $parametersString                 
+                ]
+            )
+        """
+
+        return runProcedureDsl(code)
+    }
+
+    def runSchedule(String projectName, String scheduleName, String procedureName, Map parameters) {
+        def parametersString = stringifyParameters(parameters)
+
+        def code = """
+            runProcedure(
+                projectName: '$projectName',
+                procedureName: '$procedureName',
+                scheduleName: '$scheduleName',
                 actualParameter: [
                     $parametersString                 
                 ]
@@ -149,7 +170,7 @@ class PluginTestHelper extends PluginSpockTestSupport {
     }
 
     def jobCompleted(String jobId) {
-        def res = dsl("waitForCompletion jobId:'$jobId'",null,[timeout:900])
+        def res = dsl("waitForCompletion jobId:'$jobId'", null, [timeout: 900])
         return true
     }
 
@@ -238,7 +259,7 @@ class PluginTestHelper extends PluginSpockTestSupport {
         return result
     }
 
-    String getJobStepSummary(String procedureName, String jobId) {
+    String getProcedureJobStepSummary(String procedureName, String jobId) {
         return getJobProperty("/myJob/steps/RunProcedure/steps/$procedureName/summary", jobId)
     }
 

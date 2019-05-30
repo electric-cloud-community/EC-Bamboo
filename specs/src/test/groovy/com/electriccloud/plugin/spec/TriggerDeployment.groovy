@@ -1,7 +1,6 @@
 package com.electriccloud.plugin.spec
 
 import com.electriccloud.plugins.annotations.Sanity
-import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Stepwise
 import spock.lang.Unroll
@@ -186,7 +185,7 @@ class TriggerDeployment extends BambooHelper {
         then:
         println(getJobLink(result.jobId))
         assert result.outcome == expectedOutcome
-        assert getJobStepSummary(procedureName, result.jobId) =~ expectedSummary
+        assert getProcedureJobStepSummary(procedureName, result.jobId) =~ expectedSummary
 
         where:
         caseId       | projectCase | environmentCase  | versionCase  | waitTimeout | expectedOutcome | expectedSummary

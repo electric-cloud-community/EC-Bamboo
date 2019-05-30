@@ -36,12 +36,12 @@ configuration:
       userNameLabel: Username
       required: true
       passwordLabel: Password
-#    - name: checkConnection
-#      label: Check Connection?
-#      type: checkbox
-#      checkedValue: true
-#      uncheckedValue: false
-#      initiallyChecked: 1
+    #    - name: checkConnection
+    #      label: Check Connection?
+    #      type: checkbox
+    #      checkedValue: true
+    #      uncheckedValue: false
+    #      initiallyChecked: 1
     - name: debugLevel
       label: Debug Level
       type: select
@@ -330,7 +330,7 @@ procedures:
         type: entry
         required: false
     outputParameters: {
-      deploymentProjectKeys : 'List of comma-separated deployment project keys for the plan',
+      deploymentProjectKeys: 'List of comma-separated deployment project keys for the plan',
     }
 
   - name: CreateVersion
@@ -379,3 +379,99 @@ procedures:
     outputParameters: {
       version: 'Name of the created version.'
     }
+  - name: CollectReportingData
+    description: Collects reporting data for "build" type
+    hasConfig: true
+    shell: ec-perl
+    parameters:
+      - name: projectKey
+        label: Project Key
+        documentation: Project key (short name) of project that contains build plan.
+        type: entry
+        required: true
+      - name: planKey
+        label: Plan Key
+        documentation: Short name of plan to get details. Might be simply planKey or composite planKey-jobKey.
+        type: entry
+        required: false
+      - name: transformScript
+        label: Transformation script
+        type: textarea
+        documentation: Perl code to transform report payload.
+        htmlDocumentation: |
+          Allows user to provide perl script for payload customization.
+          This method will be invoked by plugin with 2 parameters. 1st parameter is context object, 2nd is payload object.
+          Method should be named "transform", and should return payload object. In this example myTimestamp field will be added to payload object:
+          <pre>
+            sub transform {
+                my ($context, $payload) = @_;
+                $payload->{myTimestamp} = $context->one();
+                return $payload;
+            }
+            sub one {
+                my ($context) = @_;
+                return time();
+            }
+          </pre>
+      - name: initialRetrievalCount
+        label: Initial Count
+        documentation: Count of old builds to retrieve from server on the first run. If omited it will be set to 10.
+        type: entry
+        value: 10
+        required: false
+      - name: metadataPropertyPath
+        label: Metadata Property Path
+        documentation: Property sheet where run metadata will be stored. If omitted, /mySchedule/EC-Bamboo-%JobName%-build will be used for schedule context. For all other contexts root is /myProject.
+        type: entry
+        required: false
+      - name: baseDrilldownUrl
+        label: Base URL for drill-down
+        documentation: Base URL for the Bamboo. If empty it will be set to %url_from_configuration%/job/%Job name%.
+        type: entry
+        required: false
+      - name: previewMode
+        label: Preview
+        documentation: If checked, no data will be sent to the reporting system. Use this option to preview gathered data.
+        type: checkbox
+        initiallyChecked: false
+        checkedValue: 1
+        uncheckedValue: 0
+        required: false
+      - name: debugLevel
+        label: Debug
+        documentation: If checked, the log level will be set to "Debug".
+        type: checkbox
+        initiallyChecked: false
+        checkedValue: 1
+        uncheckedValue: 0
+        required: false
+      - name: releaseName
+        label: Release Name
+        documentation: DevOpsInsightServer datasource specific field.
+        required: false
+        type: entry
+      - name: releaseProjectName
+        label: Release Project Name
+        documentation: DevOpsInsightServer datasource specific field.
+        required: false
+        type: entry
+  - name: ValidateCRDParams
+    description: Validates collect reporting data params.
+    hasConfig: true
+    shell: ec-perl
+    parameters:
+      - name: projectKey
+        label: Project Key
+        documentation: Project key (short name) of project that contains build plan.
+        type: entry
+        required: true
+      - name: planKey
+        label: Plan Key
+        documentation: Short name of plan to get details. Might be simply planKey or composite planKey-jobKey.
+        type: entry
+        required: false
+      - name: frequency
+        label: Polling Frequency
+        documentation: Polling frequency (in minutes) for retrieving defects from JIRA.
+        type: entry
+        value: 30

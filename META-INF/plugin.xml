@@ -11,5 +11,6 @@
   <help>help.xml</help>
   <ecSupportLevel>10</ecSupportLevel>
   <depends min='1.4.1'>EC-PluginManager</depends>
+  <ecSupportLevel>10</ecSupportLevel>
   <commander-version min='6.0' />
 </plugin>
