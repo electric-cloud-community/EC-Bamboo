@@ -1,7 +1,6 @@
 package com.electriccloud.plugin.spec
 
 import com.electriccloud.plugins.annotations.Sanity
-import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Unroll
 
@@ -22,6 +21,8 @@ class CollectReportingData extends BambooHelper {
             config               : '',
             projectKey           : '',
             planKey              : '',
+            retrieveTestResults  : '',
+            testCategory         : '',
             transformScript      : '',
             initialRetrievalCount: '',
             metadataPropertyPath : '',
@@ -33,7 +34,7 @@ class CollectReportingData extends BambooHelper {
     ]
 
     static def bambooProject = 'PROJECT'
-    static def bambooPlan = 'PLAN'
+    static def bambooPlan = 'LONG'
     static def metadataUniqueProperty = "EC-Bamboo-${bambooProject}-${bambooPlan}-build"
 
     static String SCHEDULE_METADATA_PATH = "/projects/$projectName/schedules/$scheduleName/ecreport_data_tracker"
@@ -73,11 +74,13 @@ class CollectReportingData extends BambooHelper {
                 config               : CONFIG_NAME,
                 projectKey           : bambooProject,
                 planKey              : bambooPlan,
+                retrieveTestResults  : '1',
+                testCategory         : 'unit-test',
                 transformScript      : '',
                 initialRetrievalCount: '',
                 metadataPropertyPath : PROCEDURE_METADATA_PATH,
                 baseDrilldownUrl     : '',
-                previewMode          : '1',
+                previewMode          : '0',
                 debugLevel           : '1',
                 releaseName          : releaseName,
                 releaseProjectName   : projectName,
@@ -115,11 +118,13 @@ class CollectReportingData extends BambooHelper {
                 config               : CONFIG_NAME,
                 projectKey           : bambooProject,
                 planKey              : bambooPlan,
+                retrieveTestResults  : '1',
+                testCategory         : 'unit-test',
                 transformScript      : '',
                 initialRetrievalCount: '',
                 metadataPropertyPath : '',
                 baseDrilldownUrl     : '',
-                previewMode          : '1',
+                previewMode          : '0',
                 debugLevel           : '1',
                 releaseName          : releaseName,
                 releaseProjectName   : projectName,

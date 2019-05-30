@@ -52,38 +52,35 @@ sub buildDataset {
             }
         }
 
-        $dataset->newData({
+        my $data = $dataset->newData({
             reportObjectType => 'build',
             values           => \%payload
         });
 
-        # if ($params->{retrieveTestResults}) {
-        #     logInfo("Test results retrieval is enabled");
-        #     my $testReport = $bamboo->getTestReport(
-        #         $params->{jobName},
-        #         $row->{number},
-        #         $params->{testReportUrl}
-        #     );
-        #     if (%$testReport) {
-        #         logInfo("Got testreport for build number $row->{number}, creating new dependent data");
-        #         my $dependentData = $data->createNewDependentData('quality');
-        #
-        #         logDebug("Test Report: ", $testReport);
-        #         $dependentData->addValue(projectName => $row->{projectName});
-        #         $dependentData->addValue(releaseName => $row->{releaseName});
-        #         $dependentData->addValue(releaseProjectName => $row->{releaseProjectName});
-        #         $dependentData->addValue(skippedTests => $testReport->{skipCount} || 0);
-        #         $dependentData->addValue(successfulTests => $testReport->{passCount} || 0);
-        #         $dependentData->addValue(failedTests => $testReport->{failCount} || 0);
-        #         $dependentData->addValue(timestamp => $row->{endTime});
-        #         $dependentData->addValue(category => $params->{testCategory});
-        #         $dependentData->addValue(
-        #             totalTests => $testReport->{skipCount} + $testReport->{skipCount} + $testReport->{skipCount}
-        #         );
-        #     }
-        # }
-        # my $dataRef = $dataset->getData();
-        # unshift @$dataRef, $data;
+        if ($params->{retrieveTestResults}) {
+            logInfo("Test results retrieval is enabled");
+            if ($row->{totalTestsCount}) {
+                logInfo("Got testreport for build number $row->{buildNumber}, creating new dependent data");
+                my $dependentData = $data->createNewDependentData('quality');
+
+                my %testsPayload = (
+                    category           => $params->{testCategory} || 'unit-test',
+                    projectName        => $payload{projectName},
+                    releaseName        => $payload{releaseName},
+                    releaseProjectName => $payload{releaseProjectName},
+                    timestamp          => $payload{startTime},
+                    skippedTests       => $row->{skippedTestCount} || 0,
+                    successfulTests    => $row->{successfulTestCount} || 0,
+                    failedTests        => $row->{failedTestCount} || 0,
+                    totalTests         => $row->{totalTestsCount},
+                );
+
+                $dependentData->addValue( $_ => $testsPayload{$_} ) for (keys %testsPayload);
+            }
+            else {
+                logInfo("No test results in the build result.")
+            }
+        }
     }
     return $dataset;
 }

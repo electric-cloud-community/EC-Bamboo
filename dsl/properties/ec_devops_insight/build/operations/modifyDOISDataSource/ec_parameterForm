@@ -40,6 +40,27 @@
       <label>Plan Key:</label>
     </formElement>
     <formElement>
+      <label>Retrieve Test Results?</label>
+      <property>retrieveTestResults</property>
+      <value></value>
+      <documentation>If checked - test data will be also collected</documentation>
+      <required>0</required>
+      <type>checkbox</type>
+      <checkedValue>1</checkedValue>
+      <uncheckedValue>0</uncheckedValue>
+      <initiallyChecked>0</initiallyChecked>
+    </formElement>
+    <formElement>
+      <type>entry</type>
+      <property>testCategory</property>
+      <required>0</required>
+      <documentation>Identifier for tests of this build runs. If empty, 'unit-test' will be used. Example: 'unit-test' or 'system-test'.</documentation>
+      <label>Test Category:</label>
+      <value>unit-test</value>
+      <condition>${retrieveTestResults} == '1'</condition>
+      <dependsOn>retrieveTestResults</dependsOn>
+    </formElement>
+    <formElement>
         <type>entry</type>
         <label>Polling Frequency:</label>
         <property>frequency</property>
