@@ -81,8 +81,6 @@ sub _buildRunBuildURL {
     my $drilldownURL = $params->{baseDrilldownUrl};
     $drilldownURL ||= $params->{endpoint};
 
-    print
-
     $drilldownURL =~ s|/+$||;
     return $drilldownURL . '/browse/' . $buildInfo->{key};
 }
