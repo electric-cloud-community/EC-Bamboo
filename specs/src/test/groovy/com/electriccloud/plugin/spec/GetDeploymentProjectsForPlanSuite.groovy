@@ -1,7 +1,6 @@
 package com.electriccloud.plugin.spec
 
 import com.electriccloud.plugins.annotations.Sanity
-import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Unroll
 
@@ -158,7 +157,7 @@ class GetDeploymentProjectsForPlanSuite extends PluginTestHelper {
         then:
         println(getJobLink(result.jobId))
         assert result.outcome == expectedOutcome
-        assert getJobStepSummary(procedureName, result.jobId) =~ expectedSummary
+        assert getProcedureJobStepSummary(procedureName, result.jobId) =~ expectedSummary
 
         where:
         caseId       | projectCase | planCase            | expectedOutcome | expectedSummary

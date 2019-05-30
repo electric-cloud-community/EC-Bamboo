@@ -658,7 +658,7 @@ sub collectReportingData {
     my $reporting = FlowPDF::ComponentManager->loadComponent('FlowPlugin::Bamboo::Reporting', {
         reportObjectTypes     => [ 'build' ],
         initialRetrievalCount => $params->{initialRecordsCount},
-        metadataUniqueKey     => $params->{buildNumber},
+        metadataUniqueKey     => 'startTime',
         payloadKeys           => [ 'startTime' ]
     }, $self);
 
@@ -697,6 +697,8 @@ sub getBuildRuns {
     }
 
     my $buildResults = $self->client->get($requestPath, { expand => 'results.result', 'max-results' => $limit });
+    return unless defined $buildResults;
+
     my @result = map {_planBuildResultToShortInfo($_)} @{$buildResults->{results}{result}};
 
     return \@result;
@@ -704,6 +706,7 @@ sub getBuildRuns {
 
 sub getBuildRunsAfter {
     my ($self, $projectKey, $planKey, $parameters) = @_;
+    my $afterTime = $parameters->{afterTime};
 
     my @results = ();
 
@@ -725,14 +728,15 @@ sub getBuildRunsAfter {
 
     while (!$reachedGivenTime && $haveMoreResults) {
         my $buildResults = $self->client->get($requestPath, \%requestParams);
+        return unless defined $buildResults;
 
         # If returned less results that we requested, than there are no more updates to request
-        $haveMoreResults = $buildResults->{size} >= $requestPackSize;
+        $haveMoreResults = $buildResults->{results}{size} >= $requestPackSize;
 
         for my $buildResult (@{$buildResults->{results}{result}}) {
             my $parsed = _planBuildResultToShortInfo($buildResult, ['labels']);
 
-            if ($self->compareISODates($parsed->{buildStartedTime}, $parameters->{afterTime}) > 0) {
+            if ($self->compareISODateTimes($afterTime, $parsed->{buildStartedTime}) > 0) {
                 $reachedGivenTime = 1;
                 last;
             }
@@ -748,11 +752,13 @@ sub getBuildRunsAfter {
 }
 
 # 2019-05-28T11:14:06.894Z
-sub compareISODates {
+sub compareISODateTimes {
     my ($self, $date1, $date2) = @_;
 
     $date1 =~ s/[^0-9]//g;
     $date2 =~ s/[^0-9]//g;
+
+    logDebug("Comparing: $date1 > $date2 = ", $date1 <=> $date2);
 
     return $date1 <=> $date2;
 }
@@ -1009,7 +1015,7 @@ sub saveResultProperties {
 
         for my $property (keys %$properties) {
             my $value = $properties->{$property};
-            next if (!$value && $value ne '0');
+            next unless (defined $value);
 
             logDebug("Saving property '$property' with value '$value'");
             $stepResult->setOutcomeProperty($property, $value);

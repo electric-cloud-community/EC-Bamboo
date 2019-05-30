@@ -135,7 +135,7 @@ class GetPlanRunsSuite extends BambooHelper {
         assert result.outcome == expectedOutcome
 
         if (expectedSummary) {
-            assert getJobStepSummary(procedureName, result.jobId) =~ expectedSummary
+            assert getProcedureJobStepSummary(procedureName, result.jobId) =~ expectedSummary
         }
 
         where:

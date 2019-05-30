@@ -16,22 +16,28 @@ sub buildDataset {
     my FlowPDF::Context $context = $bamboo->getContext();
     my $params = $context->getRuntimeParameters();
 
+    my %buildStateMapping = (
+        'Successful' => 'SUCCESS',
+        'Failed'     => 'FAILURE',
+        'Unknown'    => 'NOT_BUILT',
+    );
+
     # Adding from the end of the list
     for my $row ( reverse @$records ) {
         my %payload = (
             source              => 'Bamboo',
             pluginName          => '@PLUGIN_NAME@',
             projectName         => $context->retrieveCurrentProjectName(),
-            releaseName         => $params->{releaseName},
+            releaseName         => $params->{releaseName} || '',
             releaseUri          => _buildRunBuildURL($params, $row),
-            releaseProjectName  => $params->{releaseProjectName},
+            releaseProjectName  => $params->{releaseProjectName} || '',
             pluginConfiguration => $params->{config},
             baseDrilldownUrl    => $params->{baseDrilldownUrl} || $params->{endpoint},
             buildNumber         => $row->{buildNumber},
             timestamp           => $row->{buildStartedTime},
             endTime             => $row->{buildCompletedTime},
             startTime           => $row->{buildStartedTime},
-            buildStatus         => $row->{buildState},
+            buildStatus         => $buildStateMapping{$row->{buildState} || 'Unknown'},
             launchedBy          => 'N/A',
             jobName             => $row->{key},
             duration            => $row->{buildDurationInSeconds},
@@ -101,7 +107,7 @@ sub getRecordsAfter {
     my $metadataValues = $metadata->getValue();
     logDebug("Got metadata value in getRecordsAfter:", Dumper $metadataValues);
 
-    my $records = $bamboo->getBuildRuns($params->{projectKey}, $params->{planKey}, {
+    my $records = $bamboo->getBuildRunsAfter($params->{projectKey}, $params->{planKey}, {
         maxResults => 0,
         afterTime  => $metadataValues->{startTime}
     });
@@ -145,7 +151,7 @@ sub compareMetadata {
 
     my FlowPlugin::Bamboo $pluginObject = $self->getPluginObject();
 
-    return $pluginObject->compareISODates($value1->{startTime}, $value2->{startTime});
+    return $pluginObject->compareISODateTimes($value1->{startTime}, $value2->{startTime});
 }
 
 1;
