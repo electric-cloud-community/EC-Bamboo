@@ -8,10 +8,104 @@
  * pluginParameters: Map of parameter name-value pairs for the plugin parameters defined in the form XML.
  */
 
-import com.electriccloud.domain.DevOpsInsightDataSourceResult;
-import com.electriccloud.errors.EcException;
-import com.electriccloud.errors.ErrorCodes;
-import com.electriccloud.bamboo.CollectReportingDataValidation;
+
+import com.electriccloud.domain.DevOpsInsightDataSourceResult
+import com.electriccloud.errors.EcException
+import com.electriccloud.errors.ErrorCodes
+
+// Plugins metadata
+def pluginName = 'EC-Bamboo'
+
+String getSourceDetails(Map pluginParameters) {
+    def sourceIdentifier = pluginParameters.projectKey
+
+    if (pluginParameters.planKey) {
+        sourceIdentifier += '-' + pluginParameters.planKey
+    }
+
+    return sourceIdentifier
+}
+
+void validatePluginParams(Map pluginParameters) {
+    if (pluginParameters == null) {
+        throw EcException
+                .code(ErrorCodes.InvalidParameterValue)
+                .message("pluginParameters are required for dsl script")
+                .build();
+    }
+
+    checkRequiredParameters(pluginParameters)
+
+    // Specific checks can be placed below this line
+    String frequency = pluginParameters.frequency
+
+    if (!((frequency ?: "").isInteger()) || Integer.parseInt(frequency) <= 0) {
+        throw EcException.code(ErrorCodes.InvalidArgument)
+                .message("'Polling Frequency' must be a positive integer.")
+                .build();
+    }
+
+}
+
+def getCreateActualParameters(Map pluginParameters) {
+    return [
+            config               : pluginParameters.configName,
+            projectKey           : pluginParameters.projectKey,
+            planKey              : pluginParameters.planKey,
+            initialRetrievalCount: pluginParameters.initialRetrievalCount,
+            transformScript      : pluginParameters.transformScript,
+            metadataPropertyPath : pluginParameters.metadataPropertyPath,
+            baseDrilldownUrl     : pluginParameters.baseDrilldownUrl,
+            previewMode          : '0',
+            debugLevel           : '0',
+    ]
+}
+
+
+def getModifyActualParameters(Map pluginParameters) {
+    return [
+            config          : pluginParameters.configName,
+            projectKey      : pluginParameters.projectKey,
+            planKey         : pluginParameters.planKey,
+            transformScript : pluginParameters.transformScript,
+            baseDrilldownUrl: pluginParameters.baseDrilldownUrl,
+    ]
+}
+
+void checkPayloadType(String payloadType) {
+    if (payloadType == null) {
+        throw EcException
+                .code(ErrorCodes.InvalidParameterValue)
+                .message("payloadType is required for dsl script")
+                .build();
+    }
+
+    def supportedTypes = ['build']
+    if (supportedTypes.indexOf(payloadType) < 0) {
+        throw EcException
+                .code(ErrorCodes.InvalidParameterValue)
+                .message("Payload type '$payloadType' is not supported")
+                .build();
+    }
+}
+
+void checkRequiredParameters(Map pluginParameters) {
+    def params = ['config', 'projectKey']
+    params.each { it ->
+        if (pluginParameters[it] == null) {
+            throw EcException
+                    .code(ErrorCodes.MissingArgument)
+                    .message("plugin parameter $it is required for dsl script")
+                    .build();
+        }
+    }
+
+}
+
+String getConfigProperty(Map pluginParameters) {
+    String configName = pluginParameters.config
+    return "/plugins/EC-Bamboo/project/ec_plugin_cfgs/${configName}/endpoint"
+}
 
 if (args.releaseName == null) {
     throw EcException
@@ -45,15 +139,15 @@ if (args.scheduleProjectName == null) {
 }
 
 
-def releaseName          = args.releaseName;
-def projectName          = args.projectName;
-def scheduleName         = args.scheduleName;
-def scheduleProjectName  = args.scheduleProjectName;
+def releaseName = args.releaseName;
+def projectName = args.projectName;
+def scheduleName = args.scheduleName;
+def scheduleProjectName = args.scheduleProjectName;
 
 def procedureExists(String prjct, String prcdr) {
     def projects = getProjects();
 
-    def proj = projects.grep( it.projectName == prjct );
+    def proj = projects.grep({ it.projectName == prjct });
     if (!proj.size()) {
         return false
     }
@@ -82,15 +176,12 @@ if (procedureExists(scheduleProjectName, scheduleName)) {
 }
 
 // Plugin form params
-def pluginParameters     = args.pluginParameters;
+def pluginParameters = args.pluginParameters;
 // After this line code will be plugin-specific.
 
 
-CollectReportingDataValidation.validatePluginParams(pluginParameters)
-CollectReportingDataValidation.checkPayloadType(args.reportObjectTypeName)
-
-// Plugins metadata
-def pluginName = 'EC-Bamboo'
+validatePluginParams(args.pluginParameters)
+checkPayloadType(args.reportObjectTypeName)
 
 // Extract the parameters expected through the form XML
 // EC-Bamboo param:
@@ -99,7 +190,7 @@ def pluginName = 'EC-Bamboo'
 // planKey
 // frequency
 
-def actualParameters = CollectReportingDataValidation.getCreateActualParameters(pluginParameters)
+def actualParameters = getCreateActualParameters(pluginParameters)
 
 project scheduleProjectName, {
     resourceName = null
@@ -178,14 +269,16 @@ project scheduleProjectName, {
     }
 }
 
-def configLocation = CollectReportingDataValidation.getConfigProperty(pluginParameters)
-def sourceDetails = CollectReportingDataValidation.getSourceDetails(pluginParameters)
+def configLocation = getConfigProperty(pluginParameters)
+def sourceDetails = getSourceDetails(pluginParameters)
 
 def retval = new DevOpsInsightDataSourceResult();
 
-retval.connectionInfo      = getProperty(configLocation, suppressNoSuchPropertyException: true)?.value;
-retval.sourceDetails       = sourceDetails;
-retval.scheduleName        = scheduleName;
+retval.connectionInfo = getProperty(configLocation, suppressNoSuchPropertyException: true)?.value;
+retval.sourceDetails = sourceDetails;
+retval.scheduleName = scheduleName;
 retval.scheduleProjectName = scheduleProjectName;
 
 retval;
+
+

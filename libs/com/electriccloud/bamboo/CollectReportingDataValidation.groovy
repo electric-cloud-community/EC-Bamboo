@@ -43,7 +43,7 @@ class CollectReportingDataValidation {
 
     static def getCreateActualParameters(Map pluginParameters) {
         return [
-                config               : pluginParameters.configName,
+                config               : pluginParameters.config,
                 projectKey           : pluginParameters.projectKey,
                 planKey              : pluginParameters.planKey,
                 initialRetrievalCount: pluginParameters.initialRetrievalCount,
@@ -58,7 +58,7 @@ class CollectReportingDataValidation {
 
     static def getModifyActualParameters(Map pluginParameters) {
         return [
-                config          : pluginParameters.configName,
+                config          : pluginParameters.config,
                 projectKey      : pluginParameters.projectKey,
                 planKey         : pluginParameters.planKey,
                 transformScript : pluginParameters.transformScript,

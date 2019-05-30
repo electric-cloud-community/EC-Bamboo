@@ -19,7 +19,7 @@
     <formElement>
         <type>entry</type>
         <label>Configuration Name:</label>
-        <property>configName</property>
+        <property>config</property>
         <required>1</required>
         <documentation>Previously defined configuration for the plugin</documentation>
         <configuration>1</configuration>

@@ -658,7 +658,6 @@ sub collectReportingData {
     my $reporting = FlowPDF::ComponentManager->loadComponent('FlowPlugin::Bamboo::Reporting', {
         reportObjectTypes => [ 'build' ],
         initialRetrievalCount => $params->{initialRecordsCount},
-
         metadataUniqueKey => $params->{buildNumber},
         payloadKeys       => [ 'buildStartedTime' ]
     }, $self);
