@@ -655,10 +655,12 @@ sub collectReportingData {
         FlowPDF::Log::setLogLevel(FlowPDF::Log::DEBUG);
     }
 
+    my $requestKey = $params->{projectKey} . ($params->{planKey} ? '-' . $params->{planKey} : '');
+
     my $reporting = FlowPDF::ComponentManager->loadComponent('FlowPlugin::Bamboo::Reporting', {
         reportObjectTypes     => [ 'build' ],
         initialRetrievalCount => $params->{initialRecordsCount},
-        metadataUniqueKey     => 'startTime',
+        metadataUniqueKey     => $requestKey,
         payloadKeys           => [ 'startTime' ]
     }, $self);
 

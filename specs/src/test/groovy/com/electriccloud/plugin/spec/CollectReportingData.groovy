@@ -32,20 +32,9 @@ class CollectReportingData extends BambooHelper {
             releaseProjectName   : '',
     ]
 
-    static def bambooProjects = [
-            valid     : 'PROJECT',
-            unexisting: "__UNEXISTING__",
-            empty     : ''
-    ]
-
-    static def bambooPlans = [
-            valid       : 'PLAN',
-            failing     : 'FAIL',
-            timeout     : 'LONG',
-            parametrized: 'PARAMS',
-            unexisting  : "__UNEXISTING__",
-            empty       : ''
-    ]
+    static def bambooProject = 'PROJECT'
+    static def bambooPlan = 'PLAN'
+    static def metadataUniqueProperty = "EC-Bamboo-${bambooProject}-${bambooPlan}-build"
 
     static String SCHEDULE_METADATA_PATH = "/projects/$projectName/schedules/$scheduleName/ecreport_data_tracker"
     static String PROCEDURE_METADATA_PATH = "/projects/$projectName/ecreport_data_tracker"
@@ -65,7 +54,7 @@ class CollectReportingData extends BambooHelper {
                 params       : procedureParams,
         ])
 
-        successfulBuildRun = runPlan(bambooProjects['valid'], bambooPlans['valid'], [waitForBuild: 1])
+        successfulBuildRun = runPlan(bambooProject, bambooPlan, [waitForBuild: 1])
     }
 
     def doCleanupSpec() {
@@ -82,8 +71,8 @@ class CollectReportingData extends BambooHelper {
 
         def procParams = [
                 config               : CONFIG_NAME,
-                projectKey           : bambooProjects['valid'],
-                planKey              : bambooPlans['valid'],
+                projectKey           : bambooProject,
+                planKey              : bambooPlan,
                 transformScript      : '',
                 initialRetrievalCount: '',
                 metadataPropertyPath : PROCEDURE_METADATA_PATH,
@@ -116,7 +105,6 @@ class CollectReportingData extends BambooHelper {
 
     }
 
-    @IgnoreRest
     @Unroll
     def '#caseId. CollectReportingData - schedule'() {
         given:
@@ -125,8 +113,8 @@ class CollectReportingData extends BambooHelper {
 
         def procParams = [
                 config               : CONFIG_NAME,
-                projectKey           : bambooProjects['valid'],
-                planKey              : bambooPlans['valid'],
+                projectKey           : bambooProject,
+                planKey              : bambooPlan,
                 transformScript      : '',
                 initialRetrievalCount: '',
                 metadataPropertyPath : '',
@@ -209,7 +197,7 @@ class CollectReportingData extends BambooHelper {
     def changeMetadata(def newStartTime, def metadataProperty = SCHEDULE_METADATA_PATH) {
         if (newStartTime) {
             def json = "{ \"startTime\" : \"$newStartTime\" }"
-            setProperty(metadataProperty + '/EC-Bamboo-startTime-build', json)
+            setProperty(metadataProperty + "/${metadataUniqueProperty}", json)
         } else {
             logger.debug("No value, metadata will not be changed")
         }
