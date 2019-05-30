@@ -8,9 +8,10 @@
  * pluginParameters: Map of parameter name-value pairs for the plugin parameters defined in the form XML.
  */
 
-import com.electriccloud.domain.DevOpsInsightDataSourceResult;
-import com.electriccloud.errors.EcException;
-import com.electriccloud.errors.ErrorCodes;
+
+import com.electriccloud.domain.DevOpsInsightDataSourceResult
+import com.electriccloud.errors.EcException
+import com.electriccloud.errors.ErrorCodes
 
 def PLUGIN_NAME = 'EC-Bamboo'
 def CONFIG_LOCATION = 'ec_plugin_cfgs'
@@ -54,6 +55,8 @@ def getCreateActualParameters(Map pluginParameters) {
             projectKey           : pluginParameters.projectKey,
             planKey              : pluginParameters.planKey,
             initialRetrievalCount: pluginParameters.initialRetrievalCount,
+            retrieveTestResults  : pluginParameters.retrieveTestResults,
+            testCategory         : pluginParameters.testCategory,
             transformScript      : pluginParameters.transformScript,
             metadataPropertyPath : pluginParameters.metadataPropertyPath,
             baseDrilldownUrl     : pluginParameters.baseDrilldownUrl,
@@ -65,11 +68,13 @@ def getCreateActualParameters(Map pluginParameters) {
 
 def getModifyActualParameters(Map pluginParameters) {
     return [
-            config          : pluginParameters.configName,
-            projectKey      : pluginParameters.projectKey,
-            planKey         : pluginParameters.planKey,
-            transformScript : pluginParameters.transformScript,
-            baseDrilldownUrl: pluginParameters.baseDrilldownUrl,
+            config             : pluginParameters.configName,
+            projectKey         : pluginParameters.projectKey,
+            planKey            : pluginParameters.planKey,
+            retrieveTestResults: pluginParameters.retrieveTestResults,
+            testCategory       : pluginParameters.testCategory,
+            transformScript    : pluginParameters.transformScript,
+            baseDrilldownUrl   : pluginParameters.baseDrilldownUrl,
     ]
 }
 

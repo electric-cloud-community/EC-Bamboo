@@ -52,6 +52,7 @@ def getCreateActualParameters(Map pluginParameters) {
             config               : pluginParameters.configName,
             projectKey           : pluginParameters.projectKey,
             planKey              : pluginParameters.planKey,
+            retrieveTestResults  : pluginParameters.retrieveTestResults,
             initialRetrievalCount: pluginParameters.initialRetrievalCount,
             transformScript      : pluginParameters.transformScript,
             metadataPropertyPath : pluginParameters.metadataPropertyPath,
@@ -64,11 +65,13 @@ def getCreateActualParameters(Map pluginParameters) {
 
 def getModifyActualParameters(Map pluginParameters) {
     return [
-            config          : pluginParameters.configName,
-            projectKey      : pluginParameters.projectKey,
-            planKey         : pluginParameters.planKey,
-            transformScript : pluginParameters.transformScript,
-            baseDrilldownUrl: pluginParameters.baseDrilldownUrl,
+            config             : pluginParameters.configName,
+            projectKey         : pluginParameters.projectKey,
+            planKey            : pluginParameters.planKey,
+            retrieveTestResults: pluginParameters.retrieveTestResults,
+            testCategory       : pluginParameters.testCategory,
+            transformScript    : pluginParameters.transformScript,
+            baseDrilldownUrl   : pluginParameters.baseDrilldownUrl,
     ]
 }
 

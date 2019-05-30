@@ -901,9 +901,24 @@ sub _planBuildResultToShortInfo {
     /;
 
     my %result = (
-        url     => $buildInfo->{link}{href},
-        planKey => $buildInfo->{plan}{key},
+        url             => $buildInfo->{link}{href},
+        planKey         => $buildInfo->{plan}{key},
     );
+
+    if ($buildInfo->{buildTestSummary} && $buildInfo->{buildTestSummary} ne 'No tests found') {
+        push(@oneToOne,
+            qw/buildTestSummary
+               successfulTestCount
+               failedTestCount
+               quarantinedTestCount
+               skippedTestCount/
+        );
+
+        $result{totalTestsCount} = ($buildInfo->{successfulTestCount} || 0)
+                                 + ($buildInfo->{failedTestCount} || 0)
+                                 + ($buildInfo->{quarantinedTestCount} || 0)
+                                 + ($buildInfo->{skippedTestCount} || 0)
+    }
 
     if (defined $expanded && ref $expanded eq 'ARRAY') {
         for my $section (@$expanded) {

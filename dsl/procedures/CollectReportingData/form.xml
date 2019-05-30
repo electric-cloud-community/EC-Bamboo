@@ -28,6 +28,26 @@
     <label>Plan Key:</label>
   </formElement>
   <formElement>
+    <type>checkbox</type>
+    <property>retrieveTestResults</property>
+    <required>0</required>
+    <documentation>If checked - test data will be also collected.</documentation>
+    <label>Retrieve Test Results?:</label>
+    <checkedValue>1</checkedValue>
+    <initiallyChecked>false</initiallyChecked>
+    <uncheckedValue>0</uncheckedValue>
+  </formElement>
+  <formElement>
+    <property>testCategory</property>
+    <label>Test Category:</label>
+    <documentation>Identifier for tests of this build runs. If empty, 'unit-test' will be used. Example: 'unit-test' or 'system-test'.</documentation>
+    <type>entry</type>
+    <required>0</required>
+    <condition>${retrieveTestResults} == '1'</condition>
+    <dependsOn>retrieveTestResults</dependsOn>
+    <value>unit-test</value>
+  </formElement>
+  <formElement>
     <type>textarea</type>
     <property>transformScript</property>
     <htmlDocumentation>Allows user to provide perl script for payload customization.

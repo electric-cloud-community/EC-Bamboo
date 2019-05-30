@@ -394,6 +394,22 @@ procedures:
         documentation: Short name of plan to get details. Might be simply planKey or composite planKey-jobKey.
         type: entry
         required: false
+      - name: retrieveTestResults
+        label: Retrieve Test Results?
+        documentation: If checked - test data will be also collected.
+        type: checkbox
+        initiallyChecked: false
+        checkedValue: 1
+        uncheckedValue: 0
+        required: false
+      - name: testCategory
+        label: Test Category
+        documentation: |
+          Identifier for tests of this build runs. Example: 'unit-test' or 'system-test'.
+        type: entry
+        required: false
+        dependsOn: retrieveTestResults
+        condition: ${retrieveTestResults} == '1'
       - name: transformScript
         label: Transformation script
         type: textarea
