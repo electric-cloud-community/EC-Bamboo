@@ -659,7 +659,7 @@ sub collectReportingData {
         reportObjectTypes => [ 'build' ],
         initialRetrievalCount => $params->{initialRecordsCount},
         metadataUniqueKey => $params->{buildNumber},
-        payloadKeys       => [ 'buildStartedTime' ]
+        payloadKeys       => [ 'startTime' ]
     }, $self);
 
     $reporting->CollectReportingData();
