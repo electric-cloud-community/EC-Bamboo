@@ -36,12 +36,6 @@ configuration:
       userNameLabel: Username
       required: true
       passwordLabel: Password
-    #    - name: checkConnection
-    #      label: Check Connection?
-    #      type: checkbox
-    #      checkedValue: true
-    #      uncheckedValue: false
-    #      initiallyChecked: 1
     - name: debugLevel
       label: Debug Level
       type: select
@@ -54,6 +48,17 @@ configuration:
           value: 1
         - name: Trace
           value: 2
+    - name: httpProxyUrl
+      label: HTTP Proxy
+      documentation: An HTTP proxy that will be used for the connections.
+      type: entry
+      required: false
+    - name: proxy_credential
+      label: Proxy Authorization
+      type: credential
+      userNameLabel: Proxy Username
+      passwordLabel: Proxy Password
+      required: false
 
 procedures:
   - name: GetAllPlans
@@ -405,9 +410,10 @@ procedures:
       - name: testCategory
         label: Test Category
         documentation: |
-          Identifier for tests of this build runs. Example: 'unit-test' or 'system-test'.
+          The category for tests of the collected build runs. Example: 'unit-test' or 'system-test'.
         type: entry
         required: false
+        value: unit-test
         dependsOn: retrieveTestResults
         condition: ${retrieveTestResults} == '1'
       - name: transformScript

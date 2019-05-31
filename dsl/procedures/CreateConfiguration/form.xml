@@ -56,4 +56,20 @@
     </option>
     <value>0</value>
   </formElement>
+  <formElement>
+    <type>entry</type>
+    <property>httpProxyUrl</property>
+    <required>0</required>
+    <documentation>An HTTP proxy that will be used for the connections.</documentation>
+    <label>HTTP Proxy:</label>
+  </formElement>
+  <formElement>
+    <type>credential</type>
+    <property>proxy_credential</property>
+    <required>0</required>
+    <label>Proxy Authorization:</label>
+    <attachedAsParameterToStep>createConfiguration</attachedAsParameterToStep>
+    <passwordLabel>Proxy Password</passwordLabel>
+    <userNameLabel>Proxy Username</userNameLabel>
+  </formElement>
 </editor>

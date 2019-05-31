@@ -42,6 +42,19 @@ sub new {
         $logger->info("No credential '$credentialName' found in config. Assuming anonymous access");
     }
 
+    if ($config->isParameterExists('httpProxyUrl')) {
+        my $proxyUrl = $config->getParameter('httpProxyUrl');
+        if ($proxyUrl->getValue() ne ''){
+            my FlowPDF::Credential $proxyCredential = $config->getParameter('proxy_credential');
+
+            $params->{proxy} = {
+                url      => $proxyUrl->getValue(),
+                username => $proxyCredential->getUserName(),
+                password => $proxyCredential->getSecretValue()
+            };
+        }
+    }
+
     my $self = {
         endpoint      => $config->getRequiredParameter('endpoint')->getValue(),
         authType      => $authType,
