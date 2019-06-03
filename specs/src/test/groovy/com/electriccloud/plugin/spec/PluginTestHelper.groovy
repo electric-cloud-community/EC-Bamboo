@@ -43,7 +43,7 @@ class PluginTestHelper extends PluginSpockTestSupport {
 
     static String getAssertedEnvVariable(String varName) {
         String varValue = System.getenv(varName)
-        println("VAR: '$varName'" + " VALUE: " + varValue ?: '')
+        logger.debug("VAR: '$varName'" + " VALUE: " + varValue ?: '')
         assert varValue
         return varValue
     }
@@ -57,6 +57,18 @@ class PluginTestHelper extends PluginSpockTestSupport {
     static String getResourceName() {
         return 'local'
     }
+
+    static boolean isProxyAvailable() {
+        def value = System.getenv("IS_PROXY_AVAILABLE")
+        if (value != null && value != '' && value != 'true'){
+            logger.warn("Value for IS_PROXY_AVAILABLE should be 'true' or empty.")
+        }
+        return value == 'true'
+    }
+
+    static String getProxyURL(){getAssertedEnvVariable('EF_PROXY_URL')}
+    static String getProxyUsername(){getAssertedEnvVariable('EF_PROXY_USERNAME')}
+    static String getProxyPassword(){getAssertedEnvVariable('EF_PROXY_PASSWORD')}
 
     def stringifyParameters(Map parameters) {
         return parameters
@@ -226,37 +238,6 @@ class PluginTestHelper extends PluginSpockTestSupport {
             logger.debug("Can't retrieve property name $propertyName for jobStepIS: $jobStepId")
         }
         return propertyValue
-    }
-
-    def createPluginConfiguration(def configName, Map params, def userName = getUsername(), def password = getPassword()) {
-        assert PLUGIN_NAME
-        assert configName
-        def result = runProcedure("""
-            runProcedure(
-                projectName: "/plugins/$PLUGIN_NAME/project",
-                procedureName: 'CreateConfiguration',
-                    credential: [
-                    [
-                        credentialName: 'credential',
-                        userName: '$userName',
-                        password: '$password'
-                    ],
-                ],
-                actualParameter: [
-                    config           : '${configName}', 
-                    desc             : '${params.desc}',
-                    endpoint         : '${params.endpoint}',
-                    debugLevel       : '${params.debugLevel}',
-                    credential       : 'credential',
-                ]
-            )
-            """)
-
-        assert result?.jobId
-        waitUntil {
-            jobCompleted(result)
-        }
-        return result
     }
 
     String getProcedureJobStepSummary(String procedureName, String jobId) {

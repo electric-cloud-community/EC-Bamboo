@@ -38,14 +38,15 @@
     <uncheckedValue>0</uncheckedValue>
   </formElement>
   <formElement>
-    <property>testCategory</property>
-    <label>Test Category:</label>
-    <documentation>Identifier for tests of this build runs. If empty, 'unit-test' will be used. Example: 'unit-test' or 'system-test'.</documentation>
     <type>entry</type>
+    <property>testCategory</property>
     <required>0</required>
+    <documentation>The category for tests of the collected build runs. Example: 'unit-test' or 'system-test'.
+</documentation>
+    <label>Test Category:</label>
+    <value>unit-test</value>
     <condition>${retrieveTestResults} == '1'</condition>
     <dependsOn>retrieveTestResults</dependsOn>
-    <value>unit-test</value>
   </formElement>
   <formElement>
     <type>textarea</type>

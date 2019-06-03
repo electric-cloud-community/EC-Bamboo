@@ -34,12 +34,11 @@ class BambooHelper extends PluginTestHelper {
         return properties['result']
     }
 
-    def getPlanRuns(String projectKey, String planKey, Map parameters = [:]) {
+    def getPlanDetails(String projectKey, String planKey, Map parameters = [:]) {
         Map procedureParameters = [
                 config             : CONFIG_NAME,
                 projectKey         : projectKey,
                 planKey            : planKey,
-                buildState         : 'All',
                 resultFormat       : 'propertySheet',
                 resultPropertySheet: '/myJob/result'
         ]
@@ -49,10 +48,14 @@ class BambooHelper extends PluginTestHelper {
             procedureParameters[k] = v
         }
 
-        def result = _runProcedure('RunPlan', procedureParameters)
+        def result = _runProcedure('GetPlanDetails', procedureParameters)
         assert result.outcome == 'success'
-        def properties = getJobProperties(result.jobId)
-        return properties['result']
+
+        if (procedureParameters.resultFormat == 'propertySheet'){
+            def properties = getJobProperties(result.jobId)
+            return properties['result']
+        }
+        return true
     }
 
     def enablePlan(String projectKey, String planKey) {
@@ -98,12 +101,14 @@ class BambooHelper extends PluginTestHelper {
         ])
 
         // Run procedure with params
-        def result = runProcedure(helperProjectName, procedureName, parameters)
+        def helperProcedureResult = runProcedure(helperProjectName, procedureName, parameters)
+
+        println "HELPER Job Link for $procedureName:" + getJobLink(helperProcedureResult.jobId)
 
         // Delete procedure from the project to avoid caching
         dsl "deleteProcedure(projectName: '$helperProjectName', procedureName: '$procedureName')"
 
-        return result
+        return helperProcedureResult
     }
 
 }
