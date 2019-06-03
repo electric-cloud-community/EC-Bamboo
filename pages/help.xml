@@ -1,376 +1,1031 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <meta content="text/html; charset=us-ascii" http-equiv="content-type"/>
-        <title>CloudBees Flow Plugin for Atlassian Bamboo</title>
-        <link rel="stylesheet" href="../../plugins/@PLUGIN_KEY@/pluginhelp.css" type="text/css" media="screen" />
-    </head>
-    <body>
-        <div class="help">
-            <h1>Atlassian Bamboo</h1>
-            <p>Plugin Version @PLUGIN_VERSION@</p>
-            <hr style="margin-left: -10px; margin-top: 10px; height: 1px; width: 100%; color: #5981BD;" noshade="noshade" />
-            <p>Revised on December 19, 2018</p>
-            <h1>Contents</h1>
-            <ul>
-                <li><p><a href="#overview">Overview</a></p></li>
-                <li><p><a href="#setupconfig">Setting Up the Plugin Configuration</a></p></li>
-                <li><p><a href="#procedures">Plugin Procedures</a></p></li>
-                <ul>
-                    <li><a href="#DisablePlan">DisablePlan</a></li>
-                    <li><a href="#EnablePlan">EnablePlan</a></li>
-                    <li><a href="#GetAllPlans">GetAllPlans</a></li>
-                    <li><a href="#GetPlanDetails">GetPlanDetails</a></li>
-                    <li><a href="#GetPlanRuns">GetPlanRuns</a></li>
-                    <li><a href="#RunPlan">RunPlan</a></li>
-                </ul>
-            </ul>
-            <li><p><a href="#rns">Release Notes</a></p></li>
-			<h1 id="overview">Overview</h1>
-			<p>
-                Bamboo is a continuous integration (CI) server that can be used to automate the release management for a software application, creating a continuous delivery pipeline.
-                What does this mean?
-                CI is a software development methodology in which a build, unit tests and integration tests are performed, or triggered, whenever code is committed to the repository, to ensure that new changes integrate well into the existing code base. Integration builds provide early 'fail fast' feedback on the quality of new changes.
-                Release management describes the steps that are typically performed to release a software application, including building and functional testing, tagging releases, assigning versions, and deploying and activating the new version in production.
-                <p>For more information about Atlassian Bamboo go to <a href="https://www.atlassian.com/software/bamboo" target="_blank">Bamboo home page</a>. For better Atlassian Bamboo understanding go to  <a href="https://confluence.atlassian.com/bamboo/understanding-the-bamboo-ci-server-289277285.html" target="_blank">Atlassian Documentation</a></p>
-            </p>
-            <h2>Integrated versions</h2>
-            <p>
-                This plugin was developed and tested against following Atlassian Bamboo server version:
-                <ul>
-                    <li>Atlassian Bamboo 5.15.2</li>
-                </ul>
-            </p>
-            <h1 id="setupconfig">Setting Up the Plugin Configuration</h1>
-            <p>Plugin configurations are sets of parameters that apply across some or all of the plugin procedures.
-            They reduce repetition of common values, create predefined sets of parameters for end users, and store
-            credentials securely. Each configuration has a unique name that is automatically entered in designated
-            parameters in the procedures.</p>
-            <h2>Input</h2>
-            <ol>
-                <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
-                <li>Find the EC-Bamboo row.</li>
-                <li>Click <b>Configure</b> to open the Bamboo Configurations page.</li>
-                <li>Click <b>Create Configuration</b>.</li>
-                <li>To create a Bamboo configuration, enter the following information and click <b>OK</b>.
-                <br /> Remember that you may need to create additional configurations later.</li>
-                <table class="grid">
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="required">Configuration Name</td>
-                            <td>Name of the plugin configuration.</td>
-                        </tr>
-                        <tr>
-                            <td>Description</td>
-                            <td>Description for the plugin configuration.</td>
-                        </tr>
-                        <tr>
-                            <td class="required">Bamboo server url</td>
-                            <td>Attlassian Bamboo server URL.</td>
-                        </tr>
-                        <tr>
-                            <td class="required">Credential</td>
-                            <td>
-                                <ul>
-                                    <li><b>User Name</b>: Enter the name of the Atlassian Bamboo user.</li>
-                                    <li><b>Password</b>: Enter the password for the Atlassian Bamboo user name.</li>
-                                    <li><b>Retype Password</b>: Re-enter the password for the Atlassian Bamboo user name.</li>
-                                </ul>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <img src="../../plugins/@PLUGIN_KEY@/images/Config/ConfigForm.png" />
-            </ol>
-            <h2>Output</h2>
-            <p>The Bamboo Configurations page now shows the new configuration.</p>
-            <p>You can also manage your Bamboo configurations in this page. Click <b>Edit</b> to modify an existing configuration or
-            <b>Delete</b> to remove an existing configuration.</p>
+<head>
+    <meta content="text/html; charset=us-ascii" http-equiv="content-type"/>
+    <title>@PLUGIN_KEY@ Plugin</title>
+    <link rel="stylesheet" href="../../plugins/@PLUGIN_NAME@/pluginhelp.css" type="text/css" media="screen"/>
+</head>
+<body>
+<!--
+    Generated by PluginWizardHelp
+    https://github.com/electric-cloud/PluginWizardHelp
+    Do *NOT* edit manually, use help file generation.
+-->
+<div class="help">
+    <h1>@PLUGIN_KEY@</h1>
+    <p>Plugin version @PLUGIN_VERSION@</p>
+    
+    <p>Revised on Jun 13, 2019</p>
+    
+    <hr style="margin-left: -10px; margin-top: 10px; height: 1px; width: 100%; color: #5981BD;" noshade="noshade"/>
+    <h1>Contents</h1>
+    <ul>
+    
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#SupportedVersions">Supported Versions</a></li>
+    
+    
+    
+    
+    
+    
+    
+    <li><a href="#CreateConfiguration">Plugin Configuration</a></li>
+    
 
-            <h1 id="procedures">Plugin Procedures</h1>
-            <div id="DisablePlan">
-                <h2>DisablePlan</h2>
-                <p>This procedure disables build plan.</p>
-                <h3>Input</h3>
-                <ol>
-                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
-                    <li>Got to the EC-Bamboo plugin.</li>
-                    <li>Go to the DisablePlan procedure.</li>
-                    <li>Enter the following parameters:<br />
-                    <table class="grid">
-                        <thead>
-                            <tr>
-                                <th>Parameter</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="required">Configuration name</td>
-                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
-                            </tr>
-                            <tr>
-                                <td class="required">Project key</td>
-                                <td>Project key (short name) of project that contains build plan.</td>
-                            </tr>
-                            <tr>
-                                <td class="required">Plan key</td>
-                                <td>Short name of plan to disable.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    </li>
-                </ol>
-                <br />
-                <img src="../../plugins/@PLUGIN_KEY@/images/DisablePlan/Form.png" />
-                <br />
-                <h3>Output</h3>
-                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
-                <img src="../../plugins/@PLUGIN_KEY@/images/DisablePlan/Status.png" />
-                <p>In the <b>DisablePlan</b> step, click the Log button to see the diagnostic information:</p>
-                <br /><img src="../../plugins/@PLUGIN_KEY@/images/DisablePlan/Result.png" />
-            </div>
-            <div id="EnablePlan">
-                <h2>EnablePlan</h2>
-                <p>This procedure enables build plan.</p>
-                <h3>Input</h3>
-                <ol>
-                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
-                    <li>Got to the EC-Bamboo plugin.</li>
-                    <li>Go to the EnablePlan procedure.</li>
-                    <li>Enter the following parameters:<br />
-                    <table class="grid">
-                        <thead>
-                            <tr>
-                                <th>Parameter</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="required">Configuration name</td>
-                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
-                            </tr>
-                            <tr>
-                                <td class="required">Project key</td>
-                                <td>Project key (short name) of project that contains build plan.</td>
-                            </tr>
-                            <tr>
-                                <td class="required">Plan key</td>
-                                <td>Short name of plan to enable.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    </li>
-                </ol>
-                <br />
-                <img src="../../plugins/@PLUGIN_KEY@/images/EnablePlan/Form.png" />
-                <br />
-                <h3>Output</h3>
-                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
-                <img src="../../plugins/@PLUGIN_KEY@/images/EnablePlan/Status.png" />
-                <p>In the <b>EnablePlan</b> step, click the Log button to see the diagnostic information:</p>
-                <br /><img src="../../plugins/@PLUGIN_KEY@/images/EnablePlan/Result.png" />
-            </div>
-            <div id="GetAllPlans">
-                <h2>GetAllPlans</h2>
-                <p>This procedure returns all build plan that are available for current user.</p>
-                <h3>Input</h3>
-                <ol>
-                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
-                    <li>Got to the EC-Bamboo plugin.</li>
-                    <li>Go to the GetAllPlans procedure.</li>
-                    <li>Enter the following parameters:<br />
-                    <table class="grid">
-                        <thead>
-                            <tr>
-                                <th>Parameter</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="required">Configuration name</td>
-                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    </li>
-                </ol>
-                <br />
-                <img src="../../plugins/@PLUGIN_KEY@/images/GetAllPlans/Form.png" />
-                <br />
-                <h3>Output</h3>
-                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
-                <img src="../../plugins/@PLUGIN_KEY@/images/GetAllPlans/Status.png" />
-                <p>In the <b>GetAllPlans</b> step, click the Log button to see the diagnostic information:</p>
-                <br /><img src="../../plugins/@PLUGIN_KEY@/images/GetAllPlans/Result.png" />
-            </div>
-            <div id="GetPlanDetails">
-                <h2>GetPlanDetails</h2>
-                <p>This procedure prints Bamboo build plan details.</p>
-                <h3>Input</h3>
-                <ol>
-                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
-                    <li>Got to the EC-Bamboo plugin.</li>
-                    <li>Go to the GetPlanDetails procedure.</li>
-                    <li>Enter the following parameters:<br />
-                    <table class="grid">
-                        <thead>
-                            <tr>
-                                <th>Parameter</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="required">Configuration name</td>
-                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
-                            </tr>
-                            <tr>
-                                <td class="required">Project key</td>
-                                <td>Project key (short name) of project that contains build plan.</td>
-                            </tr>
-                            <tr>
-                                <td class="required">Plan key</td>
-                                <td>Short name of plan to get details.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    </li>
-                </ol>
-                <br />
-                <img src="../../plugins/@PLUGIN_KEY@/images/GetPlanDetails/Form.png" />
-                <br />
-                <h3>Output</h3>
-                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
-                <img src="../../plugins/@PLUGIN_KEY@/images/GetPlanDetails/Status.png" />
-                <p>In the <b>GetPlanDetails</b> step, click the Log button to see the diagnostic information:</p>
-                <br /><img src="../../plugins/@PLUGIN_KEY@/images/GetPlanDetails/Result.png" />
-            </div>
-            <div id="GetPlanDetails">
-                <h2>GetPlanDetails</h2>
-                <p>This procedure returns information about runs on Bamboo build plan.</p>
-                <h3>Input</h3>
-                <ol>
-                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
-                    <li>Got to the EC-Bamboo plugin.</li>
-                    <li>Go to the GetPlanRuns procedure.</li>
-                    <li>Enter the following parameters:<br />
-                    <table class="grid">
-                        <thead>
-                            <tr>
-                                <th>Parameter</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="required">Configuration name</td>
-                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
-                            </tr>
-                            <tr>
-                                <td class="required">Project key</td>
-                                <td>Project key (short name) of project that contains build plan.</td>
-                            </tr>
-                            <tr>
-                                <td class="required">Plan key</td>
-                                <td>Short name of plan to get runs.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    </li>
-                </ol>
-                <br />
-                <img src="../../plugins/@PLUGIN_KEY@/images/GetPlanRuns/Form.png" />
-                <br />
-                <h3>Output</h3>
-                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
-                <img src="../../plugins/@PLUGIN_KEY@/images/GetPlanRuns/Status.png" />
-                <p>In the <b>GetPlanRuns</b> step, click the Log button to see the diagnostic information:</p>
-                <br /><img src="../../plugins/@PLUGIN_KEY@/images/GetPlanRuns/Result.png" />
-            </div>
-            <div id="RunPlan">
-                <h2>RunPlan</h2>
-                <p>This procedure runs Bamboo build plan.</p>
-                <h3>Input</h3>
-                <ol>
-                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
-                    <li>Got to the EC-Bamboo plugin.</li>
-                    <li>Go to the RunPlan procedure.</li>
-                    <li>Enter the following parameters:<br />
-                    <table class="grid">
-                        <thead>
-                            <tr>
-                                <th>Parameter</th>
-                                <th>Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="required">Configuration name</td>
-                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
-                            </tr>
-                            <tr>
-                                <td class="required">Project key</td>
-                                <td>Project key (short name) of project that contains build plan.</td>
-                            </tr>
-                            <tr>
-                                <td class="required">Plan key</td>
-                                <td>Short name of plan to run. All stages within specified plan will be executed.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    </li>
-                </ol>
-                <br />
-                <img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Form.png" />
-                <br />
-                <h3>Output</h3>
-                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
-                <img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Status.png" />
-                <p>In the <b>RunPlan</b> step, click the Log button to see the diagnostic information:</p>
-                <br /><img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Result.png" />
-            </div>
-            <h1 id="rns">Release Notes</h1>
-            <h2>@PLUGIN_KEY@ 1.4.2</h2>
-            <ul>
-                <li>The plugin icon has beed updated.</li>
-            </ul>
-            <h2>@PLUGIN_KEY@ 1.4.1</h2>
-            <ul>
-                <li>Output for ElectricFlow Pipelines has been improved.</li>
-                <li>Missing documentation has been added.</li>
-            </ul>
-            <h2>@PLUGIN_KEY@ 1.4.0</h2>
-            <ul>
-                <li>EnablePlan procedure has been added.</li>
-                <li>DisablePlan procedure has been added.</li>
-            </ul>
-            <h2>@PLUGIN_KEY@ 1.3.0</h2>
-            <ul>
-                <li>GetAllPlans proedure has been added.</li>
-            </ul>
-            <h2>@PLUGIN_KEY@ 1.2.0</h2>
-            <ul>
-                <li>Improved error handling.</li>
-            </ul>
-            <ul>
-                <li>Fixed an issue when credentials are not available from RunPlan procedure.</li>
-            </ul>
-            <h2>@PLUGIN_KEY@ 1.1.0</h2>
-            <ul>
-                <li>GetPlanDetails and GetPlanRuns procedures have been added.</li>
-            </ul>
-            <h2>@PLUGIN_KEY@ 1.0.0</h2>
-            <ul>
-                <li>RunPlan procedure has been added.</li>
-            </ul>
-        </div>
-    </body>
-</html>	
+    
+    <li><a href="#procedures">Plugin Procedures</a></li>
+    <li>Build Plans management<br/><i>These procedures help in managing a Build process.</i></li><ul><li><a href="#RunPlan">RunPlan</a></li><li><a href="#EnablePlan">EnablePlan</a></li><li><a href="#DisablePlan">DisablePlan</a></li><li><a href="#GetAllPlans">GetAllPlans</a></li><li><a href="#GetPlanDetails">GetPlanDetails</a></li><li><a href="#GetPlanRuns">GetPlanRuns</a></li></ul><li>Deployment Plans management<br/><i>These procedures help in managing the Deployment process.</i></li><ul><li><a href="#GetDeploymentProjectsForPlan">GetDeploymentProjectsForPlan</a></li><li><a href="#CreateVersion">CreateVersion</a></li><li><a href="#TriggerDeployment">TriggerDeployment</a></li></ul><li>Other</li><ul><li><a href="#CollectReportingData">CollectReportingData</a></li><li><a href="#ValidateCRDParams">ValidateCRDParams</a></li></ul>
+
+    
+    
+    
+    
+    
+    
+    
+    <li><a href="#releaseNotes">Release Notes</a></li>
+</ul>
+
+    
+    <h1>Overview</h1>
+    <p><p>Bamboo is a continuous integration (CI) server that can be used to automate the release management for a software application, creating a continuous delivery pipeline.
+What does this mean?
+CI is a software development methodology in which a build, unit tests and integration tests are performed, or triggered, whenever code is committed to the repository, to ensure that new changes integrate well into the existing code base. Integration builds provide early 'fail fast' feedback on the quality of new changes.
+Release management describes the steps that are typically performed to release a software application, including building and functional testing, tagging releases, assigning versions, and deploying and activating the new version in production.</p>
+<p>For more information about Atlassian Bamboo go to <a href="https://www.atlassian.com/software/bamboo" target="_blank">Bamboo home page</a>. For better Atlassian Bamboo understanding go to  <a href="https://confluence.atlassian.com/bamboo/understanding-the-bamboo-ci-server-289277285.html" target="_blank">Atlassian Documentation</a></p>
+</p>
+    <div id="SupportedVersions">
+<h1>Supported Versions</h1>
+<p>This plugin was developed and tested against following Bamboo Server versions:</p>
+<ul>
+<li>Atlassian Bamboo 6.8.1</li>
+</ul>
+<p>According to the Atlassian Bamboo changelog, the following changes define the minimal compatible versions:</p>
+<ul>
+<li>
+<a href="https://developer.atlassian.com/server/bamboo/bamboo-api-changes-for-5-11/" target="_blank">Bamboo 5.11</a>
+: Versions prior to this are not compatible with the TriggerDeployment procedure.</li>
+<li>
+<a href="https://developer.atlassian.com/server/bamboo/bamboo-api-changes-for-bamboo-3-0/" target="_blank">Bamboo 3.0</a>
+: Changes in the process of receiving Plan Build results make versions, prior to this, incompatible with RunPlan, GetPlanRuns and CollectReportingData procedures.</li>
+</ul>
+
+</div>
+    
+    
+    
+    
+    
+
+    <!--TODO custom blocks-->
+
+    
+    <div id="CreateConfiguration">
+        <a name='CreateConfiguration' id="CreateConfiguration"> </a>
+        <h1>Plugin Configurations</h1>
+
+        <p>
+            Plugin configurations are sets of parameters that apply
+            across some or all of the plugin procedures. They
+            reduce repetition of common values, create
+            predefined parameter sets for end users, and
+            securely store credentials where needed. Each configuration
+            is given a unique name that is entered in designated
+            parameters on procedures that use them.<br /><br />
+        </p>
+
+        <h3>Creating Plugin Configurations</h3>
+        <p>To create plugin configurations in ElectricFlow,
+            do these steps:</p>
+
+        <li>Go to <b>Administration</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
+        <li>Find the @PLUGIN_NAME@ row.</li>
+        <li>Click <b>Configure</b> to open the
+             Configurations page.</li>
+        <li>Click <b>Create Configuration</b> as per the description of parameters below.</li>
+        
+        Configuration Parameters
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                
+                    <td class="required">Configuration Name</td>
+                    <td>Configuration name.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                    <td >Description</td>
+                    <td>Description for the configuration</td>
+                
+            </tr>
+            
+            <tr>
+                
+                    <td class="required">Bamboo Server URL</td>
+                    <td>Atlassian Bamboo server URL.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                    <td class="required">Credential</td>
+                    <td></td>
+                
+            </tr>
+            
+            <tr>
+                
+                    <td >Debug Level</td>
+                    <td></td>
+                
+            </tr>
+            
+            <tr>
+                
+                    <td >HTTP Proxy</td>
+                    <td>An HTTP proxy that will be used for the connections.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                    <td >Proxy Authorization</td>
+                    <td></td>
+                
+            </tr>
+            
+            </tbody>
+        </table>
+        
+    </div>
+    
+
+    
+
+    <h1 id="procedures">Plugin Procedures</h1>
+    
+    
+    <p>
+        <p><b>IMPORTANT</b> Note that the names of Required parameters are marked in <span class="required">bold italics</span> in the parameter description table for each procedure.<br/></p>
+
+    </p>
+    
+
+    
+    <div id="RunPlan">
+        <h2>RunPlan</h2>
+        
+        
+        <p>Runs build plan by plan key and project key.</p>
+        
+        
+        <h3>RunPlan Parameters</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                
+                <td class="required">Configuration Name</td>
+                <td>Previously defined configuration for the plugin</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Project Key</td>
+                <td>Project key (short name) of project that contains build plan.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Plan Key</td>
+                <td>Short key of plan to run.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Custom Revision</td>
+                <td>Run a build against a custom branch (revision).</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Additional Variables</td>
+                <td>
+      Additional variables for this Run specified as name-value pairs, with 1 pair per line. <br/>If not specified, the default variables for the definition will be used. <br/>Example: <br/><b>system.debug=true</b><br/><b>BuildConfiguration=debug</b><br/><b>BuildPlatform=x64</b><br/>
+      Variables defined in Bamboo as global variables or plan variables MUST be prefixed with bamboo.variable ie. bamboo.variable.myVariable=valueForMyVariable
+    </td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Wait For Build</td>
+                <td>If checked, procedure will sequentually request for the state of Run until it is finished.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Wait Timeout</td>
+                <td>Maximum time to wait for the run to be finished.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Format</td>
+                <td>Format to save the results.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Property Sheet</td>
+                <td>Property sheet to store the results.</td>
+                
+            </tr>
+            
+            </tbody>
+        </table>
+        
+    </div>
+
+    
+    <div id="EnablePlan">
+        <h2>EnablePlan</h2>
+        
+        
+        <p>Enables build plan.</p>
+        
+        
+        <h3>EnablePlan Parameters</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                
+                <td class="required">Configuration Name</td>
+                <td>Previously defined configuration for the plugin</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Project Key</td>
+                <td>Project key (short name) of project that contains build plan.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Plan Key</td>
+                <td>Short name of plan.</td>
+                
+            </tr>
+            
+            </tbody>
+        </table>
+        
+    </div>
+
+    
+    <div id="DisablePlan">
+        <h2>DisablePlan</h2>
+        
+        
+        <p>Disables build plan.</p>
+        
+        
+        <h3>DisablePlan Parameters</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                
+                <td class="required">Configuration Name</td>
+                <td>Previously defined configuration for the plugin</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Project Key</td>
+                <td>Project key (short name) of project that contains build plan.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Plan Key</td>
+                <td>Short name of plan.</td>
+                
+            </tr>
+            
+            </tbody>
+        </table>
+        
+    </div>
+
+    
+    <div id="GetAllPlans">
+        <h2>GetAllPlans</h2>
+        
+        
+        <p>Returns all plans that are available for current user.</p>
+        
+        
+        <h3>GetAllPlans Parameters</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                
+                <td class="required">Configuration Name</td>
+                <td>Previously defined configuration for the plugin</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Project Key</td>
+                <td>Project key (short name) of project to filter plans.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Format</td>
+                <td>Format to save the results.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Property Sheet</td>
+                <td>Property sheet to store the results. Each plan will be saved under a separate property (property sheet). Additionally, the planKeys property will contain comma-separated plan keys.</td>
+                
+            </tr>
+            
+            </tbody>
+        </table>
+        
+    </div>
+
+    
+    <div id="GetPlanDetails">
+        <h2>GetPlanDetails</h2>
+        
+        
+        <p>Gets build plan details.</p>
+        
+        
+        <h3>GetPlanDetails Parameters</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                
+                <td class="required">Configuration Name</td>
+                <td>Previously defined configuration for the plugin</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Project Key</td>
+                <td>Project key (short name) of project that contains build plan.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Plan Key</td>
+                <td>Short name of plan to get details.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Format</td>
+                <td>Format to save the results.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Property Sheet</td>
+                <td>Property sheet to store the results.</td>
+                
+            </tr>
+            
+            </tbody>
+        </table>
+        
+    </div>
+
+    
+    <div id="GetPlanRuns">
+        <h2>GetPlanRuns</h2>
+        
+        
+        <p>Returns information about build plan runs byt project key and plan key.</p>
+        
+        
+        <h3>GetPlanRuns Parameters</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                
+                <td class="required">Configuration Name</td>
+                <td>Previously defined configuration for the plugin</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Project Key</td>
+                <td>Project key (short name) of project that contains build plan.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Plan Key</td>
+                <td>Short name of plan to get details.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Build State Filter</td>
+                <td>Get only plan runs with this state</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Format</td>
+                <td>Format to save the results.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Property Sheet</td>
+                <td>Property sheet to store the results. Each plan run will be saved under a separate property (property sheet). Additionally, the planKeys property will contain comma-separated plan keys.</td>
+                
+            </tr>
+            
+            </tbody>
+        </table>
+        
+    </div>
+
+    
+    <div id="GetDeploymentProjectsForPlan">
+        <h2>GetDeploymentProjectsForPlan</h2>
+        
+        
+        <p>Requests and returns list of all deployment projects linked to this build plan.</p>
+        
+        
+        <h3>GetDeploymentProjectsForPlan Parameters</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                
+                <td class="required">Configuration Name</td>
+                <td>Previously defined configuration for the plugin</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Project Key</td>
+                <td>Project key (short name) of project that contains build plan.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Plan Key</td>
+                <td>Short name of plan.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Format</td>
+                <td>Format to save the results.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Property Sheet</td>
+                <td>Property sheet to store the results.</td>
+                
+            </tr>
+            
+            </tbody>
+        </table>
+        
+    </div>
+
+    
+    <div id="CreateVersion">
+        <h2>CreateVersion</h2>
+        
+        
+        <p>Creates new version (release) from the successful build result</p>
+        
+        
+        <h3>CreateVersion Parameters</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                
+                <td class="required">Configuration Name</td>
+                <td>Previously defined configuration for the plugin</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Deployment Project Name</td>
+                <td>Name of the deployment project where version will be created.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Plan Build Key</td>
+                <td>Identifier of the Plan Build result. e.g. 'PROJECT-PLAN-22'</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Request Version Name?</td>
+                <td>Request name for the next version from the deployment project.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Version Name</td>
+                <td>Name for new version to create. e.g. 'release-22'.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Format</td>
+                <td>Format to save the results.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Property Sheet</td>
+                <td>Result property sheet to save created version properties.</td>
+                
+            </tr>
+            
+            </tbody>
+        </table>
+        
+    </div>
+
+    
+    <div id="TriggerDeployment">
+        <h2>TriggerDeployment</h2>
+        
+        
+        <p>Runs deployment plan.</p>
+        
+        
+        <h3>TriggerDeployment Parameters</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                
+                <td class="required">Configuration Name</td>
+                <td>Previously defined configuration for the plugin</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Deployment Project Name</td>
+                <td>Name of the deployment project.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Environment Name</td>
+                <td>Name of the environment for the deployment.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Version Name</td>
+                <td>Name of the version to be deployed.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Wait For Deployment</td>
+                <td>If checked, procedure will sequentually request for the state of Deployment until it is finished.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Wait Timeout</td>
+                <td>Maximum time to wait for the deployment to be finished.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Format</td>
+                <td>Format to save the results.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Result Property Sheet</td>
+                <td>Property sheet to store the results.</td>
+                
+            </tr>
+            
+            </tbody>
+        </table>
+        
+    </div>
+
+    
+    <div id="CollectReportingData">
+        <h2>CollectReportingData</h2>
+        
+        
+        <p>Collects reporting data for "build" type</p>
+        
+        
+        <h3>CollectReportingData Parameters</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                
+                <td class="required">Configuration Name</td>
+                <td>Previously defined configuration for the plugin</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Project Key</td>
+                <td>Project key (short name) of project that contains build plan.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Plan Key</td>
+                <td>Short name of plan to get details. Might be simply planKey or composite planKey-jobKey.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Retrieve Test Results?</td>
+                <td>If checked - test data will be also collected.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Test Category</td>
+                <td>The category for tests of the collected build runs. Example: 'unit-test' or 'system-test'.
+</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Transformation script</td>
+                <td>Allows user to provide perl script for payload customization.
+This method will be invoked by plugin with 2 parameters. 1st parameter is context object, 2nd is payload object.
+Method should be named &quot;transform&quot;, and should return payload object. In this example myTimestamp field will be added to payload object:
+&lt;pre&gt;
+  sub transform {
+      my ($context, $payload) = @_;
+      $payload-&gt;{myTimestamp} = $context-&gt;one();
+      return $payload;
+  }
+  sub one {
+      my ($context) = @_;
+      return time();
+  }
+&lt;/pre&gt;
+</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Initial Count</td>
+                <td>Count of old builds to retrieve from server on the first run. If omited it will be set to 10.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Metadata Property Path</td>
+                <td>Property sheet where run metadata will be stored. If omitted, /mySchedule/EC-Bamboo-%JobName%-build will be used for schedule context. For all other contexts root is /myProject.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Base URL for drill-down</td>
+                <td>Base URL for the Bamboo. If empty it will be set to %url_from_configuration%/job/%Job name%.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Preview</td>
+                <td>If checked, no data will be sent to the reporting system. Use this option to preview gathered data.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Debug</td>
+                <td>If checked, the log level will be set to "Debug".</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Release Name</td>
+                <td>DevOpsInsightServer datasource specific field.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Release Project Name</td>
+                <td>DevOpsInsightServer datasource specific field.</td>
+                
+            </tr>
+            
+            </tbody>
+        </table>
+        
+    </div>
+
+    
+    <div id="ValidateCRDParams">
+        <h2>ValidateCRDParams</h2>
+        
+        
+        <p>Validates collect reporting data params.</p>
+        
+        
+        <h3>ValidateCRDParams Parameters</h3>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                
+                <td class="required">Configuration Name</td>
+                <td>Previously defined configuration for the plugin</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td class="required">Project Key</td>
+                <td>Project key (short name) of project that contains build plan.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Plan Key</td>
+                <td>Short name of plan to get details. Might be simply planKey or composite planKey-jobKey.</td>
+                
+            </tr>
+            
+            <tr>
+                
+                <td >Polling Frequency</td>
+                <td>Polling frequency (in minutes) for retrieving defects from JIRA.</td>
+                
+            </tr>
+            
+            </tbody>
+        </table>
+        
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+    
+    
+
+    <h1 id="releaseNotes">Release Notes</h1>
+    
+    <h3>@PLUGIN_KEY@ 1.5.0</h3>
+    <ul>
+        
+        <li>Added Result Format and Result Property Sheet parameters for all the procedures which returns information from Bamboo.</li>
+        
+        <li><ul>Following procedures now produce output parameters:
+  <li>GetAllPlans</li>
+  <li>GetPlanDetails</li>
+  <li>GetPlanRuns</li>
+  <li>RunPlan</li>
+</ul>
+</li>
+        
+        <li><ul>Introduced enhancements for the RunPlan procedure:
+  <li>Posibility to run a build against custom VCS revision (branch).</li>
+  <li>Supplying the additional run variables for the build.</li>
+  <li>Showing live progress as the Plan Build runs.</li>
+  <li>Posibility to omit waiting for the Plan Run to finish.</li>
+</ul>
+</li>
+        
+        <li><ul>New procedures for the deployment process automation:
+  <li>GetDeploymentProjectsForPlan</li>
+  <li>CreateVersion</li>
+  <li>TriggerDeployment</li>
+</ul>
+</li>
+        
+        <li>New procedure CollectReportingData for the DevOpsInsightServer integration was added.</li>
+        
+        <li>Proxy support was added.</li>
+        
+        <li>Cleanup was performed.</li>
+        
+    </ul>
+    
+    <h3>@PLUGIN_KEY@ 1.4.2</h3>
+    <ul>
+        
+        <li>The plugin icon has beed updated.</li>
+        
+    </ul>
+    
+    <h3>@PLUGIN_KEY@ 1.4.1</h3>
+    <ul>
+        
+        <li>Output for ElectricFlow Pipelines has been improved.</li>
+        
+        <li>Missing documentation has been added.</li>
+        
+    </ul>
+    
+    <h3>@PLUGIN_KEY@ 1.4.0</h3>
+    <ul>
+        
+        <li>EnablePlan procedure has been added.</li>
+        
+        <li>DisablePlan procedure has been added.</li>
+        
+    </ul>
+    
+    <h3>@PLUGIN_KEY@ 1.3.0</h3>
+    <ul>
+        
+        <li>GetAllPlans proedure has been added.</li>
+        
+    </ul>
+    
+    <h3>@PLUGIN_KEY@ 1.2.0</h3>
+    <ul>
+        
+        <li>Improved error handling.</li>
+        
+        <li>Fixed an issue when credentials are not available from RunPlan procedure.</li>
+        
+    </ul>
+    
+    <h3>@PLUGIN_KEY@ 1.1.0</h3>
+    <ul>
+        
+        <li>GetPlanDetails and GetPlanRuns procedures have been added.</li>
+        
+    </ul>
+    
+    <h3>@PLUGIN_KEY@ 1.0.0</h3>
+    <ul>
+        
+        <li>RunPlan procedure has been added.</li>
+        
+    </ul>
+    
+</div>
+</body>
+</html>

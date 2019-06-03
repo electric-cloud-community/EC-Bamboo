@@ -1,0 +1,29 @@
+overview: Should be replaced with 'overview.md'
+
+#knownIssues: |
+
+proceduresPreface: |
+  <b>IMPORTANT</b> Note that the names of Required parameters are marked in <span class="required">bold italics</span> in the parameter description table for each procedure.<br/>
+
+proceduresGrouping:
+  groups:
+   - name: Build Plans management
+     description: These procedures help in managing a Build process.
+     procedures:
+       - RunPlan
+       - EnablePlan
+       - DisablePlan
+       - GetAllPlans
+       - GetPlanDetails
+       - GetPlanRuns
+   - name: Deployment Plans management
+     description: These procedures help in managing the Deployment process.
+     procedures:
+       - GetDeploymentProjectsForPlan
+       - CreateVersion
+       - TriggerDeployment
+
+chapters:
+  - name: 'Supported Versions'
+    file: supportedVersionsChapter.md
+    place: 'after overview'
