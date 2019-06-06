@@ -4,7 +4,7 @@ FlowPDF::Component::CLI::Command
 
 =head1 AUTHOR
 
-Electric Cloud
+CloudBees
 
 =head1 DESCRIPTION
 

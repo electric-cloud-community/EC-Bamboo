@@ -4,7 +4,7 @@ FlowPDF::Client::REST
 
 =head1 AUTHOR
 
-Electric Cloud
+CloudBees
 
 =head1 DESCRIPTION
 
@@ -49,9 +49,10 @@ use FlowPDF::Types;
 __PACKAGE__->defineClass({
     ua    => FlowPDF::Types::Reference('LWP::UserAgent'),
     proxy => FlowPDF::Types::Reference('HASH'),
-    oauth => FlowPDF::Types::Reference('HASH'),
+    auth  => FlowPDF::Types::Reference('FlowPDF::Client::REST::Auth')
 });
 
+use FlowPDF::Client::REST::Auth;
 use FlowPDF::ComponentManager;
 use FlowPDF::Log;
 use strict;
@@ -129,40 +130,88 @@ In that example FlowPDF::Rest loads automatically L<FlowPDF::Component::Proxy> a
 sub new {
     my ($class, $params) = @_;
 
-    logDebug("Creating FlowPDF::Client::Rest with params: ", Dumper $params);
-    if (!$params->{ua}) {
-        $params->{ua} = LWP::UserAgent->new();
+    # validating parameters
+    # auth section
+    if ($params->{auth} && (!ref $params->{auth} || ref $params->{auth} ne 'HASH')) {
+        croak "Auth section should be a HASH reference.";
     }
+    if ($params->{auth} && !$params->{auth}->{type}) {
+        croak "Auth type is expected for auth section.";
+    }
+
+    # proxy section
+    if ($params->{proxy} && (!ref $params->{proxy} || ref $params->{proxy} ne 'HASH')) {
+        croak 'Proxy section should be a HASH reference.';
+    }
+    # end of validation
+
+    logDebug("Creating FlowPDF::Client::Rest with params: ", Dumper $params);
+
+    my $restAuth = FlowPDF::Client::REST::Auth->new({
+        authValues => {},
+        authType   => '',
+    });
+    my $creationParams = {
+        auth => $restAuth,
+        ua   => $params->{ua} || LWP::UserAgent->new()
+    };
     if ($params->{proxy}) {
         logDebug("Loading Proxy Component on demand.");
         my $proxy = FlowPDF::ComponentManager->loadComponent('FlowPDF::Component::Proxy', $params->{proxy});
         logDebug("Proxy component has been loaded.");
         $proxy->apply();
-        $params->{ua} = $proxy->augment_lwp($params->{ua});
+        $creationParams->{ua} = $proxy->augment_lwp($creationParams->{ua});
+        $creationParams->{proxy} = $params->{proxy};
     }
 
+
+    my $self = $class->SUPER::new($creationParams);
+    my $restAuthValues = $restAuth->getAuthValues();
     my $oauth = undef;
-    if ($params->{oauth}) {
-        # op stands for ouathParams
-        my $op = $params->{oauth};
 
-        if ($op->{oauth_version} ne '1.0') {
-            croak "Currently OAuth version $op->{oauth_version} is not supported. Suported versions: 1.0";
+    if ($params->{auth} && $params->{auth}->{type}) {
+        my $auth = $params->{auth};
+
+        if ($auth->{type} eq 'oauth') {
+            $restAuth->setAuthType('oauth');
+            delete $auth->{type};
+            # op stands for ouathParams
+            my $op = $auth;
+
+            if ($op->{oauth_version} ne '1.0') {
+                croak "Currently OAuth version $op->{oauth_version} is not supported. Suported versions: 1.0";
+            }
+
+            # request_method is removed from mandatory fields list for now.
+            for my $p (qw/oauth_signature_method oauth_version request_token_path authorize_token_path access_token_path/) {
+                if (!defined $op->{$p}) {
+                    croak "$p is mandatory for oauth component";
+                }
+            }
+            logDebug("Loading FlowPDF::Component::OAuth");
+            $oauth = FlowPDF::ComponentManager->loadComponent('FlowPDF::Component::OAuth', $auth->{oauth});
+            logDebug("OAuth component has been loaded.");
+            $restAuthValues->{oauthComponent} = $oauth;
         }
+        elsif ($auth->{type} eq 'basic') {
+            $restAuth->setAuthType('basic');
+            # TODO: Remove later one of these options and keep only one.
+            if ($auth->{userName} || $auth->{username}) {
+                $restAuthValues->{username} = $auth->{userName} || $auth->{username};
+            }
 
-        for my $p (qw/request_method oauth_signature_method oauth_version request_token_path authorize_token_path access_token_path/) {
-            if (!defined $op->{$p}) {
-                croak "$p is mandatory for oauth component";
+            if ($auth->{password}) {
+                $restAuthValues->{password} = $auth->{password};
             }
         }
-        logDebug("Loading FlowPDF::Component::OAuth");
-        $oauth = FlowPDF::ComponentManager->loadComponent('FlowPDF::Component::OAuth', $params->{oauth});
-        logDebug("OAuth component has been loaded.");
-    }
-    my $self = $class->SUPER::new($params);
-
-    if ($oauth) {
-        $oauth->ua($self);
+        elsif ($auth->{type} eq 'bearer') {
+            logWarning("Bearer auth type is not implemented yet");
+        }
+        else {
+            if (keys %$auth) {
+                logWarning("Following auth keys are not supported: " . join(", ", keys(%$auth)));
+            }
+        }
     }
 
     return $self;
@@ -214,6 +263,15 @@ sub newRequest {
     if ($proxy) {
         my $proxyComponent = FlowPDF::ComponentManager->getComponent('FlowPDF::Component::Proxy');
         $req = $proxyComponent->augment_request($req);
+    }
+
+    my $auth = $self->getAuth();
+
+    if (my $authType = $auth->getAuthType()) {
+        my $values = $auth->getAuthValues();
+        if ($authType eq 'basic') {
+            $req->authorization_basic($values->{username}, $values->{password});
+        }
     }
     return $req;
 }

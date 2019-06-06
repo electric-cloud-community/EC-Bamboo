@@ -4,7 +4,7 @@ FlowPDF::StepResult
 
 =head1 AUTHOR
 
-Electric Cloud
+CloudBees
 
 =head1 DESCRIPTION
 
@@ -32,6 +32,7 @@ use Data::Dumper;
 use FlowPDF::StepResult::Action;
 use FlowPDF::Log;
 use FlowPDF::EF::OutputParameters;
+use FlowPDF::Helpers qw/inArray/;
 
 sub getCacheForAction {
     my ($self, $actionType, $name) = @_;
@@ -329,6 +330,38 @@ sub setOutcomeProperty {
 }
 
 
+=head2 setOutputParameter($parameterName, $parameterValue)
+
+=head3 Description
+
+Sets an output parameter for a job.
+
+=head3 Parameters
+
+=over 4
+
+=item (Required)(String) Output parameter name
+
+=item (Required)(String) Output parameter value
+
+=back
+
+=head3 Returns
+
+=over
+
+=item (FlowPDF::StepResult) self
+
+=back
+
+%%%LANG=perl%%%
+
+    $stepResult->setOutputParameter('Last Build Number', '42');
+
+%%%LANG%%%
+
+=cut
+
 sub setOutputParameter {
     my ($self, $name, $value) = @_;
 
@@ -341,6 +374,69 @@ sub setOutputParameter {
         entityName => $name,
         entityValue => $value
     });
+    my $actions = $self->getActions();
+    push @$actions, $action;
+    $self->setIsApplied(0);
+    return $self;
+}
+
+
+=head2 setReportUrl($reportName, $reportUrl)
+
+=head3 Description
+
+Sets a report and it's URL for the job.
+If it is being invoked in pipeline runs, sets also a property with a link to the pipeline summary.
+
+=head3 Parameters
+
+=over 4
+
+=item (Required)(String) Report name
+
+=item (Required)(String) Report URL
+
+=back
+
+=head3 Returns
+
+=over
+
+=item (FlowPDF::StepResult) self
+
+=back
+
+%%%LANG=perl%%%
+
+    $stepResult->setReportUrl('Build Link #42', 'http://localhost:8080/job/HelloWorld/42');
+
+%%%LANG%%%
+
+=cut
+
+sub setReportUrl {
+    my ($self, $reportName, $reportUrl) = @_;
+
+    if (!defined $reportName || !defined $reportUrl) {
+        croak "Report name and report url are mandatory for setReportUrl.";
+    }
+
+    # if we have a pipeline run, we need to set an ec summary.
+    if ($self->getContext()->getRunContext() eq 'pipeline') {
+        my $summary = qq|<html><a href="$reportUrl" target="_blank">Download Report</a></html>|;
+        $self->setPipelineSummary($reportName . ':', $summary);
+    }
+
+    $self->setOutcomeProperty(qq|/myJob/report-urls/$reportName|, $reportUrl);
+
+    return $self;
+}
+
+
+sub newAction {
+    my ($self, @params) = @_;
+
+    my $action = FlowPDF::StepResult::Action->new(@params);
     my $actions = $self->getActions();
     push @$actions, $action;
     $self->setIsApplied(0);
@@ -384,8 +480,7 @@ sub apply {
     my $actions = $self->getActions();
     for my $action (@$actions) {
         if (!ref $action) {
-            # TODO: Improve error message here.
-            croak "Reference is expected";
+            croak "Reference is expected for action. Got scalar.";
         }
         if (ref $action ne 'FlowPDF::StepResult::Action') {
             croak "FlowPDF::StepResult::Action is expected. Got: ", ref $action;
@@ -398,8 +493,9 @@ sub apply {
         if ($currentAction eq 'setJobOutcome' || $currentAction eq 'setJobStepOutcome') {
             $ec->setProperty($left, $right);
         }
-        # TODO: Refactor this if condition
-        elsif ($currentAction eq 'setPipelineSummary' || $currentAction eq 'setOutcomeProperty' || $currentAction eq 'setJobSummary' || $currentAction eq 'setJobStepSummary') {
+        # elsif ($currentAction eq 'setPipelineSummary' || $currentAction eq 'setOutcomeProperty' || $currentAction eq 'setJobSummary' || $currentAction eq 'setJobStepSummary') {
+        elsif (inArray($currentAction, ('setPipelineSummary', 'setOutcomeProperty', 'setJobSummary', 'setJobStepSummary'))) {
+
             my $line;
             if ($currentAction ne 'setOutcomeProperty') {
                 $line = $self->setCacheForAction($currentAction, $left, $right);

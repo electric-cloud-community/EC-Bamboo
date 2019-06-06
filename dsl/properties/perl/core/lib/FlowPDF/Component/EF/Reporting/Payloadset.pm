@@ -4,7 +4,7 @@ FlowPDF::Component::EF::Reporting::Payloadset
 
 =head1 AUTHOR
 
-Electric Cloud
+CloudBees
 
 =head1 DESCRIPTION
 
