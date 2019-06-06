@@ -176,6 +176,11 @@ sub buildRequest {
 
     my HTTP::Request $request = $rest->newRequest($method => $requestPath);
 
+    # Masking credentials in Base64 too
+    if (my $auth = $request->header('authorization')){
+        $self->logger->setMaskPatterns($auth);
+    }
+
     # Query parameters
     if (defined $queryParams && ref $queryParams eq 'HASH') {
         $request->uri->query_form(%$queryParams);

@@ -51,9 +51,9 @@ This component should be used in the following sequence:
 =cut
 
 package FlowPDF::Component::CLI;
-use base qw/FlowPDF::BaseClass2/;
+use base qw/FlowPDF::Component/;
 
-FlowPDF::Component::CLI->defineClass({
+__PACKAGE__->defineClass({
     workingDirectory    => FlowPDF::Types::Scalar(),
     resultsDirectory    => FlowPDF::Types::Scalar(),
     componentInitParams => FlowPDF::Types::Reference('HASH'),
@@ -78,7 +78,10 @@ sub init {
     if (!$params->{resultsDirectory}) {
         $params->{resultsDirectory} = $params->{workingDirectory};
     }
-    return $class->new($params);
+    my $retval = $class->new($params);
+    $retval->setComponentInitParams($params);
+
+    return $retval;
 }
 
 

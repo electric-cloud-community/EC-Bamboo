@@ -250,13 +250,29 @@ sub setMaskPatterns {
         shift @params;
     }
     for my $p (@params) {
+        next if isCommonPassword($p);
+        $p = quotemeta($p);
         # avoiding duplicates
         if (inArray($p, @$MASK_PATTERNS)) {
             next;
         }
+
         push @$MASK_PATTERNS, $p;
     }
     return 1;
+}
+
+sub isCommonPassword {
+    my ($password) = @_;
+
+    # well, huh.
+    if ($password eq 'password') {
+        return 1;
+    }
+    if ($password =~ m/^(?:TEST)+$/is) {
+        return 1;
+    }
+    return 0;
 }
 
 sub maskLine {
@@ -267,7 +283,6 @@ sub maskLine {
     }
 
     for my $p (@$MASK_PATTERNS) {
-        $p = quotemeta($p);
         $line =~ s/$p/[PROTECTED]/gs;
     }
     return $line;
