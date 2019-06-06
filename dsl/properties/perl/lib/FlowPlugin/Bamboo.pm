@@ -13,8 +13,6 @@ use JSON qw/decode_json/;
 
 # Service function that is being used to set some metadata for a plugin.
 sub pluginInfo {
-    FlowPDF::Log::setLogToProperty('/myJob/debug_logs');
-
     return {
         pluginName      => '@PLUGIN_KEY@',
         pluginVersion   => '@PLUGIN_VERSION@',
@@ -27,6 +25,16 @@ sub init {
     my ($self, $params) = @_;
 
     my FlowPDF::Context $context = $self->getContext();
+
+    # Check if should redirect logs
+    my $propLocation = '/plugins/@PLUGIN_KEY@/project/ec_debug_logToProperty';
+    eval {
+        my $debugToPropertyXpath = $context->getEc->getProperty($propLocation);
+        my $debugToProperty = $debugToPropertyXpath->findvalue('//value')->string_value();;
+        if (defined $debugToProperty && $debugToProperty ne ''){
+            FlowPDF::Log::setLogToProperty($debugToProperty);
+        }
+    };
 
     $self->{restClient} = FlowPlugin::REST->new($context, {
         APIBase     => '/rest/api/latest/',
@@ -63,10 +71,12 @@ sub getAllPlans {
     $params->{resultFormat} ||= 'json';
     $params->{resultPropertySheet} ||= '/myJob/plans';
 
-    # Requesting and formatting information
+    logInfo("Requesting and formatting information");
     my @infoToSave = ();
     if (!$params->{projectKey}) {
         my $response = $self->client->get('/project', { expand => 'projects.project.plans.plan' });
+        return unless defined $response;
+
         for my $project (@{$response->{projects}{project}}) {
             logInfo("Found project: '$project->{key}'");
 
@@ -78,6 +88,8 @@ sub getAllPlans {
     }
     else {
         my $response = $self->client->get('/project/' . $params->{projectKey}, { expand => 'plans.plan' });
+        return unless defined $response;
+
         logInfo("Found project: '$response->{key}'");
         for my $plan (@{$response->{plans}{plan}}) {
             logInfo("Found plan: '$plan->{key}'");
@@ -99,16 +111,14 @@ sub getAllPlans {
         $params->{resultFormat},
         $params->{resultPropertySheet},
         \@infoToSave
-    );
+    ) and logInfo("Plan(s) information was saved to properties.");
 
     # Saving outcome properties and parameters
     my $planKeysStr = join(', ', map {$_->{key}} @infoToSave);
     $stepResult->setOutputParameter('planKeys', $planKeysStr);
 
-    logInfo("Plan(s) information was saved to properties.");
-
     $stepResult->setJobStepOutcome('success');
-    $stepResult->setJobStepSummary('Plans found: ' . $planKeysStr);
+    $stepResult->setJobStepSummary("Found " . scalar(@infoToSave) . ' plan(s).');
     $stepResult->setJobSummary("Found " . scalar(@infoToSave) . ' plan(s).');
 
     $stepResult->apply();
@@ -130,6 +140,7 @@ sub getPlanDetails {
 
     my $planKey = "$params->{projectKey}-$params->{planKey}";
 
+    logInfo("Requesting details for $planKey");
     my $response = $self->client->get("/plan/$planKey", { expand => 'stages.stage' }, undef, {
         errorHook => {
             404 => sub {
@@ -153,14 +164,13 @@ sub getPlanDetails {
         $params->{resultPropertySheet},
         $infoToSave
     );
+    logInfo("Plan information was saved to properties.");
 
     # Saving outcome properties and parameters
     $stepResult->setOutputParameter('planKeys', $infoToSave->{key});
 
-    logInfo("Plan(s) information was saved to properties.");
-
     $stepResult->setJobStepOutcome('success');
-    $stepResult->setJobStepSummary('Plans found: ' . $infoToSave->{key});
+    $stepResult->setJobStepSummary("Build Plan details was saved to properties.");
     $stepResult->setJobSummary("Info about $planKey was saved to property(ies)");
 
     $stepResult->apply();
@@ -177,9 +187,9 @@ sub getDeploymentProjectsForPlan {
 
     my $planKey = "$params->{projectKey}-$params->{planKey}";
 
-    # Get list of plans
+    logInfo("Requesting information about $planKey");
     my $deployProjectsRefs = $self->client->get("/deploy/project/forPlan", { planKey => $planKey });
-    return if (!defined $deployProjectsRefs);
+    return unless defined $deployProjectsRefs;
 
     # Result is array ref of { id => '', name => '' }
     my @infoToSave = ();
@@ -201,8 +211,8 @@ sub getDeploymentProjectsForPlan {
 
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, \@infoToSave);
 
-    my @deplomentProjectKeys = map {$_->{key}} @infoToSave;
-    $stepResult->setOutputParameter('deploymentProjectKeys', join(', ', @deplomentProjectKeys));
+    my @deploymentProjectKeys = map {$_->{key}} @infoToSave;
+    $stepResult->setOutputParameter('deploymentProjectKeys', join(', ', @deploymentProjectKeys));
 
     my $summary = "Deployment projects info saved to properties.";
     logInfo($summary);
@@ -300,23 +310,21 @@ sub createVersion {
     }
 
     # Stripping plan key from the build result key [PROJECT-PLAN]-22
-    my ($project, $plan, $buildNum) = split('-', $params->{planBuildKey});
+    my ($project, $plan) = split('-', $params->{planBuildKey});
     my $planKey = join('-', $project, $plan);
     logInfo("Plan key : $planKey");
 
     my $deployProjectsRefs = $self->client->get("/deploy/project/forPlan", { planKey => $planKey });
-    return if (!defined $deployProjectsRefs);
+    return unless defined $deployProjectsRefs;
 
     # Filtering one that have same name
     my ($deploymentProject) = grep {$_->{name} eq $params->{deploymentProjectName}} @$deployProjectsRefs;
+
     if (!defined $deploymentProject) {
-        logInfo("Found deployment projects: " . join(', ', map {$_->{name}} @$deployProjectsRefs));
-        $stepResult->setJobStepOutcome('error');
-        $stepResult->setJobSummary("Can't get deployment project id");
-        $stepResult->setJobStepSummary(
+        logWarning("Here are the deployment projects we've got: " . join(', ', map {$_->{name}} @$deployProjectsRefs));
+        return $self->setStepResultFields($stepResult, 'error', "Can't get deployment project id",
             "Can't find deployment project with name '$params->{deploymentProjectName}' for plan '$planKey'"
         );
-        return;
     }
     my $deploymentProjectId = $deploymentProject->{id};
     if (!$params->{versionName} && $params->{requestVersionName}) {
@@ -324,6 +332,8 @@ sub createVersion {
             # Can't see any difference with/without this but as we have it, let's specify
             resultKey => $params->{planBuildKey}
         });
+        return unless defined $nextVersionRequest;
+
         $params->{versionName} = $nextVersionRequest->{nextVersionName};
     }
 
@@ -371,7 +381,7 @@ sub runPlan {
         executeAllStages => 'true'
     );
 
-    # Additional parameter
+    # Additional parameters
     if ($params->{additionalBuildVariables}) {
         my $buildParams = parseKeyValuePairs($params->{additionalBuildVariables});
         $queueRequestParams{$_} = $buildParams->{$_} for (keys %$buildParams);
@@ -402,8 +412,8 @@ sub runPlan {
         . "/chain/result/viewChainResult.action?"
         . "planKey=$planKey&buildNumber=$buildNumber";
 
-    $stepResult->setOutcomeProperty("/myJob/report-urls/View Build Report", $bambooResultURL);
-    $stepResult->setOutputParameter('buildUrl', $queueResponse->{link}{href});
+    $stepResult->setReportUrl("View Build Report", $bambooResultURL);
+    $stepResult->setOutputParameter('buildUrl', $bambooResultURL);
     $stepResult->setOutputParameter('buildResultKey', $queueResponse->{buildResultKey});
 
     if ($params->{waitForBuild}) {
@@ -446,7 +456,7 @@ sub runPlan {
         }
 
         if ($finished == 0) {
-            return $self->finishStepWith($stepResult, 'error',
+            return $self->setStepResultFields($stepResult, 'error',
                 'Exceeded the wait timeout while waiting for the build to finish.'
             );
         }
@@ -457,24 +467,23 @@ sub runPlan {
     my $buildInfo = $self->client->get("/result/$queueResponse->{buildResultKey}", {
         expand => 'results.result.artifacts,results.result.labels'
     });
+    return unless defined $buildInfo;
+
     my $infoToSave = _planBuildResultToShortInfo($buildInfo, ['artifacts', 'labels']);
 
     # Save properties
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $infoToSave);
 
     if (!$params->{waitForBuild}) {
-        return $self->finishStepWith($stepResult, 'success', 'Build was successfully added to a queue.');
+        return $self->setStepResultFields($stepResult, 'success', 'Build was successfully added to a queue.');
     }
     # Failed build
     elsif ($infoToSave->{finished} && !$infoToSave->{successful}) {
-        return $self->finishStepWith($stepResult, 'warning', 'Build was not finished successfully');
+        return $self->setStepResultFields($stepResult, 'warning', 'Build was not finished successfully');
     }
     # Build that was not started
     elsif (!$infoToSave->{finished} && $infoToSave->{buildState} eq 'Unknown') {
-        return $self->finishStepWith($stepResult, 'warning',
-            "Build was not started.",
-            'Build was not started (probably because of compilation errors)'
-        );
+        return $self->setStepResultFields($stepResult, 'warning', "Build was not started.");
     }
 
     $stepResult->setJobStepOutcome('success');
@@ -499,14 +508,14 @@ sub triggerDeployment {
 
     my ($project) = grep {$_->{name} eq $params->{deploymentProjectName}} @$allProjects;
     if (!defined $project) {
-        return $self->finishStepWith($stepResult, 'error', "Can't find deployment project '$params->{deploymentProjectName}'.");
+        return $self->setStepResultFields($stepResult, 'error', "Can't find deployment project '$params->{deploymentProjectName}'.");
     }
     logTrace("Project", $project);
 
     # Get environment
     my ($environment) = grep {$_->{name} eq $params->{deploymentEnvironmentName}} @{$project->{environments}};
     if (!defined $environment) {
-        return $self->finishStepWith($stepResult, 'error', "Can't find environment '$params->{deploymentEnvironmentName}'.");
+        return $self->setStepResultFields($stepResult, 'error', "Can't find environment '$params->{deploymentEnvironmentName}'.");
     }
     logTrace("Environment", $environment);
 
@@ -514,7 +523,7 @@ sub triggerDeployment {
     my $allVersions = $self->client->get("/deploy/project/$project->{id}/versions");
     my ($version) = grep {$_->{name} eq $params->{deploymentVersionName}} @{$allVersions->{versions}};
     if (!defined $version) {
-        return $self->finishStepWith($stepResult, 'error', "Can't find version '$params->{deploymentVersionName}'.");
+        return $self->setStepResultFields($stepResult, 'error', "Can't find version '$params->{deploymentVersionName}'.");
     }
     logTrace("Version", $version);
 
@@ -550,13 +559,10 @@ sub triggerDeployment {
             logInfo("Waiting $sleepTime second(s) before requesting the status again.");
             $waited += $sleepTime;
             sleep $sleepTime;
-        }
+        } # while
 
         if ($finished == 0) {
-            $stepResult->setJobStepOutcome('error');
-            $stepResult->setJobStepSummary('Exceeded the wait timeout while waiting for the deployment to finish.');
-            $stepResult->setJobSummary('Exceeded the wait timeout while waiting for the deployment to finish.');
-            return;
+            return $self->setStepResultFields($stepResult, 'error', 'Exceeded the wait timeout while waiting for the deployment to finish.');
         }
     }
 
@@ -568,24 +574,17 @@ sub triggerDeployment {
     my $bambooResultURL = $params->{endpoint}
         . '/deploy/viewDeploymentResult.action?deploymentResultId=' . $deploymentResultId;
 
-    $stepResult->setOutcomeProperty("/myJob/report-urls/View Deployment Report", $bambooResultURL);
-
+    $stepResult->setReportUrl("View Deployment Report", $bambooResultURL);
     $stepResult->setOutputParameter('deploymentResultKey', $deploymentResultId);
     $stepResult->setOutputParameter('deploymentResultUrl', $bambooResultURL);
 
     if (!$params->{waitForDeployment}) {
-        $stepResult->setJobStepOutcome('success');
-        $stepResult->setJobSummary("Deployment was successfully added to a queue.");
-        $stepResult->setJobStepSummary('Deployment was successfully added to a queue.');
-        return;
+        return $self->setStepResultFields($stepResult, 'success', "Deployment was successfully added to a queue.");
     }
 
     # Failed deployment
     if ($params->{waitForDeployment} && $shortInfo->{deploymentState} ne 'SUCCESS') {
-        $stepResult->setJobStepOutcome('warning');
-        $stepResult->setJobStepSummary("Deployment was not finished successfully.");
-        $stepResult->setJobSummary("Deployment was not finished successfully.");
-        return;
+        return $self->setStepResultFields($stepResult, 'warning', "Deployment was not finished successfully.");
     }
 
     $stepResult->setJobStepOutcome('success');
@@ -605,7 +604,7 @@ sub enablePlan {
     my $result = $self->client->post("/plan/$planKey/enable");
     return if (!defined $result || $result ne '1');
 
-    my $summary = "Plan '$planKey' was enabled.";
+    my $summary = "Build plan '$planKey' was enabled.";
 
     logInfo($summary);
     $stepResult->setJobStepOutcome('success');
@@ -625,7 +624,7 @@ sub disablePlan {
     my $result = $self->client->delete("/plan/$planKey/enable");
     return if (!defined $result || $result ne '1');
 
-    my $summary = "Plan '$planKey' was disabled.";
+    my $summary = "Build plan '$planKey' was disabled.";
 
     logInfo($summary);
     $stepResult->setJobStepOutcome('success');
@@ -810,11 +809,10 @@ sub detailedErrorHandler {
     return;
 }
 
-sub finishStepWith {
+sub setStepResultFields {
     my ($self, $stepResult, $outcome, $jobStepSummary, $jobSummary) = @_;
     $jobSummary ||= $jobStepSummary;
 
-    logError("Finishing with: $jobStepSummary");
     logTrace("Finish initiated by:" . join(', ', caller()));
 
     $stepResult->setJobStepOutcome($outcome);
@@ -822,7 +820,6 @@ sub finishStepWith {
     $stepResult->setJobSummary($jobSummary);
 
     $stepResult->apply();
-    exit 0;
 }
 
 sub _planToShortInfo {
@@ -954,8 +951,10 @@ sub _deploymentProjectToShortInfo {
     $result{$_} = $deploymentProject->{$_} for @oneToOne;
 
     my @environments = ();
+    my @environmentNames = ();
     for my $env (@{$deploymentProject->{environments}}) {
-        push(@environments, {
+        push (@environmentNames, $env->{name});
+        push (@environments, {
             id                  => $env->{id},
             key                 => $env->{key}{key},
             name                => $env->{name},
@@ -965,6 +964,7 @@ sub _deploymentProjectToShortInfo {
         });
     }
     $result{environments} = \@environments;
+    $result{environmentNames} = join(', ', @environmentNames);
 
     return \%result;
 }
@@ -1016,7 +1016,7 @@ sub saveResultProperties {
 
     if ($resultFormat eq 'none') {
         logInfo("Will not save the results. 'Do Not Save The Result' was chosen for Result Format.");
-        return;
+        return 0;
     }
 
     if (!defined $resultProperty || $resultProperty eq '') {
@@ -1026,7 +1026,7 @@ sub saveResultProperties {
     if ($resultFormat eq 'json') {
         my $encodedResult = JSON::encode_json($result);
         $stepResult->setOutcomeProperty($resultProperty, $encodedResult);
-        return;
+        return 1;
     }
 
     if ($resultFormat eq 'propertySheet') {
@@ -1043,7 +1043,7 @@ sub saveResultProperties {
 
     $stepResult->apply();
 
-    return;
+    return 1;
 }
 
 sub transformToProperties {
