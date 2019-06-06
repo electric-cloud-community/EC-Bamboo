@@ -7,11 +7,11 @@ procedure 'CreateVersion', description: 'Creates new version (release) from the 
         command = new File(pluginDir, "dsl/procedures/CreateVersion/steps/CreateVersion.pl").text
         shell = 'ec-perl'
 
-    }
+        }
 
     formalOutputParameter 'version',
         description: 'Name of the created version.'
-// === procedure_autogen ends, checksum: 31607520a38e9e02d48173182c8df59a ===
+// === procedure_autogen ends, checksum: c65e62ee62d76c15abd955e107083e96 ===
 // Do not update the code above the line
 // procedure properties declaration can be placed in here, like
 // property 'property name', value: "value"
