@@ -30,7 +30,14 @@ configuration:
       documentation: Atlassian Bamboo server URL.
       type: entry
       required: true
-    - name: credential
+    - name: authScheme
+      label: Authentication Scheme
+      documentation: Authentication scheme, that will be used to authenticate the requests.
+      type: select
+      options:
+        - name: Basic HTTP
+        - value: basic
+    - name: basic_credential
       label: Credential
       type: credential
       userNameLabel: Username
@@ -76,7 +83,13 @@ procedures:
         documentation: Format to save the results.
         type: select
         required: false
-        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet' }, { name: 'Do not save the result', value: 'none' }]
+        options:
+          - name: 'JSON'
+            value: 'json'
+          - name: 'Property Sheet'
+            value: 'propertySheet'
+          - name: 'Do not save the result'
+            value: 'none'
         value: json
       - name: resultPropertySheet
         label: Result Property Sheet
@@ -84,6 +97,8 @@ procedures:
         type: entry
         required: false
         value: /myJob/plans
+        dependsOn: resultFormat
+        condition: ${resultFormat} != 'none'
     outputParameters: {planKeys: 'List of comma-separated plan keys'}
 
   - name: GetPlanDetails
@@ -107,7 +122,11 @@ procedures:
         type: select
         required: false
         value: json
-        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet' }]
+        options:
+          - name: 'JSON'
+            value: 'json'
+          - name: 'Property Sheet'
+            value: 'propertySheet'
       - name: resultPropertySheet
         label: Result Property Sheet
         documentation: Property sheet to store the results.
@@ -143,13 +162,21 @@ procedures:
         type: select
         required: false
         value: json
-        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet'}, { name: 'Do not save the result', value: 'none' }]
+        options:
+          - name: 'JSON'
+            value: 'json'
+          - name: 'Property Sheet'
+            value: 'propertySheet'
+          - name: 'Do not save the result'
+            value: 'none'
       - name: resultPropertySheet
         label: Result Property Sheet
         documentation: Property sheet to store the results. Each plan run will be saved under a separate property (property sheet). Additionally, the planKeys property will contain comma-separated plan keys.
         value: /myJob/resultKeys
         type: entry
         required: false
+        dependsOn: resultFormat
+        condition: ${resultFormat} != 'none'
     outputParameters: {
       resultKeys: "List of comma-separated plan build result keys.",
       latestResultKey: 'Key for the latest build run.'
@@ -183,6 +210,12 @@ procedures:
             <b>BuildConfiguration=debug</b> <br/>
             <b>BuildPlatform=x64</b> <br/>
            Variables defined in Bamboo as global variables or plan variables MUST be prefixed with bamboo.variable ie. bamboo.variable.myVariable=valueForMyVariable
+        documentation: |
+          Additional variables for this Run specified as name-value pairs, with 1 pair per line. <br/>If not specified, the default variables for the definition will be used. <br/>Example: <br/>
+            <b>system.debug=true</b> <br/>
+            <b>BuildConfiguration=debug</b> <br/>
+            <b>BuildPlatform=x64</b> <br/>
+           Variables defined in Bamboo as global variables or plan variables MUST be prefixed with bamboo.variable ie. bamboo.variable.myVariable=valueForMyVariable
         type: textarea
         required: false
         collection: 1
@@ -210,13 +243,21 @@ procedures:
         type: select
         required: false
         value: json
-        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet'}, { name: 'Do not save the result', value: 'none' }]
+        options:
+          - name: 'JSON'
+            value: 'json'
+          - name: 'Property Sheet'
+            value: 'propertySheet'
+          - name: 'Do not save the result'
+            value: 'none'
       - name: resultPropertySheet
         label: Result Property Sheet
         documentation: Property sheet to store the results.
         value: /myJob/runResult
         type: entry
         required: false
+        dependsOn: resultFormat
+        condition: ${resultFormat} != 'none'
     outputParameters: {
       buildResultKey: 'Composite key for the Run Result.',
       buildUrl: 'Link to the result page.'
@@ -294,13 +335,21 @@ procedures:
         type: select
         required: false
         value: json
-        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet'}, { name: 'Do not save the result', value: 'none' }]
+        options:
+          - name: 'JSON'
+            value: 'json'
+          - name: 'Property Sheet'
+            value: 'propertySheet'
+          - name: 'Do not save the result'
+            value: 'none'
       - name: resultPropertySheet
         label: Result Property Sheet
         documentation: Property sheet to store the results.
         value: /myJob/deploymentResult
         type: entry
         required: false
+        dependsOn: resultFormat
+        condition: ${resultFormat} != 'none'
     outputParameters: {
       deploymentResultKey: 'Key of the deployment result.',
       deploymentResultUrl: 'URL to the deployment result report.'
@@ -327,13 +376,21 @@ procedures:
         type: select
         required: false
         value: json
-        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet'}, { name: 'Do not save the result', value: 'none' }]
+        options:
+          - name: 'JSON'
+            value: 'json'
+          - name: 'Property Sheet'
+            value: 'propertySheet'
+          - name: 'Do not save the result'
+            value: 'none'
       - name: resultPropertySheet
         label: Result Property Sheet
         documentation: Property sheet to store the results.
         value: /myJob/deploymentProjectKeys
         type: entry
         required: false
+        dependsOn: resultFormat
+        condition: ${resultFormat} != 'none'
     outputParameters: {
       deploymentProjectKeys: 'List of comma-separated deployment project keys for the plan',
     }
@@ -374,13 +431,21 @@ procedures:
         type: select
         required: false
         value: json
-        options: [{ name: 'JSON', value: 'json' }, { name: 'Property Sheet', value: 'propertysheet'}, { name: 'Do not save the result', value: 'none' }]
+        options:
+          - name: 'JSON'
+            value: 'json'
+          - name: 'Property Sheet'
+            value: 'propertySheet'
+          - name: 'Do not save the result'
+            value: 'none'
       - name: resultPropertySheet
         label: Result Property Sheet
         documentation: Result property sheet to save created version properties.
         value: /myJob/version
         type: entry
         required: false
+        dependsOn: resultFormat
+        condition: ${resultFormat} != 'none'
     outputParameters: {
       version: 'Name of the created version.'
     }

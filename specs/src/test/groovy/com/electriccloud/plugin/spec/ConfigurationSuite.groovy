@@ -19,7 +19,7 @@ class ConfigurationSuite extends BambooHelper {
 //    @Shared
 //    String checkConnection
     @Shared
-    String debugLevel = 3
+    String debugLevel = 1
     @Shared
     String desc
     @Shared
@@ -41,7 +41,7 @@ class ConfigurationSuite extends BambooHelper {
     static def endpoints = [
             correct  : BAMBOO_URL,
             incorrect: "$BAMBOO_URL/incorrect",
-            emty     : '',
+            empty     : '',
     ]
 
     static def credentials = [
@@ -98,12 +98,13 @@ class ConfigurationSuite extends BambooHelper {
         def creds = credentials[credentialCase]
         def params = [
                 config    : config,
+                authScheme: 'basic',
                 endpoint  : endpoints.correct,
                 debugLevel: debugLevel,
                 desc      : desc
         ]
         when: "When section: Create Configuration"
-        def result = createPluginConfiguration(params, [user: creds.user, pass: creds.password])
+        def result = createPluginConfiguration(params, creds)
 
         then: "Verification Create procedures"
         assert result
@@ -140,6 +141,7 @@ class ConfigurationSuite extends BambooHelper {
 
         def params = [
                 config      : config,
+                authScheme: 'basic',
                 endpoint    : endpoint,
                 debugLevel  : 3,
                 desc        : desc,
@@ -176,14 +178,15 @@ class ConfigurationSuite extends BambooHelper {
 
     Object createPluginConfiguration(Map params, Map credential = [:], Map proxyCredential = [:]) {
         def projectName = "/plugins/$PLUGIN_NAME/project"
+        assert credential
 
         def credentials = []
 
-        params.credential = 'credential'
+        params.basic_credential = 'basic_credential'
         credentials.push([
-                credentialName: 'credential',
-                userName      : credential.user,
-                password      : credential.pass
+                credentialName: 'basic_credential',
+                userName      : credential.user ?: '',
+                password      : credential.pass ?: ''
         ])
 
         params.proxy_credential = 'proxy_credential'

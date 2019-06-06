@@ -27,12 +27,8 @@ sub init {
     my ($self, $params) = @_;
 
     my FlowPDF::Context $context = $self->getContext();
-    my $configValues = $context->getConfigValues($params->{config});
 
-    # Will add
-    $self->{_config} = $configValues;
-
-    $self->{restClient} = FlowPlugin::REST->new($configValues, {
+    $self->{restClient} = FlowPlugin::REST->new($context, {
         APIBase     => '/rest/api/latest/',
         contentType => 'json',
         errorHook   => {
@@ -43,7 +39,13 @@ sub init {
     });
 }
 
-sub config {return shift->{_config}};
+sub config {
+    my $self = shift;
+    unless ($self->{_config}){
+        $self->{_config} = $self->getContext()->getConfigValues();
+    }
+    return $self->{_config};
+};
 
 #@returns FlowPlugin::REST
 sub client {return shift->{restClient}};
