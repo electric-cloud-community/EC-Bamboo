@@ -31,7 +31,6 @@
   <formElement>
     <type>select</type>
     <property>authScheme</property>
-    <documentation>Authentication scheme, that will be used to authenticate the requests.</documentation>
     <label>Authentication Scheme:</label>
     <option>
       <name>Basic HTTP</name>
@@ -46,6 +45,7 @@
     <type>credential</type>
     <property>basic_credential</property>
     <required>1</required>
+    <documentation>Provide the credentials ElectricFlow uses to communicate with the Bamboo server.</documentation>
     <label>Credential:</label>
     <attachedAsParameterToStep>createConfiguration</attachedAsParameterToStep>
     <passwordLabel>Password</passwordLabel>
@@ -55,6 +55,7 @@
     <type>select</type>
     <property>debugLevel</property>
     <required>0</required>
+    <documentation>Level of the plugin procedure's verbosity.</documentation>
     <label>Debug Level:</label>
     <option>
       <name>Info</name>
@@ -81,6 +82,7 @@
     <type>credential</type>
     <property>proxy_credential</property>
     <required>0</required>
+    <documentation>Provide the credentials ElectricFlow uses to authenticate proxy requests.</documentation>
     <label>Proxy Authorization:</label>
     <attachedAsParameterToStep>createConfiguration</attachedAsParameterToStep>
     <passwordLabel>Proxy Password</passwordLabel>

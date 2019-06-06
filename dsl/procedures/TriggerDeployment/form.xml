@@ -38,7 +38,7 @@
     <type>checkbox</type>
     <property>waitForDeployment</property>
     <required>0</required>
-    <documentation>If checked, procedure will sequentually request for the state of Deployment until it is finished.</documentation>
+    <documentation>If checked, the procedure will wait until the deployment is finished or until the wait time exceeds the value specified in the Wait Timeout, whichever is earlier.</documentation>
     <label>Wait For Deployment:</label>
     <checkedValue>1</checkedValue>
     <initiallyChecked>true</initiallyChecked>
@@ -48,9 +48,11 @@
     <type>entry</type>
     <property>waitTimeout</property>
     <required>0</required>
-    <documentation>Maximum time to wait for the deployment to be finished.</documentation>
+    <documentation>Timeout in seconds to wait for deployment to finish. Will be used if "Wait for build" is checked. Default waiting time is 300 secs.</documentation>
     <label>Wait Timeout:</label>
     <value>300</value>
+    <condition>${waitForDeployment} == '1'</condition>
+    <dependsOn>waitForDeployment</dependsOn>
   </formElement>
   <formElement>
     <type>select</type>

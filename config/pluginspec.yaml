@@ -32,12 +32,12 @@ configuration:
       required: true
     - name: authScheme
       label: Authentication Scheme
-      documentation: Authentication scheme, that will be used to authenticate the requests.
       type: select
       options:
         - name: Basic HTTP
         - value: basic
     - name: basic_credential
+      documentation: Provide the credentials ElectricFlow uses to communicate with the Bamboo server.
       label: Credential
       type: credential
       userNameLabel: Username
@@ -45,6 +45,7 @@ configuration:
       passwordLabel: Password
     - name: debugLevel
       label: Debug Level
+      documentation: Level of the plugin procedure's verbosity.
       type: select
       required: 0
       value: 0
@@ -62,6 +63,7 @@ configuration:
       required: false
     - name: proxy_credential
       label: Proxy Authorization
+      documentation: Provide the credentials ElectricFlow uses to authenticate proxy requests.
       type: credential
       userNameLabel: Proxy Username
       passwordLabel: Proxy Password
@@ -200,7 +202,7 @@ procedures:
       - name: customRevision
         label: Custom Revision
         type: entry
-        documentation: Run a build against a custom branch (revision).
+        documentation: Run build against a custom branch (revision).
         required: false
       - name: additionalBuildVariables
         label: Additional Variables
@@ -225,7 +227,7 @@ procedures:
         collectionValueSeparator: =
       - name: waitForBuild
         label: Wait For Build
-        documentation: If checked, procedure will sequentually request for the state of Run until it is finished.
+        documentation: If checked, the procedure will wait until the build is finished or until the wait time exceeds the value specified in the Wait Timeout, whichever is earlier.
         type: checkbox
         initiallyChecked: true
         checkedValue: 1
@@ -233,10 +235,12 @@ procedures:
         required: true
       - name: waitTimeout
         label: Wait Timeout
-        documentation: Maximum time to wait for the run to be finished.
+        documentation: Timeout in seconds to wait for build to finish. Will be used if "Wait for build" is checked. Default waiting time is 300 secs.
         type: entry
         value: 300
         required: false
+        dependsOn: waitForBuild
+        condition: ${waitForBuild} == '1'
       - name: resultFormat
         label: Result Format
         documentation: Format to save the results.
@@ -317,7 +321,7 @@ procedures:
         required: true
       - name: waitForDeployment
         label: Wait For Deployment
-        documentation: If checked, procedure will sequentually request for the state of Deployment until it is finished.
+        documentation: If checked, the procedure will wait until the deployment is finished or until the wait time exceeds the value specified in the Wait Timeout, whichever is earlier.
         type: checkbox
         initiallyChecked: true
         checkedValue: 1
@@ -325,10 +329,12 @@ procedures:
         required: false
       - name: waitTimeout
         label: Wait Timeout
-        documentation: Maximum time to wait for the deployment to be finished.
+        documentation: Timeout in seconds to wait for deployment to finish. Will be used if "Wait for build" is checked. Default waiting time is 300 secs.
         type: entry
         value: 300
         required: false
+        dependsOn: waitForDeployment
+        condition: ${waitForDeployment} == '1'
       - name: resultFormat
         label: Result Format
         documentation: Format to save the results.

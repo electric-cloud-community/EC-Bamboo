@@ -24,7 +24,7 @@
   - Proxy support was added.
   - Cleanup was performed.
 1.4.2:
-  - The plugin icon has beed updated.
+  - The plugin icon has been updated.
 1.4.1:
   - Output for ElectricFlow Pipelines has been improved.
   - Missing documentation has been added.
@@ -32,7 +32,7 @@
   - EnablePlan procedure has been added.
   - DisablePlan procedure has been added.
 1.3.0:
-  - GetAllPlans proedure has been added.
+  - GetAllPlans procedure has been added.
 1.2.0:
   - Improved error handling.
   - Fixed an issue when credentials are not available from RunPlan procedure.
