@@ -1,6 +1,6 @@
 // This procedure.dsl was generated automatically
 // === procedure_autogen starts ===
-procedure 'DisablePlan', description: 'Disables build plan', {
+procedure 'DisablePlan', description: 'Disables build plan.', {
 
     step 'DisablePlan', {
         description = ''

@@ -22,7 +22,7 @@ def stepsWithAttachedCredentials = [
 [procedureName: "DisablePlan", stepName: "DisablePlan"],
 [procedureName: "TriggerDeployment", stepName: "TriggerDeployment"],
 [procedureName: "GetDeploymentProjectsForPlan", stepName: "GetDeploymentProjectsForPlan"],
-[procedureName: "CreateVersion", stepName: "CreateVersion"],
+[procedureName: "CreateRelease", stepName: "CreateRelease"],
 [procedureName: "CollectReportingData", stepName: "CollectReportingData"],
 [procedureName: "ValidateCRDParams", stepName: "ValidateCRDParams"],
 // === steps with credentials ends ===

@@ -67,7 +67,7 @@ class BambooHelper extends PluginTestHelper {
         assert result.outcome == 'success'
     }
 
-    def createVersion(String deploymentProjectName, String buildResultKey, String version = randomize('release')) {
+    def createRelease(String deploymentProjectName, String buildResultKey, String version = randomize('release')) {
         def procedureParams = [
                 config               : CONFIG_NAME,
                 deploymentProjectName: deploymentProjectName,
@@ -78,7 +78,7 @@ class BambooHelper extends PluginTestHelper {
                 resultPropertySheet  : '/myJob/result'
         ]
 
-        def result = _runProcedure('CreateVersion', procedureParams)
+        def result = _runProcedure('CreateRelease', procedureParams)
 
         def properties = getJobProperties(result.jobId)
         return properties['result']

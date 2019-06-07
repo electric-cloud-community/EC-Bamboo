@@ -395,8 +395,8 @@ procedures:
       deploymentProjectKeys: 'List of comma-separated deployment project keys for the plan',
     }
 
-  - name: CreateVersion
-    description: Creates new version (release) from the successful build result
+  - name: CreateRelease
+    description: Creates new version (release) from the successful build result.
     hasConfig: true
     shell: ec-perl
     parameters:
@@ -450,7 +450,7 @@ procedures:
       version: 'Name of the created version.'
     }
   - name: CollectReportingData
-    description: Collects reporting data for "build" type
+    description: Collects reporting data for the DevOpsInsight Dashboards. Will collect build results with optional tests run summary.
     hasConfig: true
     shell: ec-perl
     parameters:
@@ -526,7 +526,7 @@ procedures:
         required: false
       - name: debugLevel
         label: Debug
-        documentation: If checked, the log level will be set to "Debug".
+        documentation: If checked, the log level will be set to "Debug" for the job.
         type: checkbox
         initiallyChecked: false
         checkedValue: 1
@@ -534,16 +534,16 @@ procedures:
         required: false
       - name: releaseName
         label: Release Name
-        documentation: DevOpsInsightServer datasource specific field.
+        documentation: Name of the CloudBees Flow release collected data relates to.
         required: false
         type: entry
       - name: releaseProjectName
         label: Release Project Name
-        documentation: DevOpsInsightServer datasource specific field.
+        documentation: Name of the CloudBees Flow release project collected data relates to.
         required: false
         type: entry
   - name: ValidateCRDParams
-    description: Validates collect reporting data params.
+    description: Service procedure to check parameter values passed for DOISDataSource creation.
     hasConfig: true
     shell: ec-perl
     parameters:

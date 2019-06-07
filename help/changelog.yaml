@@ -17,7 +17,7 @@
   - |
     <ul>New procedures for the deployment process automation:
       <li>GetDeploymentProjectsForPlan</li>
-      <li>CreateVersion</li>
+      <li>CreateRelease</li>
       <li>TriggerDeployment</li>
     </ul>
   - New procedure CollectReportingData for the DevOpsInsightServer integration was added.

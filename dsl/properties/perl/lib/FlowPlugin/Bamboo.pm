@@ -300,7 +300,7 @@ sub getPlanRuns {
     $stepResult->apply();
 }
 
-sub createVersion {
+sub createRelease {
     my FlowPDF $self = shift;
     my $params = shift;
     my FlowPDF::StepResult $stepResult = shift;

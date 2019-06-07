@@ -1,6 +1,6 @@
 // This procedure.dsl was generated automatically
 // === procedure_autogen starts ===
-procedure 'ValidateCRDParams', description: 'Validates collect reporting data params.', {
+procedure 'ValidateCRDParams', description: 'Service procedure to check parameter values passed for DOISDataSource creation.', {
 
     step 'ValidateCRDParams', {
         description = ''
@@ -8,7 +8,7 @@ procedure 'ValidateCRDParams', description: 'Validates collect reporting data pa
         shell = 'ec-perl'
 
         }
-// === procedure_autogen ends, checksum: 818c26cadb4f6fdb9d6d0685da4ac493 ===
+// === procedure_autogen ends, checksum: 1386f5f1a89484d3343906de65c8419b ===
 // Do not update the code above the line
 // procedure properties declaration can be placed in here, like
     property 'standardStepPicker', 'false'

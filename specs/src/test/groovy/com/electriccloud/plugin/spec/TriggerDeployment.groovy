@@ -207,7 +207,7 @@ class TriggerDeployment extends BambooHelper {
      */
     String getVersionNameForDeploymentProject(String deploymentProjectName) {
         if (existingVersions[deploymentProjectName] == null) {
-            existingVersions[deploymentProjectName] = createVersion(deploymentProjectName, (String) successfulBuildRun['key'])
+            existingVersions[deploymentProjectName] = createRelease(deploymentProjectName, (String) successfulBuildRun['key'])
         }
         return existingVersions[deploymentProjectName]['name']
     }

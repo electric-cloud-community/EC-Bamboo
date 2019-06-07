@@ -34,7 +34,7 @@
 
     
     <li><a href="#procedures">Plugin Procedures</a></li>
-    <li>Build Plans management<br/><i>These procedures help in managing a Build process.</i></li><ul><li><a href="#RunPlan">RunPlan</a></li><li><a href="#EnablePlan">EnablePlan</a></li><li><a href="#DisablePlan">DisablePlan</a></li><li><a href="#GetAllPlans">GetAllPlans</a></li><li><a href="#GetPlanDetails">GetPlanDetails</a></li><li><a href="#GetPlanRuns">GetPlanRuns</a></li></ul><li>Deployment Plans management<br/><i>These procedures help in managing the Deployment process.</i></li><ul><li><a href="#GetDeploymentProjectsForPlan">GetDeploymentProjectsForPlan</a></li><li><a href="#CreateVersion">CreateVersion</a></li><li><a href="#TriggerDeployment">TriggerDeployment</a></li></ul><li>Other</li><ul><li><a href="#CollectReportingData">CollectReportingData</a></li><li><a href="#ValidateCRDParams">ValidateCRDParams</a></li></ul>
+    <li>Build Plans management<br/><i>These procedures help in managing a Build process.</i></li><ul><li><a href="#RunPlan">RunPlan</a></li><li><a href="#EnablePlan">EnablePlan</a></li><li><a href="#DisablePlan">DisablePlan</a></li><li><a href="#GetAllPlans">GetAllPlans</a></li><li><a href="#GetPlanDetails">GetPlanDetails</a></li><li><a href="#GetPlanRuns">GetPlanRuns</a></li></ul><li>Deployment Plans management<br/><i>These procedures help in managing a Deployment process.</i></li><ul><li><a href="#GetDeploymentProjectsForPlan">GetDeploymentProjectsForPlan</a></li><li><a href="#CreateRelease">CreateRelease</a></li><li><a href="#TriggerDeployment">TriggerDeployment</a></li></ul><li>Other</li><ul><li><a href="#CollectReportingData">CollectReportingData</a></li><li><a href="#ValidateCRDParams">ValidateCRDParams</a></li></ul>
 
     
     
@@ -229,10 +229,7 @@ Release management describes the steps that are typically performed to release a
             <tr>
                 
                 <td >Additional Variables</td>
-                <td>Additional variables for this Run specified as name-value pairs, with 1 pair per line. &lt;br/&gt;If not specified, the default variables for the definition will be used. &lt;br/&gt;Example: &lt;br/&gt;
-  &lt;b&gt;system.debug=true&lt;/b&gt; &lt;br/&gt;
-  &lt;b&gt;BuildConfiguration=debug&lt;/b&gt; &lt;br/&gt;
-  &lt;b&gt;BuildPlatform=x64&lt;/b&gt; &lt;br/&gt;
+                <td>Additional variables for this Run specified as name-value pairs, with 1 pair per line. <br/>If not specified, the default variables for the definition will be used. <br/>Example: <br/><b>system.debug=true</b><br/><b>BuildConfiguration=debug</b><br/><b>BuildPlatform=x64</b><br/>
  Variables defined in Bamboo as global variables or plan variables MUST be prefixed with bamboo.variable ie. bamboo.variable.myVariable=valueForMyVariable
 </td>
                 
@@ -648,14 +645,14 @@ Release management describes the steps that are typically performed to release a
     </div>
 
     
-    <div id="CreateVersion">
-        <h2>CreateVersion</h2>
+    <div id="CreateRelease">
+        <h2>CreateRelease</h2>
         
         
-        <p>Creates new version (release) from the successful build result</p>
+        <p>Creates new version (release) from the successful build result.</p>
         
         
-        <h3>CreateVersion Parameters</h3>
+        <h3>CreateRelease Parameters</h3>
         <table class="grid">
             <thead>
             <tr>
@@ -720,7 +717,7 @@ Release management describes the steps that are typically performed to release a
         <p>
             <h4>Usage Example</h4>
 <p>
-<img src="../../plugins/@PLUGIN_KEY@/images/CreateVersion/Form.png" />
+<img src="../../plugins/@PLUGIN_KEY@/images/CreateRelease/Form.png" />
 </p>
 
         </p>
@@ -819,7 +816,7 @@ Release management describes the steps that are typically performed to release a
         <h2>CollectReportingData</h2>
         
         
-        <p>Collects reporting data for "build" type</p>
+        <p>Collects reporting data for the DevOpsInsight Dashboards. Will collect build results with optional tests run summary.</p>
         
         
         <h3>CollectReportingData Parameters</h3>
@@ -874,7 +871,7 @@ Release management describes the steps that are typically performed to release a
                 <td>Allows user to provide perl script for payload customization.
 This method will be invoked by plugin with 2 parameters. 1st parameter is context object, 2nd is payload object.
 Method should be named &quot;transform&quot;, and should return payload object. In this example myTimestamp field will be added to payload object:
-&lt;pre&gt;
+<pre>
   sub transform {
       my ($context, $payload) = @_;
       $payload-&gt;{myTimestamp} = $context-&gt;one();
@@ -884,8 +881,7 @@ Method should be named &quot;transform&quot;, and should return payload object. 
       my ($context) = @_;
       return time();
   }
-&lt;/pre&gt;
-</td>
+</pre></td>
                 
             </tr>
             
@@ -920,21 +916,21 @@ Method should be named &quot;transform&quot;, and should return payload object. 
             <tr>
                 
                 <td >Debug</td>
-                <td>If checked, the log level will be set to "Debug".</td>
+                <td>If checked, the log level will be set to "Debug" for the job.</td>
                 
             </tr>
             
             <tr>
                 
                 <td >Release Name</td>
-                <td>DevOpsInsightServer datasource specific field.</td>
+                <td>Name of the CloudBees Flow release collected data relates to.</td>
                 
             </tr>
             
             <tr>
                 
                 <td >Release Project Name</td>
-                <td>DevOpsInsightServer datasource specific field.</td>
+                <td>Name of the CloudBees Flow release project collected data relates to.</td>
                 
             </tr>
             
@@ -948,7 +944,7 @@ Method should be named &quot;transform&quot;, and should return payload object. 
         <h2>ValidateCRDParams</h2>
         
         
-        <p>Validates collect reporting data params.</p>
+        <p>Service procedure to check parameter values passed for DOISDataSource creation.</p>
         
         
         <h3>ValidateCRDParams Parameters</h3>
@@ -1032,7 +1028,7 @@ Method should be named &quot;transform&quot;, and should return payload object. 
         
         <li><ul>New procedures for the deployment process automation:
   <li>GetDeploymentProjectsForPlan</li>
-  <li>CreateVersion</li>
+  <li>CreateRelease</li>
   <li>TriggerDeployment</li>
 </ul>
 </li>
