@@ -6,7 +6,7 @@ FlowPDF::Context
 
 =head1 AUTHOR
 
-Electric Cloud
+CloudBees
 
 =head1 DESCRIPTION
 
@@ -30,6 +30,7 @@ __PACKAGE__->defineClass({
     currentStepParameters   => FlowPDF::Types::Reference('FlowPDF::StepParameters'),
     currentStepConfigValues => FlowPDF::Types::Reference('FlowPDF::Config'),
     currentProjectName      => FlowPDF::Types::Scalar(),
+    hasConfigField          => FlowPDF::Types::Enum('1', '0')
 });
 
 use strict;
@@ -43,6 +44,16 @@ use FlowPDF::StepResult;
 use FlowPDF::Log;
 use FlowPDF::Client::REST;
 use FlowPDF::Helpers qw/bailOut trim/;
+
+use FlowPDF::Constants qw/
+    DEBUG_LEVEL_PROPERTY
+    HTTP_PROXY_URL_PROPERTY
+    PROXY_CREDENTIAL_PROPERTY
+    BASIC_AUTH_CREDENTIAL_PROPERTY
+    AUTH_SCHEME_PROPERTY
+    AUTH_SCHEME_VALUE_FOR_BASIC_AUTH
+/;
+
 use Carp;
 use Data::Dumper;
 use ElectricCommander;
@@ -51,13 +62,19 @@ sub new {
     my ($class, @params) = @_;
 
     my $self = $class->SUPER::new(@params);
-    my $configValues = $self->getConfigValues();
+    my $configValues = undef;
+    eval {
+        $configValues = $self->getConfigValues();
+        1;
+    } or do {
+        if ($self->getHasConfigField()) {
+            bailOut("Can't get config: $@");
+        }
+    };
     if ($configValues) {
-        # TODO: Move this to the plugin constants.
-        my $debugLevel = $configValues->getParameter('debugLevel');
-        # TODO: Create a function to set this.
+        my $debugLevel = $configValues->getParameter(DEBUG_LEVEL_PROPERTY);
         if ($debugLevel) {
-            $FlowPDF::Log::LOG_LEVEL = $debugLevel->getValue();
+            FlowPDF::Log::setLogLevel($debugLevel->getValue());
             logDebug("Debug level is set to ", $debugLevel->getValue());
         }
     }
@@ -134,7 +151,15 @@ sub getRuntimeParameters {
     my ($self) = @_;
 
     my $p = $self->getStepParameters();
-    my $c = $self->getConfigValues();
+    my $c = undef;
+    eval {
+        $c = $self->getConfigValues();
+        1;
+    } or do {
+        if ($self->getHasConfigField()) {
+            bailOut("Can't get config: $@");
+        }
+    };
     my ($pKeys, $cKeys);
 
     my $retval = {};
@@ -248,6 +273,9 @@ sub getStepParameters {
     my $parametersList = [];
     my $parameters = {};
     for my $k (keys %$stepParametersHash) {
+        if ($context->getPluginObject()->isConfigField($k)) {
+            $context->setHasConfigField('1');
+        }
         push @{$parametersList}, $k;
         my $p;
         if (!ref $stepParametersHash->{$k}) {
@@ -322,6 +350,7 @@ sub getConfigValues {
     if (my $retval = $context->getCurrentStepConfigValues()) {
         return $retval;
     }
+    # TODO: croak here with the same exception as "No config field detected in current step parameters".
     my $stepParameters = $context->getStepParameters();
     my $po = $context->getPluginObject();
     logTrace("Plugin Object: ", Dumper $po);
@@ -431,9 +460,11 @@ sub retrieveConfigByNameAndLocation {
             my $credentials = $self->getEc->getFullCredential($credentialName);
             my $user_name = $credentials->findvalue('//userName')->string_value;
             my $password = $credentials->findvalue('//password')->string_value;
-            # $retval->{$name} = {};
             $retval->{$name}->{userName} = $user_name;
             $retval->{$name}->{password} = $password;
+            if ($password) {
+                FlowPDF::Log->setMaskPatterns($password);
+            }
         }
         else {
             if (!defined $value || $value eq '') {
@@ -676,13 +707,17 @@ sub getCurrentStepParametersAsHash {
         my $value = $self->get_param($name);
 
         my $name_in_list = $name;
-        # TODO: Add credentials handling logic. Now we're nexting.
         if ($param->findvalue('type')->string_value() eq 'credential') {
             my $cred = $self->getEc()->getFullCredential($value);
             my $username = $cred->findvalue('//userName')->string_value;
             my $password = $cred->findvalue('//password')->string_value;
             $params->{$name_in_list}->{userName} = $username;
             $params->{$name_in_list}->{password} = $password;
+
+            # setting mask pattern
+            if ($password) {
+                FlowPDF::Log->setMaskPatterns($password);
+            }
         }
         else {
             $value = trim($value);
@@ -724,6 +759,18 @@ and you can be sure, that all requests that you're doing through L<FlowPDF::Clie
 Also, note that if you have debugLevel parameter in your configuration, and it will be set to debug,
 debug mode for FlowPDF::ComponentProxy will be enabled by default.
 
+=item Basic Authorization
+
+Basic authorization can be automatically applied to all your rest requests. To do that you need to make sure that following parameters are present in your plugin configuration:
+
+=over 8
+
+=item authScheme parameter has value "basic"
+
+=item credential with the basic_credential name
+
+=back
+
 =back
 
 =head3 Parameters
@@ -759,22 +806,50 @@ sub newRESTClient {
     my ($context, $params) = @_;
 
     my $creationParams = {};
-    my $configValues = $context->getConfigValues();
-    # TODO: Move all magic field names to the constants
+    my $configValues = undef;
+    eval {
+        $configValues = $context->getConfigValues();
+        1;
+    } or do {
+        if ($context->getHasConfigField()) {
+            bailOut("Can't get config: $@");
+        }
+    };
     if ($configValues) {
         # handling the proxy here
-        my $proxyUrl = $configValues->getParameter('httpProxyUrl');
+        my $proxyUrl = $configValues->getParameter(HTTP_PROXY_URL_PROPERTY);
         logDebug("ProxyURL Parameter is " . Dumper $proxyUrl);
         if ($proxyUrl) {
             logDebug("proxyUrl parameter has been found in configuration, using proxy ", $proxyUrl->getValue());
             # setting a proxy URL;
-            $creationParams->{proxy}->{debug} = $FlowPDF::Log::LOG_LEVEL;
+            $creationParams->{proxy}->{debug} = FlowPDF::Log::getLogLevel();
             $creationParams->{proxy}->{url} = $proxyUrl->getValue();
 
-            # TODO: change this to getCredential later
-            if (my $proxyCredential = $configValues->getParameter('proxy_credential')) {
+            if (my $proxyCredential = $configValues->getParameter(PROXY_CREDENTIAL_PROPERTY)) {
                 $creationParams->{proxy}->{username} = $proxyCredential->getUserName();
                 $creationParams->{proxy}->{password} = $proxyCredential->getSecretValue();
+            }
+        }
+        # handling basic auth here.
+        my $authScheme = $configValues->getParameter(AUTH_SCHEME_PROPERTY);
+        if ($authScheme) {
+            logDebug("Hadling $authScheme authorization from config");
+            if ($authScheme->getValue() eq AUTH_SCHEME_VALUE_FOR_BASIC_AUTH) {
+                logDebug("Auth scheme 'basic' has been detected");
+                my $basicCred = $configValues->getParameter(BASIC_AUTH_CREDENTIAL_PROPERTY);
+                if ($basicCred) {
+                    my $user = $basicCred->getUserName();
+                    my $password = $basicCred->getSecretValue();
+                    $creationParams->{auth} = {
+                        type     => 'basic',
+                        username => $user || '',
+                        password => $password || ''
+                    };
+                    logDebug("Parameters for basic auth are: " . Dumper $creationParams->{auth});
+                }
+            }
+            else {
+                logDebug("Auth Scheme $authScheme is not implemented yet");
             }
         }
     }

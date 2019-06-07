@@ -3,7 +3,7 @@
     Please not not edit this file manually as it will be regenerated.
 -->
 <editor>
-  <help>/commander/pages/@PLUGIN_NAME@/help?s=Administration&amp;amp;ss=Plugins#GetPlanRuns</help>
+  <help>/commander/pages/@PLUGIN_NAME@/help?s=Administration&amp;ss=Plugins#GetPlanRuns</help>
   <formElement>
     <type>entry</type>
     <property>config</property>
@@ -63,7 +63,7 @@
     </option>
     <option>
       <name>Property Sheet</name>
-      <value>propertysheet</value>
+      <value>propertySheet</value>
     </option>
     <option>
       <name>Do not save the result</name>
@@ -78,5 +78,7 @@
     <documentation>Property sheet to store the results. Each plan run will be saved under a separate property (property sheet). Additionally, the planKeys property will contain comma-separated plan keys.</documentation>
     <label>Result Property Sheet:</label>
     <value>/myJob/resultKeys</value>
+    <condition>${resultFormat} != 'none'</condition>
+    <dependsOn>resultFormat</dependsOn>
   </formElement>
 </editor>

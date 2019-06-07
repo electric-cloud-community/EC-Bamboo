@@ -20,8 +20,10 @@ __PACKAGE__->defineClass({
 
 sub new {
     my $class = shift;
-    my FlowPDF::Config $config = shift;
+    my FlowPDF::Context $context = shift;
     my ($params) = @_;
+
+    my FlowPDF::Config $config = $context->getConfigValues();
 
     # Should create logger before initializing
     my $debugLog = 0;
@@ -30,35 +32,8 @@ sub new {
     }
     my $logger = FlowPDF::Log->new({ level => $debugLog });
 
-    # TODO: read auth type and the credential for ir
-    my $authType = 'basic';
-    my $credentialName = 'credential';
-
-    my $credential;
-    if ($config->isParameterExists('credential')) {
-        $credential = $config->getParameter('credential');
-    }
-    else {
-        $logger->info("No credential '$credentialName' found in config. Assuming anonymous access");
-    }
-
-    if ($config->isParameterExists('httpProxyUrl')) {
-        my $proxyUrl = $config->getParameter('httpProxyUrl');
-        if ($proxyUrl->getValue() ne ''){
-            my FlowPDF::Credential $proxyCredential = $config->getParameter('proxy_credential');
-
-            $params->{proxy} = {
-                url      => $proxyUrl->getValue(),
-                username => $proxyCredential->getUserName(),
-                password => $proxyCredential->getSecretValue()
-            };
-        }
-    }
-
     my $self = {
         endpoint      => $config->getRequiredParameter('endpoint')->getValue(),
-        authType      => $authType,
-        credential    => $credential,
 
         # No default encode/decode
         encodeContent => sub {return shift},
@@ -70,10 +45,7 @@ sub new {
     };
     bless($self, $class);
 
-    my %clientParams = ();
-    $clientParams{proxy} = $params->{proxy} if $params->{proxy};
-    $clientParams{oauth} = $params->{oauth} if $params->{oauth};
-    $self->setRestClient(FlowPDF::Client::REST->new(\%clientParams));
+    $self->setRestClient($context->newRESTClient());
 
     $self->setLogger($logger);
     $self->setErrorHandler($params->{errorHandler}) if ($params->{errorHandler});
@@ -203,7 +175,11 @@ sub buildRequest {
     my $requestPath = $self->buildRequestPath($path);
 
     my HTTP::Request $request = $rest->newRequest($method => $requestPath);
-    $self->authorizeRequest($request);
+
+    # Masking credentials in Base64 too
+    if (my $auth = $request->header('authorization')){
+        $self->logger->setMaskPatterns($auth);
+    }
 
     # Query parameters
     if (defined $queryParams && ref $queryParams eq 'HASH') {
@@ -244,21 +220,6 @@ sub buildRequestPath {
 
     return $endpoint . '/' . $path;
 }
-
-sub authorizeRequest {
-    my ($self, $request) = @_;
-
-    my FlowPDF::Credential $credential = $self->getCredential();
-    return $request unless defined $credential;
-
-    $request->authorization_basic(
-        $credential->getUserName(),
-        $credential->getSecretValue()
-    );
-
-    return $request;
-}
-
 
 sub post {return shift->_call('POST', @_)}
 sub get {return shift->_call('GET', @_)}

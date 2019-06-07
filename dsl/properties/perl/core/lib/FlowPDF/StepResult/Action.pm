@@ -19,7 +19,8 @@ my $supportedActions = {
     setJobOutcome      => 1,
     setOutcomeProperty => 1,
     setJobSummary      => 1,
-    setJobStepSummary  => 1
+    setJobStepSummary  => 1,
+    setReportUrl       => 1,
 };
 
 
@@ -35,7 +36,6 @@ sub classDefinition {
 sub new {
     my ($class, $params) = @_;
 
-    # TODO: Improve validation later.
     if (!$supportedActions->{$params->{actionType}}) {
         croak "Action Type $params->{actionType} is not supported. Supported actions are: ", join(', ', keys %$supportedActions);
     }

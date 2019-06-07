@@ -19,26 +19,79 @@ class PluginTestHelper extends PluginSpockTestSupport {
         String password = BAMBOO_PASSWORD
         String endpoint = BAMBOO_URL
 
-//        String checkConnection = 1
-
         if (System.getenv('RECREATE_CONFIG')) {
             props.recreate = true
         }
 
-        createPluginConfiguration(
+        def params = [
+                desc            : 'Spec tests configuration',
+                endpoint        : endpoint,
+                authScheme      : 'basic',
+                basic_credential: configName,
+                proxy_credential: configName + '_proxy_credential',
+                debugLevel      : 2,
+                httpProxyUrl    : isProxyAvailable() ? getProxyURL() : ''
+        ]
+
+        def credentials = [
+                [
+                        credentialName: configName,
+                        userName      : username,
+                        password      : password
+                ], [
+                        credentialName: configName + '_proxy_credential',
+                        userName      : isProxyAvailable() ? getProxyUsername() : '',
+                        password      : isProxyAvailable() ? getProxyPassword() : ''
+                ]
+        ]
+
+        return createPluginConfiguration(
                 PLUGIN_NAME,
                 configName,
-                [
-                        desc      : 'Spec tests configuration',
-                        endpoint  : endpoint,
-                        credential: 'credential',
-                        debugLevel: 3,
-//                        checkConnection: checkConnection,
-                ],
-                username,
-                password,
+                params,
+                credentials,
                 props
         )
+    }
+
+    def createPluginConfiguration(String pluginName, String configName, Map params = [:], List credentials = [], Map opts = [:]) {
+        def confPath = opts.confPath ?: 'ec_plugin_cfgs'
+
+        if (doesConfExist("/plugins/$pluginName/project/$confPath", configName)) {
+            if (opts.recreate) {
+                deleteConfiguration(pluginName, configName)
+            } else {
+                println "Configuration $configName exists"
+                return
+            }
+        }
+
+        def credentialDsl = credentials.collect {
+            "[credentialName: '${it.credentialName}', userName: '${it.userName}', password: '${it.password}']"
+        }.join(',')
+
+        params.config = configName
+        // Parameters
+        def paramLines = params.collect { key, value ->
+            "$key: '''$value'''"
+        }
+        def actualParameter = '[' + paramLines.join(', ') + ']'
+
+        def result = dsl("""
+            runProcedure(
+                projectName: "/plugins/$pluginName/project",
+                procedureName: 'CreateConfiguration',
+                credential: [ $credentialDsl ],
+                actualParameter: $actualParameter
+            )
+        """)
+
+        assert result?.jobId
+        def poll = createPoll(120)
+        poll.eventually {
+            jobCompleted(result)
+        }
+        assert jobStatus(result.jobId).outcome == 'success'
     }
 
     static String getAssertedEnvVariable(String varName) {
@@ -60,15 +113,17 @@ class PluginTestHelper extends PluginSpockTestSupport {
 
     static boolean isProxyAvailable() {
         def value = System.getenv("IS_PROXY_AVAILABLE")
-        if (value != null && value != '' && value != 'true'){
+        if (value != null && value != '' && value != 'true') {
             logger.warn("Value for IS_PROXY_AVAILABLE should be 'true' or empty.")
         }
         return value == 'true'
     }
 
-    static String getProxyURL(){getAssertedEnvVariable('EF_PROXY_URL')}
-    static String getProxyUsername(){getAssertedEnvVariable('EF_PROXY_USERNAME')}
-    static String getProxyPassword(){getAssertedEnvVariable('EF_PROXY_PASSWORD')}
+    static String getProxyURL() { getAssertedEnvVariable('EF_PROXY_URL') }
+
+    static String getProxyUsername() { getAssertedEnvVariable('EF_PROXY_USERNAME') }
+
+    static String getProxyPassword() { getAssertedEnvVariable('EF_PROXY_PASSWORD') }
 
     def stringifyParameters(Map parameters) {
         return parameters

@@ -6,11 +6,11 @@ FlowPDF
 
 =head1 AUTHOR
 
-ElectricCloud
+CloudBees
 
 =head1 DESCRIPTION
 
-FlowPDF is an Electric Cloud Plugin Development Framework.
+FlowPDF is an Flow Plugin Development Framework.
 
 This tool has been created to make plugin development easier.
 
@@ -100,7 +100,7 @@ __PACKAGE__->defineClass({
     configLocations => FlowPDF::Types::ArrayrefOf(FlowPDF::Types::Scalar()),,
     contextFactory  => FlowPDF::Types::Reference('FlowPDF::ContextFactory'),
     pluginValues    => FlowPDF::Types::Reference('HASH'),
-    contextObject   => FlowPDF::Types::Reference('FlowPDF::Context'),
+    contextObject   => FlowPDF::Types::Reference('FlowPDF::Context')
 });
 
 use strict;
@@ -112,11 +112,13 @@ use Data::Dumper;
 use FlowPDF::Service::Bootstrap;
 use FlowPDF::ContextFactory;
 use FlowPDF::ComponentManager;
+use FlowPDF::Helpers qw/inArray/;
 
+our $VERSION = '1.1.7';
 
-our $VERSION = '1.1.1';
-
-# TODO: Explain this later.
+# We need to do an autoflush for STDOUT and STDERR to not mess up output streams.
+# $| is a local variable for currently selected file descriptor.
+# we're selecting STDOUT and enabling autoflush, and the same thing is being performed for STDERR.
 BEGIN {
     select (STDERR);
     $| = 1;
@@ -312,4 +314,20 @@ sub getPluginProjectName {
 
 =cut
 
+
+# a private method to gat is that field name is a field name for a config.
+sub isConfigField {
+    my ($self, $field) = @_;
+
+    if (!$field) {
+        croak "Field is a mandatory parameter for config field validation.";
+    }
+
+    my $configFields = $self->getConfigFields();
+    if (inArray($field, @$configFields)) {
+        return 1;
+    }
+
+    return 0;
+}
 1;

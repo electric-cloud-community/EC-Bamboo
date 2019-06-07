@@ -1,10 +1,16 @@
+=head1 DEPRECATION NOTE
+
+This class has been deprecated and L<FlowPDF::BaseClass2> should be used instead.
+
+This class works aroung perl AUTOLOAD mechanism, which is extremely hard to debug.
+
 =head1 NAME
 
 FlowPDF::BaseClass
 
 =head1 AUTHOR
 
-Electric Cloud
+CloudBees
 
 =head1 DESCRIPTION
 
@@ -121,8 +127,7 @@ sub AUTOLOAD {
 
 }
 
-# This function is empty for a reason.
-# TODO: Add reference about autoload and DESTROY handles from perldoc.
+# This function is empty for a reason, please, see https://www.perlmonks.org/?node_id=1124504
 sub DESTROY {}
 sub import {}
 sub __get {
@@ -136,10 +141,6 @@ sub __get {
         $rv = $object->{$field};
         return $rv;
     }
-    # TODO: improve error handling here.
-    # if ($opts->{nonFatal}) {
-    # croak "Field $field does not exist";
-    #}
     return undef;
 }
 

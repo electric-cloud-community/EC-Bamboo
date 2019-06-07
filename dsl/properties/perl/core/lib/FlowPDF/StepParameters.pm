@@ -4,7 +4,7 @@ FlowPDF::StepParameters
 
 =head1 AUTHOR
 
-Electric Cloud
+CloudBees
 
 =head1 DESCRIPTION
 

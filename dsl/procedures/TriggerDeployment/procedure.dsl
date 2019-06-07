@@ -7,14 +7,14 @@ procedure 'TriggerDeployment', description: 'Runs deployment plan.', {
         command = new File(pluginDir, "dsl/procedures/TriggerDeployment/steps/TriggerDeployment.pl").text
         shell = 'ec-perl'
 
-    }
+        }
 
     formalOutputParameter 'deploymentResultKey',
         description: 'Key of the deployment result.'
 
     formalOutputParameter 'deploymentResultUrl',
         description: 'URL to the deployment result report.'
-// === procedure_autogen ends, checksum: be97d85d7dbe38bf9f92c5bdacf34eea ===
+// === procedure_autogen ends, checksum: c2974c8ff8008c956e79ffd5dda18a02 ===
 // Do not update the code above the line
 // procedure properties declaration can be placed in here, like
 // property 'property name', value: "value"

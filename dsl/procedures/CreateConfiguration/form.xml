@@ -4,7 +4,7 @@
 -->
 
 <editor>
-  <help>/commander/pages/@PLUGIN_NAME@/help?s=Administration&amp;amp;ss=Plugins#CreateConfiguration</help>
+  <help>/commander/pages/@PLUGIN_NAME@/help?s=Administration&amp;ss=Plugins#CreateConfiguration</help>
   <formElement>
     <type>entry</type>
     <property>config</property>
@@ -29,9 +29,23 @@
     <label>Bamboo Server URL:</label>
   </formElement>
   <formElement>
+    <type>select</type>
+    <property>authScheme</property>
+    <label>Authentication Scheme:</label>
+    <option>
+      <name>Basic HTTP</name>
+      <value />
+    </option>
+    <option>
+      <name>basic</name>
+      <value>basic</value>
+    </option>
+  </formElement>
+  <formElement>
     <type>credential</type>
-    <property>credential</property>
+    <property>basic_credential</property>
     <required>1</required>
+    <documentation>Provide the credentials ElectricFlow uses to communicate with the Bamboo server.</documentation>
     <label>Credential:</label>
     <attachedAsParameterToStep>createConfiguration</attachedAsParameterToStep>
     <passwordLabel>Password</passwordLabel>
@@ -41,6 +55,7 @@
     <type>select</type>
     <property>debugLevel</property>
     <required>0</required>
+    <documentation>Level of the plugin procedure's verbosity.</documentation>
     <label>Debug Level:</label>
     <option>
       <name>Info</name>
@@ -67,6 +82,7 @@
     <type>credential</type>
     <property>proxy_credential</property>
     <required>0</required>
+    <documentation>Provide the credentials ElectricFlow uses to authenticate proxy requests.</documentation>
     <label>Proxy Authorization:</label>
     <attachedAsParameterToStep>createConfiguration</attachedAsParameterToStep>
     <passwordLabel>Proxy Password</passwordLabel>

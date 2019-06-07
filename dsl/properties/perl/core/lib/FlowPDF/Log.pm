@@ -4,7 +4,7 @@ FlowPDF::Log
 
 =head1 AUTHOR
 
-Electric Cloud
+CloudBees
 
 =head1 DESCRIPTION
 
@@ -227,12 +227,11 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Carp;
-
-# use FlowPDF::Helpers qw/bailOut/;
+use FlowPDF::Helpers qw/inArray/;
 
 our $LOG_LEVEL = 0;
 our $LOG_TO_PROPERTY = '';
-
+our $MASK_PATTERNS = [];
 
 use constant {
     ERROR => -1,
@@ -240,6 +239,54 @@ use constant {
     DEBUG => 1,
     TRACE => 2,
 };
+
+sub setMaskPatterns {
+    my (@params) = @_;
+
+    unless (@params) {
+        croak "Missing mask patterns for setMastPatterns.";
+    }
+    if ($params[0] eq __PACKAGE__ || ref $params[0] eq __PACKAGE__) {
+        shift @params;
+    }
+    for my $p (@params) {
+        next if isCommonPassword($p);
+        $p = quotemeta($p);
+        # avoiding duplicates
+        if (inArray($p, @$MASK_PATTERNS)) {
+            next;
+        }
+
+        push @$MASK_PATTERNS, $p;
+    }
+    return 1;
+}
+
+sub isCommonPassword {
+    my ($password) = @_;
+
+    # well, huh.
+    if ($password eq 'password') {
+        return 1;
+    }
+    if ($password =~ m/^(?:TEST)+$/is) {
+        return 1;
+    }
+    return 0;
+}
+
+sub maskLine {
+    my ($self, $line) = @_;
+
+    if (!ref $self || $self eq __PACKAGE__) {
+        $line = $self;
+    }
+
+    for my $p (@$MASK_PATTERNS) {
+        $line =~ s/$p/[PROTECTED]/gs;
+    }
+    return $line;
+}
 
 sub setLogToProperty {
     my ($param1, $param2) = @_;
@@ -459,10 +506,13 @@ sub _log {
     my @lines = ();
     for my $message (@messages) {
         if (ref $message) {
-            print Dumper($message);
-            push @lines, Dumper($message);
+            my $t = Dumper($message);
+            $t = $self->maskLine($t);
+            print $t;
+            push @lines, $t;
         }
         else {
+            $message = $self->maskLine($message);
             print "$message\n";
             push @lines, $message;
         }
