@@ -70,7 +70,7 @@ class EnablePlanSuite extends BambooHelper {
         assert result.outcome == 'success'
 
         // Check logs
-        assert result.logs =~ /Plan '$projectKey-$planKey' was enabled/
+        assert result.logs =~ /Build plan '$projectKey-$planKey' was enabled./
 
         where:
         caseId       | config      | projectKey              | planKey

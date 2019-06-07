@@ -30,12 +30,6 @@ configuration:
       documentation: Atlassian Bamboo server URL.
       type: entry
       required: true
-    - name: authScheme
-      label: Authentication Scheme
-      type: select
-      options:
-        - name: Basic HTTP
-        - value: basic
     - name: basic_credential
       documentation: Provide the credentials ElectricFlow uses to communicate with the Bamboo server.
       label: Credential

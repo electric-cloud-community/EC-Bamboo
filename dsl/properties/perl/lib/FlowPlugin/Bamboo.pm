@@ -8,6 +8,7 @@ use Data::Dumper;
 use FlowPDF::Log;
 use FlowPDF::Helpers qw/bailOut/;
 use FlowPlugin::REST;
+use FlowPDF::Constants qw/AUTH_SCHEME_VALUE_FOR_BASIC_AUTH/;
 
 use JSON qw/decode_json/;
 
@@ -17,7 +18,10 @@ sub pluginInfo {
         pluginName      => '@PLUGIN_KEY@',
         pluginVersion   => '@PLUGIN_VERSION@',
         configFields    => [ 'config' ],
-        configLocations => [ 'ec_plugin_cfgs' ]
+        configLocations => [ 'ec_plugin_cfgs' ],
+        defaultConfigValues => {
+            authScheme => AUTH_SCHEME_VALUE_FOR_BASIC_AUTH
+        }
     };
 }
 
@@ -322,7 +326,7 @@ sub createVersion {
 
     if (!defined $deploymentProject) {
         logWarning("Here are the deployment projects we've got: " . join(', ', map {$_->{name}} @$deployProjectsRefs));
-        return $self->setStepResultFields($stepResult, 'error', "Can't get deployment project id",
+        return $self->setStepResultFields($stepResult, 'error', "Can't find deployment project with name '$params->{deploymentProjectName}'",
             "Can't find deployment project with name '$params->{deploymentProjectName}' for plan '$planKey'"
         );
     }
@@ -333,7 +337,6 @@ sub createVersion {
             resultKey => $params->{planBuildKey}
         });
         return unless defined $nextVersionRequest;
-
         $params->{versionName} = $nextVersionRequest->{nextVersionName};
     }
 

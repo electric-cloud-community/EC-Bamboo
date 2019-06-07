@@ -167,8 +167,7 @@ sub getRuntimeParameters {
         $pKeys = $p->getParametersList();
         for my $key (@$pKeys) {
             my $row = $p->getParameter($key);
-
-            next unless $row;
+            next unless defined $row;
             if (ref $row eq 'FlowPDF::Credential') {
                 my $prefix = '';
 
@@ -383,11 +382,29 @@ sub getConfigValues {
 
     # TODO: Improve this error message.
     if (!$configHash) {
-        croak "Config does not exist";
+        croak "Config does not exist.";
     }
-
     my $keys = [];
     my $configValuesHash = {};
+    # handling user defined default config values.
+    my $defaultConfigValues = $po->getDefaultConfigValues();
+    $defaultConfigValues ||= {};
+    for my $cv (keys %$defaultConfigValues) {
+        if (defined $configHash->{$cv}) {
+            logWarning("The config field '$cv' that was set to default value in plugin code is present in configuration. Default value from plugin code is ignored.");
+            next;
+        }
+        if ($cv =~ m/_credential$/s) {
+            if (!defined $defaultConfigValues->{$cv}->{userName} && !defined $defaultConfigValues->{$cv}->{password}) {
+                logWarning("Missing userName and password for the default credential");
+                next;
+            }
+        }
+
+        $configHash->{$cv} = $defaultConfigValues->{$cv};
+    }
+    # end of handling default config values
+
     for my $k (keys %$configHash) {
         push @$keys, $k;
 

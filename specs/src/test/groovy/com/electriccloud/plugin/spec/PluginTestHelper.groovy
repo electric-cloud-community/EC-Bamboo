@@ -26,7 +26,6 @@ class PluginTestHelper extends PluginSpockTestSupport {
         def params = [
                 desc            : 'Spec tests configuration',
                 endpoint        : endpoint,
-                authScheme      : 'basic',
                 basic_credential: configName,
                 proxy_credential: configName + '_proxy_credential',
                 debugLevel      : 2,

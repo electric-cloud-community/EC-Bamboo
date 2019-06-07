@@ -98,7 +98,6 @@ class ConfigurationSuite extends BambooHelper {
         def creds = credentials[credentialCase]
         def params = [
                 config    : config,
-                authScheme: 'basic',
                 endpoint  : endpoints.correct,
                 debugLevel: debugLevel,
                 desc      : desc
@@ -141,7 +140,6 @@ class ConfigurationSuite extends BambooHelper {
 
         def params = [
                 config      : config,
-                authScheme: 'basic',
                 endpoint    : endpoint,
                 debugLevel  : 3,
                 desc        : desc,

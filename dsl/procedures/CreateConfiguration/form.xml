@@ -29,19 +29,6 @@
     <label>Bamboo Server URL:</label>
   </formElement>
   <formElement>
-    <type>select</type>
-    <property>authScheme</property>
-    <label>Authentication Scheme:</label>
-    <option>
-      <name>Basic HTTP</name>
-      <value />
-    </option>
-    <option>
-      <name>basic</name>
-      <value>basic</value>
-    </option>
-  </formElement>
-  <formElement>
     <type>credential</type>
     <property>basic_credential</property>
     <required>1</required>
