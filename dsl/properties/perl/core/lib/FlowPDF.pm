@@ -94,13 +94,14 @@ use base qw/FlowPDF::BaseClass2/;
 use FlowPDF::Types;
 
 __PACKAGE__->defineClass({
-    pluginName      => FlowPDF::Types::Scalar(),
-    pluginVersion   => FlowPDF::Types::Scalar(),
-    configFields    => FlowPDF::Types::ArrayrefOf(FlowPDF::Types::Scalar()),
-    configLocations => FlowPDF::Types::ArrayrefOf(FlowPDF::Types::Scalar()),,
-    contextFactory  => FlowPDF::Types::Reference('FlowPDF::ContextFactory'),
-    pluginValues    => FlowPDF::Types::Reference('HASH'),
-    contextObject   => FlowPDF::Types::Reference('FlowPDF::Context')
+    pluginName          => FlowPDF::Types::Scalar(),
+    pluginVersion       => FlowPDF::Types::Scalar(),
+    configFields        => FlowPDF::Types::ArrayrefOf(FlowPDF::Types::Scalar()),
+    configLocations     => FlowPDF::Types::ArrayrefOf(FlowPDF::Types::Scalar()),
+    contextFactory      => FlowPDF::Types::Reference('FlowPDF::ContextFactory'),
+    pluginValues        => FlowPDF::Types::Reference('HASH'),
+    contextObject       => FlowPDF::Types::Reference('FlowPDF::Context'),
+    defaultConfigValues => FlowPDF::Types::Reference('HASH')
 });
 
 use strict;
@@ -114,7 +115,7 @@ use FlowPDF::ContextFactory;
 use FlowPDF::ComponentManager;
 use FlowPDF::Helpers qw/inArray/;
 
-our $VERSION = '1.1.7';
+our $VERSION = '1.1.8';
 
 # We need to do an autoflush for STDOUT and STDERR to not mess up output streams.
 # $| is a local variable for currently selected file descriptor.
@@ -245,7 +246,9 @@ sub runStep {
             stepName      => $stepName
         })
     });
-
+    if ($pluginInfo->{defaultConfigValues}) {
+        $flowpdf->setDefaultConfigValues($pluginInfo->{defaultConfigValues});
+    }
     my $context           = $flowpdf->getContext();
     my $runtimeParameters = $context->getRuntimeParameters();
     my $stepResult        = $context->newStepResult();
@@ -254,7 +257,6 @@ sub runStep {
     if ($pluginInfo->{pluginValues}) {
         $flowpdf->setPluginValues($pluginInfo->{pluginValues});
     }
-
     my $retval = $flowpdf->$function($runtimeParameters, $stepResult);
     $stepResult->applyIfNotApplied();
     return $retval;

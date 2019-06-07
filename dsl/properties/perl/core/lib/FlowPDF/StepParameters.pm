@@ -78,7 +78,7 @@ sub isParameterExists {
     my ($self, $parameterName) = @_;
 
     my $p = $self->getParameters();
-    if ($p->{$parameterName}) {
+    if (exists $p->{$parameterName}) {
         return 1;
     }
     return 0;

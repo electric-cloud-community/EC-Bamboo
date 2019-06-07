@@ -137,13 +137,6 @@ Release management describes the steps that are typically performed to release a
             
             <tr>
                 
-                    <td >Authentication Scheme</td>
-                    <td></td>
-                
-            </tr>
-            
-            <tr>
-                
                     <td class="required">Credential</td>
                     <td>Provide the credentials ElectricFlow uses to communicate with the Bamboo server.</td>
                 
