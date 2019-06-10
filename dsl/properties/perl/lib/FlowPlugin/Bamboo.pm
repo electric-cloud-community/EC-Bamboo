@@ -243,7 +243,7 @@ sub getPlanRuns {
     my $planKey = "$params->{projectKey}-$params->{planKey}";
     my %requestParameters = (
         expand        => 'results.result.artifacts,results.result.labels',
-        'max-results' => 0
+        'max-results' => (defined $params->{maxResults} ? $params->{maxResults} : 25)
     );
 
     if (defined $params->{buildState} && $params->{buildState} ne 'All') {

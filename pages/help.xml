@@ -546,6 +546,13 @@ Release management describes the steps that are typically performed to release a
             
             <tr>
                 
+                <td >Max Results</td>
+                <td>Limit the count of retrieved plan results by this value. Set to '0' to retrieve all results.</td>
+                
+            </tr>
+            
+            <tr>
+                
                 <td >Build State Filter</td>
                 <td>Get only plan runs with this state</td>
                 
