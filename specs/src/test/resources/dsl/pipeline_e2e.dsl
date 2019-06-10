@@ -261,6 +261,169 @@ project 'Default', {
             }
         }
 
+        stage 'Enable/Disable Plan', {
+            description = ''
+            colorCode = '#d62728'
+            completionType = 'auto'
+            condition = null
+            duration = null
+            parallelToPrevious = null
+            pipelineName = 'Bamboo'
+            plannedEndDate = null
+            plannedStartDate = null
+            precondition = null
+            resourceName = null
+            waitForPlannedStartDate = '0'
+
+            gate 'PRE', {
+                condition = null
+                precondition = null
+            }
+
+            gate 'POST', {
+                condition = null
+                precondition = null
+            }
+
+            task 'EnablePlan', {
+                description = ''
+                actionLabelText = null
+                actualParameter = [
+                        'config': configName,
+                        'planKey': bambooPlan,
+                        'projectKey': bambooProject,
+                ]
+                advancedMode = '0'
+                afterLastRetry = null
+                allowOutOfOrderRun = '0'
+                allowSkip = null
+                alwaysRun = '0'
+                condition = null
+                deployerExpression = null
+                deployerRunType = null
+                disableFailure = null
+                duration = null
+                emailConfigName = null
+                enabled = '1'
+                environmentName = null
+                environmentProjectName = null
+                environmentTemplateName = null
+                environmentTemplateProjectName = null
+                errorHandling = 'stopOnError'
+                gateCondition = null
+                gateType = null
+                groupName = null
+                groupRunType = null
+                insertRollingDeployManualStep = '0'
+                instruction = null
+                notificationEnabled = null
+                notificationTemplate = null
+                parallelToPrevious = null
+                plannedEndDate = null
+                plannedStartDate = null
+                precondition = null
+                requiredApprovalsCount = null
+                resourceName = ''
+                retryCount = null
+                retryInterval = null
+                retryType = null
+                rollingDeployEnabled = null
+                rollingDeployManualStepCondition = null
+                skippable = '0'
+                snapshotName = null
+                stageSummaryParameters = null
+                startingStage = null
+                subErrorHandling = null
+                subapplication = null
+                subpipeline = null
+                subpluginKey = 'EC-Bamboo'
+                subprocedure = 'EnablePlan'
+                subprocess = null
+                subproject = null
+                subrelease = null
+                subreleasePipeline = null
+                subreleasePipelineProject = null
+                subreleaseSuffix = null
+                subservice = null
+                subworkflowDefinition = null
+                subworkflowStartingState = null
+                taskProcessType = null
+                taskType = 'PLUGIN'
+                triggerType = null
+                useApproverAcl = '0'
+                waitForPlannedStartDate = '0'
+            }
+
+            task 'DisablePlan', {
+                description = ''
+                actionLabelText = null
+                actualParameter = [
+                        'config': configName,
+                        'planKey': bambooPlan,
+                        'projectKey': bambooProject,
+                ]
+                advancedMode = '0'
+                afterLastRetry = null
+                allowOutOfOrderRun = '0'
+                allowSkip = null
+                alwaysRun = '0'
+                condition = null
+                deployerExpression = null
+                deployerRunType = null
+                disableFailure = null
+                duration = null
+                emailConfigName = null
+                enabled = '1'
+                environmentName = null
+                environmentProjectName = null
+                environmentTemplateName = null
+                environmentTemplateProjectName = null
+                errorHandling = 'stopOnError'
+                gateCondition = null
+                gateType = null
+                groupName = null
+                groupRunType = null
+                insertRollingDeployManualStep = '0'
+                instruction = null
+                notificationEnabled = null
+                notificationTemplate = null
+                parallelToPrevious = null
+                plannedEndDate = null
+                plannedStartDate = null
+                precondition = null
+                requiredApprovalsCount = null
+                resourceName = ''
+                retryCount = null
+                retryInterval = null
+                retryType = null
+                rollingDeployEnabled = null
+                rollingDeployManualStepCondition = null
+                skippable = '0'
+                snapshotName = null
+                stageSummaryParameters = null
+                startingStage = null
+                subErrorHandling = null
+                subapplication = null
+                subpipeline = null
+                subpluginKey = 'EC-Bamboo'
+                subprocedure = 'DisablePlan'
+                subprocess = null
+                subproject = null
+                subrelease = null
+                subreleasePipeline = null
+                subreleasePipelineProject = null
+                subreleaseSuffix = null
+                subservice = null
+                subworkflowDefinition = null
+                subworkflowStartingState = null
+                taskProcessType = null
+                taskType = 'PLUGIN'
+                triggerType = null
+                useApproverAcl = '0'
+                waitForPlannedStartDate = '0'
+            }
+        }
+
         stage 'Build Plan', {
             description = ''
             colorCode = '#ff7f0e'
