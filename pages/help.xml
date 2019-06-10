@@ -185,7 +185,7 @@ Release management describes the steps that are typically performed to release a
         <h2>RunPlan</h2>
         
         
-        <p>Runs build plan by plan key and project key.</p>
+        <p>This procedure runs Bamboo build plan.</p>
         
         
         <h3>RunPlan Parameters</h3>
@@ -229,9 +229,7 @@ Release management describes the steps that are typically performed to release a
             <tr>
                 
                 <td >Additional Variables</td>
-                <td>Additional variables for this Run specified as name-value pairs, with 1 pair per line. <br/>If not specified, the default variables for the definition will be used. <br/>Example: <br/><b>system.debug=true</b><br/><b>BuildConfiguration=debug</b><br/><b>BuildPlatform=x64</b><br/>
- Variables defined in Bamboo as global variables or plan variables MUST be prefixed with bamboo.variable ie. bamboo.variable.myVariable=valueForMyVariable
-</td>
+                <td>Override global and/or plan variables for this Run. New values should be specified as name-value pairs, with 1 pair per line.<br/>Example: <br/><b>system.debug=true</b><br/><b>BuildConfiguration=debug</b><br/><b>BuildPlatform=x64</b><br/></td>
                 
             </tr>
             
@@ -281,7 +279,7 @@ Release management describes the steps that are typically performed to release a
         <h2>EnablePlan</h2>
         
         
-        <p>Enables build plan.</p>
+        <p>This procedure enables build plan.</p>
         
         
         <h3>EnablePlan Parameters</h3>
@@ -333,7 +331,7 @@ Release management describes the steps that are typically performed to release a
         <h2>DisablePlan</h2>
         
         
-        <p>Disables build plan.</p>
+        <p>This procedure disables build plan.</p>
         
         
         <h3>DisablePlan Parameters</h3>
@@ -444,7 +442,7 @@ Release management describes the steps that are typically performed to release a
         <h2>GetPlanDetails</h2>
         
         
-        <p>Gets build plan details.</p>
+        <p>This procedure prints Bamboo build plan details.</p>
         
         
         <h3>GetPlanDetails Parameters</h3>
@@ -510,7 +508,7 @@ Release management describes the steps that are typically performed to release a
         <h2>GetPlanRuns</h2>
         
         
-        <p>Returns information about build plan runs byt project key and plan key.</p>
+        <p>This procedure returns information about runs on Bamboo build plan.</p>
         
         
         <h3>GetPlanRuns Parameters</h3>
@@ -590,7 +588,7 @@ Release management describes the steps that are typically performed to release a
         <h2>GetDeploymentProjectsForPlan</h2>
         
         
-        <p>Requests and returns list of all deployment projects linked to this build plan.</p>
+        <p>This procedure returns information about deployment projects linked to this build plan.</p>
         
         
         <h3>GetDeploymentProjectsForPlan Parameters</h3>
@@ -656,7 +654,7 @@ Release management describes the steps that are typically performed to release a
         <h2>CreateRelease</h2>
         
         
-        <p>Creates new version (release) from the successful build result.</p>
+        <p>This procedure creates new release (version) from the build plan result.</p>
         
         
         <h3>CreateRelease Parameters</h3>
@@ -736,7 +734,7 @@ Release management describes the steps that are typically performed to release a
         <h2>TriggerDeployment</h2>
         
         
-        <p>Runs deployment plan.</p>
+        <p>This procedure runs Bamboo deployment plan.</p>
         
         
         <h3>TriggerDeployment Parameters</h3>
@@ -823,7 +821,7 @@ Release management describes the steps that are typically performed to release a
         <h2>CollectReportingData</h2>
         
         
-        <p>Collects reporting data for the DevOpsInsight Dashboards. Will collect build results with optional tests run summary.</p>
+        <p>This procedure collects reporting data for the DevOpsInsight Dashboards. It collects build results with optional tests run details.</p>
         
         
         <h3>CollectReportingData Parameters</h3>
