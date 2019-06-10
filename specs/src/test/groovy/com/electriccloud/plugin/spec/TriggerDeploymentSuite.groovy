@@ -6,7 +6,7 @@ import spock.lang.Stepwise
 import spock.lang.Unroll
 
 @Stepwise
-class TriggerDeployment extends BambooHelper {
+class TriggerDeploymentSuite extends BambooHelper {
 
     static String procedureName = 'TriggerDeployment'
     static String projectName = "EC-Specs $procedureName"

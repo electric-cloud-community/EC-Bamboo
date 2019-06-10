@@ -11,6 +11,7 @@ use FlowPlugin::REST;
 use FlowPDF::Constants qw/AUTH_SCHEME_VALUE_FOR_BASIC_AUTH/;
 
 use JSON qw/decode_json/;
+use URI::Escape qw/uri_escape_utf8/;
 
 # Service function that is being used to set some metadata for a plugin.
 sub pluginInfo {
@@ -387,7 +388,10 @@ sub runPlan {
     # Additional parameters
     if ($params->{additionalBuildVariables}) {
         my $buildParams = parseKeyValuePairs($params->{additionalBuildVariables});
-        $queueRequestParams{$_} = $buildParams->{$_} for (keys %$buildParams);
+        for (keys %$buildParams) {
+            $queueRequestParams{'bamboo.variable.' . $_} = uri_escape_utf8($buildParams->{$_});
+        }
+
     }
 
     # Custom revision
