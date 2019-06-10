@@ -38,17 +38,15 @@
     <type>textarea</type>
     <property>additionalBuildVariables</property>
     <required>0</required>
-    <htmlDocumentation>Additional variables for this Run specified as name-value pairs, with 1 pair per line. <br/>If not specified, the default variables for the definition will be used. <br/>Example: <br/>
+    <htmlDocumentation>Override global and/or plan variables for this Run. New values should be specified as name-value pairs, with 1 pair per line.<br/>Example: <br/>
   <b>system.debug=true</b> <br/>
   <b>BuildConfiguration=debug</b> <br/>
   <b>BuildPlatform=x64</b> <br/>
- Variables defined in Bamboo as global variables or plan variables MUST be prefixed with bamboo.variable ie. bamboo.variable.myVariable=valueForMyVariable
 </htmlDocumentation>
-    <documentation>Additional variables for this Run specified as name-value pairs, with 1 pair per line. &lt;br/&gt;If not specified, the default variables for the definition will be used. &lt;br/&gt;Example: &lt;br/&gt;
-  &lt;b&gt;system.debug=true&lt;/b&gt; &lt;br/&gt;
-  &lt;b&gt;BuildConfiguration=debug&lt;/b&gt; &lt;br/&gt;
-  &lt;b&gt;BuildPlatform=x64&lt;/b&gt; &lt;br/&gt;
- Variables defined in Bamboo as global variables or plan variables MUST be prefixed with bamboo.variable ie. bamboo.variable.myVariable=valueForMyVariable
+    <documentation>Override global and/or plan variables for this Run. New values should be specified as name-value pairs, with 1 pair per line.&lt;br/&gt;Example: &lt;br/&gt;
+  &lt;b&gt;system.debug=true&lt;/b&gt;
+  &lt;b&gt;BuildConfiguration=debug&lt;/b&gt;
+  &lt;b&gt;BuildPlatform=x64&lt;/b&gt;
 </documentation>
     <label>Additional Variables:</label>
     <collection>1</collection>
