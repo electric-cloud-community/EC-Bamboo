@@ -515,6 +515,7 @@ sub triggerDeployment {
 
     my ($project) = grep {$_->{name} eq $params->{deploymentProjectName}} @$allProjects;
     if (!defined $project) {
+        logInfo("Here are names of all projects returned by Bamboo: ", (map { $_->{name} } @$allProjects) );
         return $self->setStepResultFields($stepResult, 'error', "Can't find deployment project '$params->{deploymentProjectName}'.");
     }
     logTrace("Project", $project);
