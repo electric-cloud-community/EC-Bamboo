@@ -93,7 +93,7 @@
         </p>
 
         <h3>Creating Plugin Configurations</h3>
-        <p>To create plugin configurations in ElectricFlow,
+        <p>To create plugin configurations in CloudBees Flow,
             do these steps:</p>
 
         <li>Go to <b>Administration</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
@@ -261,6 +261,32 @@
             
             </tbody>
         </table>
+
+        
+        <h4>Output Parameters</h4>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                <td>buildResultKey</td>
+                <td>Composite key for the Run Result.</td>
+            </tr>
+            
+            <tr>
+                <td>buildUrl</td>
+                <td>Link to the result page.</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -313,6 +339,9 @@
             
             </tbody>
         </table>
+
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -365,6 +394,9 @@
             
             </tbody>
         </table>
+
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -424,6 +456,27 @@
             
             </tbody>
         </table>
+
+        
+        <h4>Output Parameters</h4>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                <td>planKeys</td>
+                <td>List of comma-separated plan keys</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -490,6 +543,9 @@
             
             </tbody>
         </table>
+
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -570,6 +626,32 @@
             
             </tbody>
         </table>
+
+        
+        <h4>Output Parameters</h4>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                <td>resultKeys</td>
+                <td>List of comma-separated plan build result keys.</td>
+            </tr>
+            
+            <tr>
+                <td>latestResultKey</td>
+                <td>Key for the latest build run.</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -636,6 +718,27 @@
             
             </tbody>
         </table>
+
+        
+        <h4>Output Parameters</h4>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                <td>deploymentProjectKeys</td>
+                <td>List of comma-separated deployment project keys for the plan</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -716,6 +819,27 @@
             
             </tbody>
         </table>
+
+        
+        <h4>Output Parameters</h4>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                <td>version</td>
+                <td>Name of the created version.</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -803,6 +927,32 @@
             
             </tbody>
         </table>
+
+        
+        <h4>Output Parameters</h4>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                <td>deploymentResultKey</td>
+                <td>Key of the deployment result.</td>
+            </tr>
+            
+            <tr>
+                <td>deploymentResultUrl</td>
+                <td>URL to the deployment result report.</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -939,6 +1089,9 @@ Method should be named &quot;transform&quot;, and should return payload object. 
             
             </tbody>
         </table>
+
+        
+
         
         <p>
             <p>Normally, this procedure will be used as a DOIS DataSource.
@@ -999,6 +1152,9 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
             
             </tbody>
         </table>
+
+        
+
         
     </div>
 
