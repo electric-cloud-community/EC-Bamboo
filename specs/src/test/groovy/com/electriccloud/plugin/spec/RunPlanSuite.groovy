@@ -50,8 +50,7 @@ class RunPlanSuite extends PluginTestHelper {
             // Here effective is only second parameter, so we can check parser too
             valid              : "TEST_MESSAGE=hello\nFAIL_MESSAGE=Expected failure",
             valid_flow_fallback: "TEST_MESSAGE=hello;#;#;#FAIL_MESSAGE=Expected failure",
-            timeout            : "TEST_MESSAGE=hello\nSLEEP_TIME=11",
-            empty              : ""
+            timeout            : "TEST_MESSAGE=hello\nSLEEP_TIME=35"
     ]
 
     static defaultResultPropertyPath = 'runResult'
@@ -221,13 +220,13 @@ class RunPlanSuite extends PluginTestHelper {
     }
 
     @Unroll
-    @IgnoreRest
     def "#caseId. RunPlan - Additional Parameters"() {
         given:
         def project = bambooProjects['valid']
         def plan = bambooPlans['parametrized']
 
         def additionalBuildVariables = buildParameters[parametersCase]
+        assert additionalBuildVariables
 
         def procedureParams = [
                 config                  : CONFIG_NAME,
@@ -236,7 +235,7 @@ class RunPlanSuite extends PluginTestHelper {
                 customRevision          : '',
                 additionalBuildVariables: additionalBuildVariables,
                 waitForBuild            : 1,
-                waitTimeout             : 10,
+                waitTimeout             : 15,
                 resultFormat            : 'none',
                 resultPropertySheet     : resultPropertySheet
         ]
@@ -252,13 +251,12 @@ class RunPlanSuite extends PluginTestHelper {
         cleanup:
         if (parametersCase == 'timeout') {
             println("Waiting for the build to finish")
-            Thread.sleep(10 * 1000)
+            Thread.sleep(30 * 1000)
         }
         where:
         caseId        | parametersCase        | expectedOutcome | expectedSummary
-        'CHANGEME_10' | 'empty'               | 'success'       | 'Build result information saved to the properties'
-//        'CHANGEME_10' | 'valid'               | 'warning'       | 'Build was not finished successfully'
-//        'CHANGEME_11' | 'valid_flow_fallback' | 'warning'       | 'Build was not finished successfully'
+        'CHANGEME_10' | 'valid'               | 'warning'       | 'Build was not finished successfully'
+        'CHANGEME_11' | 'valid_flow_fallback' | 'warning'       | 'Build was not finished successfully'
         'CHANGEME_12' | 'timeout'             | 'error'         | 'Exceeded the wait timeout'
     }
 
