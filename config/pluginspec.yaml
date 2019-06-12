@@ -558,6 +558,6 @@ procedures:
         required: false
       - name: frequency
         label: Polling Frequency
-        documentation: Polling frequency (in minutes) for retrieving defects from JIRA.
+        documentation: Polling frequency (in minutes) for retrieving defects from Bamboo.
         type: entry
         value: 30

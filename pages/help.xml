@@ -822,10 +822,6 @@
         <p>This procedure collects reporting data for the DevOpsInsight Dashboards. It collects build results with optional tests run details.</p>
         
         
-            <p>This procedure collects reporting data for the DevOps Insight Dashboards.
-Collected build results (with optional tests run details) will be displayed on the Release Command Center dashboard.</p>
-
-        
         <h3>CollectReportingData Parameters</h3>
         <table class="grid">
             <thead>
@@ -950,10 +946,6 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
 <p>
 <img src="../../plugins/@PLUGIN_KEY@/images/CollectReportingData/DataSourceForm.png" />
 </p>
-<p>After the DataSource schedule run, you will see something like this on the dashboard.</p>
-<p>
-<img src="../../plugins/@PLUGIN_KEY@/images/CollectReportingData/ReleaseCommandCenter.png" />
-</p>
 
         </p>
         
@@ -1001,7 +993,7 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
             <tr>
                 
                 <td >Polling Frequency</td>
-                <td>Polling frequency (in minutes) for retrieving defects from JIRA.</td>
+                <td>Polling frequency (in minutes) for retrieving defects from Bamboo.</td>
                 
             </tr>
             
