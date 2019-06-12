@@ -40,7 +40,7 @@ sub buildDataset {
             buildStatus         => $buildStateMapping{$row->{buildState} || 'Unknown'},
             launchedBy          => 'N/A',
             jobName             => $row->{key},
-            duration            => $row->{buildDurationInSeconds},
+            duration            => $row->{buildDuration},
             tags                => $row->{labels} || '',
             sourceUrl           => $row->{url},
         );

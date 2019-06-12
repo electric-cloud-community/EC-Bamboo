@@ -903,6 +903,7 @@ sub _planBuildResultToShortInfo {
 
         buildStartedTime
         buildCompletedTime
+        buildDuration
         buildDurationInSeconds
         buildReason
     /;
