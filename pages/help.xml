@@ -1124,15 +1124,16 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
         
         <li>Added Result Format and Result Property Sheet parameters for all the procedures which returns information from Bamboo.</li>
         
-        <li><ul>Following procedures now produce output parameters:
-  <li>GetAllPlans</li>
-  <li>GetPlanDetails</li>
-  <li>GetPlanRuns</li>
-  <li>RunPlan</li>
+        <li><p>New procedures for the deployment process automation:</p>
+<ul>
+  <li>GetDeploymentProjectsForPlan</li>
+  <li>CreateRelease</li>
+  <li>TriggerDeployment</li>
 </ul>
 </li>
         
-        <li><ul>Introduced enhancements for the RunPlan procedure:
+        <li><p>Introduced enhancements for the RunPlan procedure:</p>
+<ul>
   <li>Posibility to run a build against custom VCS revision (branch).</li>
   <li>Supplying the additional run variables for the build.</li>
   <li>Showing live progress as the Plan Build runs.</li>
@@ -1140,14 +1141,16 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
 </ul>
 </li>
         
-        <li><ul>New procedures for the deployment process automation:
-  <li>GetDeploymentProjectsForPlan</li>
-  <li>CreateRelease</li>
-  <li>TriggerDeployment</li>
+        <li><p>Following procedures now produce output parameters:</p>
+<ul>
+  <li>GetAllPlans</li>
+  <li>GetPlanDetails</li>
+  <li>GetPlanRuns</li>
+  <li>RunPlan</li>
 </ul>
 </li>
         
-        <li>New procedure CollectReportingData for the DevOpsInsightServer integration was added.</li>
+        <li>New procedure CollectReportingData for the DevOps Insight Server integration was added.</li>
         
         <li>Proxy support was added.</li>
         
