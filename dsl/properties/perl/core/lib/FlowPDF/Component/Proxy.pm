@@ -71,7 +71,6 @@ our $componentVersion = $VERSION;
 sub init {
     my ($class, $params) = @_;
 
-    logDebug("TEST Class: $class, Params: " . Dumper $params);
     return $class->new($params);
 }
 

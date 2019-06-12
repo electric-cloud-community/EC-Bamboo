@@ -139,6 +139,7 @@ use JSON;
 use ElectricCommander;
 use FlowPDF::Helpers qw/bailOut/;
 use FlowPDF::Log;
+use FlowPDF::Log::FW;
 
 # local $| = 1;
 
@@ -166,7 +167,7 @@ sub setEc {
 sub getEc {
     return $ELECTRIC_COMMANDER_OBJECT if $ELECTRIC_COMMANDER_OBJECT;
 
-    logDebug "ElectricCommander object has not been set for " . __PACKAGE__ . ", creating default object.";
+    fwLogDebug "ElectricCommander object has not been set for " . __PACKAGE__ . ", creating default object.";
     my $ec = ElectricCommander->new();
     return setEc($ec);
 }
@@ -212,10 +213,10 @@ sub sendReportToEF {
     my $payload = $self->getValues();
     my $reportObjectType = $self->getReportObjectType();
     my $encodedPayload = $self->encode();
-    logInfo "Encoded payload to send: $encodedPayload";
+    fwLogInfo "Encoded payload to send: $encodedPayload";
 
     if (FlowPDF::Component::EF::Reporting->isPreview()) {
-        logInfo("Preview mode is enabled, nothing to send");
+        fwLogInfo("Preview mode is enabled, nothing to send");
         return 1;
     }
 

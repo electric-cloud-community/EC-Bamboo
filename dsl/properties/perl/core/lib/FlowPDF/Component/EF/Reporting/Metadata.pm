@@ -92,6 +92,8 @@ __PACKAGE__->defineClass({
 use strict;
 use warnings;
 use FlowPDF::Log;
+use FlowPDF::Log::FW;
+
 use JSON;
 use Carp;
 
@@ -104,26 +106,26 @@ sub build {
 sub newFromLocation {
     my ($class, $pluginObject, $location) = @_;
 
-    logDebug("Got metadata location: $location");
+    fwLogDebug("Got metadata location: $location");
     my $ec = $pluginObject->getContext()->getEc();
     my $metadata = undef;
 
     my $retval = undef;
     eval {
-        logDebug("Retrieving metadata from $location");
+        fwLogDebug("Retrieving metadata from $location");
         $metadata = $ec->getProperty($location)->findvalue('//value')->string_value();
-        logDebug("Retrieval result: $metadata");
+        fwLogDebug("Retrieval result: $metadata");
         if ($metadata) {
-            logDebug("Metadata found: '$metadata', decoding...");
+            fwLogDebug("Metadata found: '$metadata', decoding...");
             $metadata = decode_json($metadata);
-            logDebug("Decoded metadata");
+            fwLogDebug("Decoded metadata");
             $retval = __PACKAGE__->new({
                 value        => $metadata,
                 propertyPath => $location
             });
         }
         else {
-            logDebug("No metadata found at '$location'");
+            fwLogDebug("No metadata found at '$location'");
         }
     };
 

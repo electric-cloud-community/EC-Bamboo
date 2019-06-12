@@ -341,6 +341,7 @@ use FlowPDF::Component::EF::Reporting::Payloadset;
 use FlowPDF::Component::EF::Reporting::Engine;
 use FlowPDF::Helpers qw/bailOut/;
 use FlowPDF::Log;
+use FlowPDF::Log::FW;
 use FlowPDF::Component::EF::Reporting::Metadata;
 use FlowPDF::Component::EF::Reporting::MetadataFactory;
 use FlowPDF::Component::EF::Reporting::Transformer;
@@ -474,7 +475,7 @@ sub CollectReportingData {
     });
     $metadataFactory->setPropertyPath($metadataFactory->getPropertyPath . '/' . $metadataFactory->buildMetadataName());
     logInfo("Metadata Property Path: " . $metadataFactory->getPropertyPath());
-    logDebug("Reference inside of CollectReportingData: ", ref $self);
+    fwLogDebug("Reference inside of CollectReportingData: ", ref $self);
     my $pluginObject = $self->getPluginObject();
     my $stepResult = $pluginObject->getContext()->newStepResult();
     if (FlowPDF::Component::EF::Reporting->isPreview()) {
@@ -625,39 +626,6 @@ sub prepareAndValidatePayloads {
     };
     return $self;
 }
-
-
-# sub prepareAndValidatePayloadsOld {
-#     my ($self, $payloads) = @_;
-
-#     if (ref $payloads ne 'FlowPDF::Component::EF::Reporting::Payloadset') {
-#         bailOut("PayloadSet are expected to be an FlowPDF::Component::EF::Reporting::Payloadset reference. Got: " . ref $payloads);
-#     }
-
-#     my $pluginObject = $self->getPluginObject();
-#     my $ec = $pluginObject->getContext()->getEc();
-#     my $reportingEngine = FlowPDF::Component::EF::Reporting::Engine->new({
-#         ec => $ec
-#     });
-#     my $preparedPayloads = $payloads->getPayloads();
-
-#     for my $row (@$preparedPayloads) {
-#         logDebug "Payload BEFORE conversion: " . Dumper $row;
-#         my $type = $row->getReportObjectType();
-#         my $values = $row->getValues();
-#         my $definition = $reportingEngine->getPayloadDefinition($type);
-#         for my $k (keys %$values) {
-#             if (!$definition->{$k}) {
-#                 logWarning("$k that is present in payload is not present in $type object definition. Removing it from payload.");
-#                 delete $values->{$k};
-#                 next;
-#             }
-#             $values->{$k} = $self->validateAndConvertRow($k, $definition->{$k}->{type}, $values->{$k});
-#         }
-#         logDebug "Payload AFTER conversion: " . Dumper $row;
-#     }
-#     return $self;
-# }
 
 
 sub prepareAndValidateSinglePayload {
