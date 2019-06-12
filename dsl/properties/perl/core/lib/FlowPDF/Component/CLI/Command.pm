@@ -28,6 +28,8 @@ use warnings;
 
 use FlowPDF::Helpers qw/isWin/;
 use FlowPDF::Log;
+use FlowPDF::Log::FW;
+
 use Carp;
 
 
@@ -66,11 +68,7 @@ It is much better to use newCommand metod from L<FlowPDF::Component::CLI>
 sub new {
     my ($class, $shell, @args) = @_;
 
-    logDebug("Creating $class ...\n");
-    # TODO: Improve validation here.
-    # if (!-f $shell) {
-    #     croak "File $shell that is provided to be used as shell does not exist.";
-    # }
+    fwLogDebug("Creating $class ...\n");
 
     @args = escapeArgs(@args);
     $shell = escapeArgs($shell);

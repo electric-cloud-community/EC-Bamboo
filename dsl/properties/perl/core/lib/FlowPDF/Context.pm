@@ -42,6 +42,7 @@ use FlowPDF::Parameter;
 use FlowPDF::Credential;
 use FlowPDF::StepResult;
 use FlowPDF::Log;
+use FlowPDF::Log::FW;
 use FlowPDF::Client::REST;
 use FlowPDF::Helpers qw/bailOut trim/;
 
@@ -75,7 +76,7 @@ sub new {
         my $debugLevel = $configValues->getParameter(DEBUG_LEVEL_PROPERTY);
         if ($debugLevel) {
             FlowPDF::Log::setLogLevel($debugLevel->getValue());
-            logDebug("Debug level is set to ", $debugLevel->getValue());
+            fwLogDebug("Debug level is set to ", $debugLevel->getValue());
         }
     }
     unless ($self->getEc()) {
@@ -453,7 +454,7 @@ sub retrieveConfigByNameAndLocation {
     my $config_fields = $po->getConfigFields();
 
     my $config_property_sheet = sprintf("/projects/%s/%s/%s", $plugin_project_name, $configLocation, $configName);
-    logDebug("Config property sheet: $config_property_sheet");
+    fwLogDebug("Config property sheet: $config_property_sheet");
     my $property_sheet_id = eval { $self->getEc->getProperty($config_property_sheet)->findvalue('//propertySheetId')->string_value };
     if ($@) {
         return undef;
@@ -492,7 +493,7 @@ sub retrieveConfigByNameAndLocation {
 
     }
 
-    logDebug("Retval", Dumper $retval);
+    fwLogDebug("Retval", Dumper $retval);
     return $retval;
 
 }
@@ -592,7 +593,7 @@ sub getCurrentScheduleName {
         $scheduleName = $result->findvalue('//scheduleName')->string_value();
         if ($scheduleName) {
             # $self->logger()->info('Schedule found: ', $scheduleName);
-            logDebug("Schedule found: $scheduleName");
+            fwLogDebug("Schedule found: $scheduleName");
         };
         1;
     } or do {
@@ -835,9 +836,9 @@ sub newRESTClient {
     if ($configValues) {
         # handling the proxy here
         my $proxyUrl = $configValues->getParameter(HTTP_PROXY_URL_PROPERTY);
-        logDebug("ProxyURL Parameter is " . Dumper $proxyUrl);
+        fwLogDebug("ProxyURL Parameter is " . Dumper $proxyUrl);
         if ($proxyUrl) {
-            logDebug("proxyUrl parameter has been found in configuration, using proxy ", $proxyUrl->getValue());
+            fwLogDebug("proxyUrl parameter has been found in configuration, using proxy ", $proxyUrl->getValue());
             # setting a proxy URL;
             $creationParams->{proxy}->{debug} = FlowPDF::Log::getLogLevel();
             $creationParams->{proxy}->{url} = $proxyUrl->getValue();
@@ -850,9 +851,9 @@ sub newRESTClient {
         # handling basic auth here.
         my $authScheme = $configValues->getParameter(AUTH_SCHEME_PROPERTY);
         if ($authScheme) {
-            logDebug("Hadling $authScheme authorization from config");
+            fwLogDebug("Hadling $authScheme authorization from config");
             if ($authScheme->getValue() eq AUTH_SCHEME_VALUE_FOR_BASIC_AUTH) {
-                logDebug("Auth scheme 'basic' has been detected");
+                fwLogDebug("Auth scheme 'basic' has been detected");
                 my $basicCred = $configValues->getParameter(BASIC_AUTH_CREDENTIAL_PROPERTY);
                 if ($basicCred) {
                     my $user = $basicCred->getUserName();
@@ -862,15 +863,15 @@ sub newRESTClient {
                         username => $user || '',
                         password => $password || ''
                     };
-                    logDebug("Parameters for basic auth are: " . Dumper $creationParams->{auth});
+                    fwLogDebug("Parameters for basic auth are: " . Dumper $creationParams->{auth});
                 }
             }
             else {
-                logDebug("Auth Scheme $authScheme is not implemented yet");
+                fwLogDebug("Auth Scheme $authScheme is not implemented yet");
             }
         }
     }
-    logDebug("REST client creation parameters are: ", Dumper $creationParams);
+    fwLogDebug("REST client creation parameters are: ", Dumper $creationParams);
 
     if ($params->{oauth}) {
         $creationParams->{oauth} = $params->{oauth};

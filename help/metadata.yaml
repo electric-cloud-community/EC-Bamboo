@@ -17,10 +17,10 @@ proceduresGrouping:
        - GetPlanDetails
        - GetPlanRuns
    - name: Deployment Plans management
-     description: These procedures help in managing the Deployment process.
+     description: These procedures help in managing a Deployment process.
      procedures:
        - GetDeploymentProjectsForPlan
-       - CreateVersion
+       - CreateRelease
        - TriggerDeployment
 
 chapters:

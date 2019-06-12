@@ -11,6 +11,7 @@ use FlowPlugin::REST;
 use FlowPDF::Constants qw/AUTH_SCHEME_VALUE_FOR_BASIC_AUTH/;
 
 use JSON qw/decode_json/;
+use URI::Escape qw/uri_escape_utf8/;
 
 # Service function that is being used to set some metadata for a plugin.
 sub pluginInfo {
@@ -242,7 +243,7 @@ sub getPlanRuns {
     my $planKey = "$params->{projectKey}-$params->{planKey}";
     my %requestParameters = (
         expand        => 'results.result.artifacts,results.result.labels',
-        'max-results' => 0
+        'max-results' => (defined $params->{maxResults} ? $params->{maxResults} : 25)
     );
 
     if (defined $params->{buildState} && $params->{buildState} ne 'All') {
@@ -300,7 +301,7 @@ sub getPlanRuns {
     $stepResult->apply();
 }
 
-sub createVersion {
+sub createRelease {
     my FlowPDF $self = shift;
     my $params = shift;
     my FlowPDF::StepResult $stepResult = shift;
@@ -387,7 +388,10 @@ sub runPlan {
     # Additional parameters
     if ($params->{additionalBuildVariables}) {
         my $buildParams = parseKeyValuePairs($params->{additionalBuildVariables});
-        $queueRequestParams{$_} = $buildParams->{$_} for (keys %$buildParams);
+        for (keys %$buildParams) {
+            $queueRequestParams{'bamboo.variable.' . $_} = uri_escape_utf8($buildParams->{$_});
+        }
+
     }
 
     # Custom revision
@@ -511,6 +515,7 @@ sub triggerDeployment {
 
     my ($project) = grep {$_->{name} eq $params->{deploymentProjectName}} @$allProjects;
     if (!defined $project) {
+        logInfo("Here are names of all projects returned by Bamboo: ", (map { $_->{name} } @$allProjects) );
         return $self->setStepResultFields($stepResult, 'error', "Can't find deployment project '$params->{deploymentProjectName}'.");
     }
     logTrace("Project", $project);
@@ -663,7 +668,7 @@ sub collectReportingData {
 
     my $reporting = FlowPDF::ComponentManager->loadComponent('FlowPlugin::Bamboo::Reporting', {
         reportObjectTypes     => [ 'build' ],
-        initialRetrievalCount => $params->{initialRecordsCount},
+        initialRetrievalCount => $params->{initialRetrievalCount},
         metadataUniqueKey     => $requestKey,
         payloadKeys           => [ 'startTime' ]
     }, $self);

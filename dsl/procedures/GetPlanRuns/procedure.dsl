@@ -1,6 +1,6 @@
 // This procedure.dsl was generated automatically
 // === procedure_autogen starts ===
-procedure 'GetPlanRuns', description: 'Returns information about build plan runs byt project key and plan key.', {
+procedure 'GetPlanRuns', description: 'This procedure returns information about runs on Bamboo build plan.', {
 
     step 'GetPlanRuns', {
         description = ''
@@ -14,7 +14,7 @@ procedure 'GetPlanRuns', description: 'Returns information about build plan runs
 
     formalOutputParameter 'latestResultKey',
         description: 'Key for the latest build run.'
-// === procedure_autogen ends, checksum: 5fe58af8ee7fc9cbfa11ec33aa7f8e72 ===
+// === procedure_autogen ends, checksum: 37dbdfa4666f61003364175a7788ef20 ===
 // Do not update the code above the line
 // procedure properties declaration can be placed in here, like
 // property 'property name', value: "value"

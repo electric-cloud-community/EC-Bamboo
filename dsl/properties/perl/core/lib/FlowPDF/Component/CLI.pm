@@ -65,6 +65,7 @@ use FlowPDF::Helpers qw/isWin genRandomNumbers/;
 use FlowPDF::Component::CLI::Command;
 use FlowPDF::Component::CLI::ExecutionResult;
 use FlowPDF::Log;
+use FlowPDF::Log::FW;
 use Carp;
 
 

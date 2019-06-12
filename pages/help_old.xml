@@ -1,0 +1,376 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta content="text/html; charset=us-ascii" http-equiv="content-type"/>
+        <title>CloudBees Flow Plugin for Atlassian Bamboo</title>
+        <link rel="stylesheet" href="../../plugins/@PLUGIN_KEY@/pluginhelp.css" type="text/css" media="screen" />
+    </head>
+    <body>
+        <div class="help">
+            <h1>Atlassian Bamboo</h1>
+            <p>Plugin Version @PLUGIN_VERSION@</p>
+            <hr style="margin-left: -10px; margin-top: 10px; height: 1px; width: 100%; color: #5981BD;" noshade="noshade" />
+            <p>Revised on December 19, 2018</p>
+            <h1>Contents</h1>
+            <ul>
+                <li><p><a href="#overview">Overview</a></p></li>
+                <li><p><a href="#setupconfig">Setting Up the Plugin Configuration</a></p></li>
+                <li><p><a href="#procedures">Plugin Procedures</a></p></li>
+                <ul>
+                    <li><a href="#DisablePlan">DisablePlan</a></li>
+                    <li><a href="#EnablePlan">EnablePlan</a></li>
+                    <li><a href="#GetAllPlans">GetAllPlans</a></li>
+                    <li><a href="#GetPlanDetails">GetPlanDetails</a></li>
+                    <li><a href="#GetPlanRuns">GetPlanRuns</a></li>
+                    <li><a href="#RunPlan">RunPlan</a></li>
+                </ul>
+            </ul>
+            <li><p><a href="#rns">Release Notes</a></p></li>
+			<h1 id="overview">Overview</h1>
+			<p>
+                Bamboo is a continuous integration (CI) server that can be used to automate the release management for a software application, creating a continuous delivery pipeline.
+                What does this mean?
+                CI is a software development methodology in which a build, unit tests and integration tests are performed, or triggered, whenever code is committed to the repository, to ensure that new changes integrate well into the existing code base. Integration builds provide early 'fail fast' feedback on the quality of new changes.
+                Release management describes the steps that are typically performed to release a software application, including building and functional testing, tagging releases, assigning versions, and deploying and activating the new version in production.
+                <p>For more information about Atlassian Bamboo go to <a href="https://www.atlassian.com/software/bamboo" target="_blank">Bamboo home page</a>. For better Atlassian Bamboo understanding go to  <a href="https://confluence.atlassian.com/bamboo/understanding-the-bamboo-ci-server-289277285.html" target="_blank">Atlassian Documentation</a></p>
+            </p>
+            <h2>Integrated versions</h2>
+            <p>
+                This plugin was developed and tested against following Atlassian Bamboo server version:
+                <ul>
+                    <li>Atlassian Bamboo 5.15.2</li>
+                </ul>
+            </p>
+            <h1 id="setupconfig">Setting Up the Plugin Configuration</h1>
+            <p>Plugin configurations are sets of parameters that apply across some or all of the plugin procedures.
+            They reduce repetition of common values, create predefined sets of parameters for end users, and store
+            credentials securely. Each configuration has a unique name that is automatically entered in designated
+            parameters in the procedures.</p>
+            <h2>Input</h2>
+            <ol>
+                <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
+                <li>Find the EC-Bamboo row.</li>
+                <li>Click <b>Configure</b> to open the Bamboo Configurations page.</li>
+                <li>Click <b>Create Configuration</b>.</li>
+                <li>To create a Bamboo configuration, enter the following information and click <b>OK</b>.
+                <br /> Remember that you may need to create additional configurations later.</li>
+                <table class="grid">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="required">Configuration Name</td>
+                            <td>Name of the plugin configuration.</td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
+                            <td>Description for the plugin configuration.</td>
+                        </tr>
+                        <tr>
+                            <td class="required">Bamboo server url</td>
+                            <td>Attlassian Bamboo server URL.</td>
+                        </tr>
+                        <tr>
+                            <td class="required">Credential</td>
+                            <td>
+                                <ul>
+                                    <li><b>User Name</b>: Enter the name of the Atlassian Bamboo user.</li>
+                                    <li><b>Password</b>: Enter the password for the Atlassian Bamboo user name.</li>
+                                    <li><b>Retype Password</b>: Re-enter the password for the Atlassian Bamboo user name.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <img src="../../plugins/@PLUGIN_KEY@/images/Config/ConfigForm.png" />
+            </ol>
+            <h2>Output</h2>
+            <p>The Bamboo Configurations page now shows the new configuration.</p>
+            <p>You can also manage your Bamboo configurations in this page. Click <b>Edit</b> to modify an existing configuration or
+            <b>Delete</b> to remove an existing configuration.</p>
+
+            <h1 id="procedures">Plugin Procedures</h1>
+            <div id="DisablePlan">
+                <h2>DisablePlan</h2>
+                <p>This procedure disables build plan.</p>
+                <h3>Input</h3>
+                <ol>
+                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
+                    <li>Got to the EC-Bamboo plugin.</li>
+                    <li>Go to the DisablePlan procedure.</li>
+                    <li>Enter the following parameters:<br />
+                    <table class="grid">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="required">Configuration name</td>
+                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Project key</td>
+                                <td>Project key (short name) of project that contains build plan.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Plan key</td>
+                                <td>Short name of plan to disable.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </li>
+                </ol>
+                <br />
+                <img src="../../plugins/@PLUGIN_KEY@/images/DisablePlan/Form.png" />
+                <br />
+                <h3>Output</h3>
+                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
+                <img src="../../plugins/@PLUGIN_KEY@/images/DisablePlan/Status.png" />
+                <p>In the <b>DisablePlan</b> step, click the Log button to see the diagnostic information:</p>
+                <br /><img src="../../plugins/@PLUGIN_KEY@/images/DisablePlan/Result.png" />
+            </div>
+            <div id="EnablePlan">
+                <h2>EnablePlan</h2>
+                <p>This procedure enables build plan.</p>
+                <h3>Input</h3>
+                <ol>
+                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
+                    <li>Got to the EC-Bamboo plugin.</li>
+                    <li>Go to the EnablePlan procedure.</li>
+                    <li>Enter the following parameters:<br />
+                    <table class="grid">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="required">Configuration name</td>
+                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Project key</td>
+                                <td>Project key (short name) of project that contains build plan.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Plan key</td>
+                                <td>Short name of plan to enable.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </li>
+                </ol>
+                <br />
+                <img src="../../plugins/@PLUGIN_KEY@/images/EnablePlan/Form.png" />
+                <br />
+                <h3>Output</h3>
+                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
+                <img src="../../plugins/@PLUGIN_KEY@/images/EnablePlan/Status.png" />
+                <p>In the <b>EnablePlan</b> step, click the Log button to see the diagnostic information:</p>
+                <br /><img src="../../plugins/@PLUGIN_KEY@/images/EnablePlan/Result.png" />
+            </div>
+            <div id="GetAllPlans">
+                <h2>GetAllPlans</h2>
+                <p>This procedure returns all build plan that are available for current user.</p>
+                <h3>Input</h3>
+                <ol>
+                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
+                    <li>Got to the EC-Bamboo plugin.</li>
+                    <li>Go to the GetAllPlans procedure.</li>
+                    <li>Enter the following parameters:<br />
+                    <table class="grid">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="required">Configuration name</td>
+                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </li>
+                </ol>
+                <br />
+                <img src="../../plugins/@PLUGIN_KEY@/images/GetAllPlans/Form.png" />
+                <br />
+                <h3>Output</h3>
+                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
+                <img src="../../plugins/@PLUGIN_KEY@/images/GetAllPlans/Status.png" />
+                <p>In the <b>GetAllPlans</b> step, click the Log button to see the diagnostic information:</p>
+                <br /><img src="../../plugins/@PLUGIN_KEY@/images/GetAllPlans/Result.png" />
+            </div>
+            <div id="GetPlanDetails">
+                <h2>GetPlanDetails</h2>
+                <p>This procedure prints Bamboo build plan details.</p>
+                <h3>Input</h3>
+                <ol>
+                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
+                    <li>Got to the EC-Bamboo plugin.</li>
+                    <li>Go to the GetPlanDetails procedure.</li>
+                    <li>Enter the following parameters:<br />
+                    <table class="grid">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="required">Configuration name</td>
+                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Project key</td>
+                                <td>Project key (short name) of project that contains build plan.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Plan key</td>
+                                <td>Short name of plan to get details.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </li>
+                </ol>
+                <br />
+                <img src="../../plugins/@PLUGIN_KEY@/images/GetPlanDetails/Form.png" />
+                <br />
+                <h3>Output</h3>
+                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
+                <img src="../../plugins/@PLUGIN_KEY@/images/GetPlanDetails/Status.png" />
+                <p>In the <b>GetPlanDetails</b> step, click the Log button to see the diagnostic information:</p>
+                <br /><img src="../../plugins/@PLUGIN_KEY@/images/GetPlanDetails/Result.png" />
+            </div>
+            <div id="GetPlanDetails">
+                <h2>GetPlanDetails</h2>
+                <p>This procedure returns information about runs on Bamboo build plan.</p>
+                <h3>Input</h3>
+                <ol>
+                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
+                    <li>Got to the EC-Bamboo plugin.</li>
+                    <li>Go to the GetPlanRuns procedure.</li>
+                    <li>Enter the following parameters:<br />
+                    <table class="grid">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="required">Configuration name</td>
+                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Project key</td>
+                                <td>Project key (short name) of project that contains build plan.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Plan key</td>
+                                <td>Short name of plan to get runs.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </li>
+                </ol>
+                <br />
+                <img src="../../plugins/@PLUGIN_KEY@/images/GetPlanRuns/Form.png" />
+                <br />
+                <h3>Output</h3>
+                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
+                <img src="../../plugins/@PLUGIN_KEY@/images/GetPlanRuns/Status.png" />
+                <p>In the <b>GetPlanRuns</b> step, click the Log button to see the diagnostic information:</p>
+                <br /><img src="../../plugins/@PLUGIN_KEY@/images/GetPlanRuns/Result.png" />
+            </div>
+            <div id="RunPlan">
+                <h2>RunPlan</h2>
+                <p>This procedure runs Bamboo build plan.</p>
+                <h3>Input</h3>
+                <ol>
+                    <li>In the Main Menu, click <b>Admin</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
+                    <li>Got to the EC-Bamboo plugin.</li>
+                    <li>Go to the RunPlan procedure.</li>
+                    <li>Enter the following parameters:<br />
+                    <table class="grid">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="required">Configuration name</td>
+                                <td>Name of the configuration to be used. URL and credentials are retrieved from the given configuration. A Configuration defines connection details and can be created by going to plugin configuration page.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Project key</td>
+                                <td>Project key (short name) of project that contains build plan.</td>
+                            </tr>
+                            <tr>
+                                <td class="required">Plan key</td>
+                                <td>Short name of plan to run. All stages within specified plan will be executed.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    </li>
+                </ol>
+                <br />
+                <img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Form.png" />
+                <br />
+                <h3>Output</h3>
+                <p>After the job runs, you can view the results on the Job Details page in ElectricFlow. The status of the page was checked successfully.</p>
+                <img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Status.png" />
+                <p>In the <b>RunPlan</b> step, click the Log button to see the diagnostic information:</p>
+                <br /><img src="../../plugins/@PLUGIN_KEY@/images/RunPlan/Result.png" />
+            </div>
+            <h1 id="rns">Release Notes</h1>
+            <h2>@PLUGIN_KEY@ 1.4.2</h2>
+            <ul>
+                <li>The plugin icon has been updated.</li>
+            </ul>
+            <h2>@PLUGIN_KEY@ 1.4.1</h2>
+            <ul>
+                <li>Output for ElectricFlow Pipelines has been improved.</li>
+                <li>Missing documentation has been added.</li>
+            </ul>
+            <h2>@PLUGIN_KEY@ 1.4.0</h2>
+            <ul>
+                <li>EnablePlan procedure has been added.</li>
+                <li>DisablePlan procedure has been added.</li>
+            </ul>
+            <h2>@PLUGIN_KEY@ 1.3.0</h2>
+            <ul>
+                <li>GetAllPlans procedure has been added.</li>
+            </ul>
+            <h2>@PLUGIN_KEY@ 1.2.0</h2>
+            <ul>
+                <li>Improved error handling.</li>
+            </ul>
+            <ul>
+                <li>Fixed an issue when credentials are not available from RunPlan procedure.</li>
+            </ul>
+            <h2>@PLUGIN_KEY@ 1.1.0</h2>
+            <ul>
+                <li>GetPlanDetails and GetPlanRuns procedures have been added.</li>
+            </ul>
+            <h2>@PLUGIN_KEY@ 1.0.0</h2>
+            <ul>
+                <li>RunPlan procedure has been added.</li>
+            </ul>
+        </div>
+    </body>
+</html>	

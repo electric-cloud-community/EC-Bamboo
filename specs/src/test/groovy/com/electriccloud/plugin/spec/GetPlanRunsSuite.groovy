@@ -14,6 +14,7 @@ class GetPlanRunsSuite extends BambooHelper {
             config             : '',
             projectKey         : '',
             planKey            : '',
+            maxResults         : '',
             buildState         : '',
             resultFormat       : '',
             resultPropertySheet: ''
@@ -83,6 +84,7 @@ class GetPlanRunsSuite extends BambooHelper {
                 config             : CONFIG_NAME,
                 projectKey         : projectKey,
                 planKey            : planKey,
+                maxResults         : '',
                 buildState         : 'All',
                 resultFormat       : resultFormat,
                 resultPropertySheet: resultPropertySheet
@@ -122,6 +124,7 @@ class GetPlanRunsSuite extends BambooHelper {
                 config             : CONFIG_NAME,
                 projectKey         : projectKey,
                 planKey            : planKey,
+                maxResults         : '',
                 buildState         : buildState,
                 resultFormat       : resultFormat,
                 resultPropertySheet: resultPropertySheet

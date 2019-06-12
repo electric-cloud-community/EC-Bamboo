@@ -14,6 +14,7 @@ use strict;
 use warnings;
 use FlowPDF::Component::EF::Reporting::Metadata;
 use FlowPDF::Log;
+use FlowPDF::Log::FW;
 use FlowPDF::Helpers qw/bailOut/;
 use Carp;
 use Data::Dumper;
@@ -71,11 +72,11 @@ sub newFromLocation {
     my ($self) = @_;
 
     my $location = $self->getPropertyPath();
-    logDebug("Got property path: $location");
+    fwLogDebug("Got property path: $location");
     my $metadata = FlowPDF::Component::EF::Reporting::Metadata->newFromLocation(
         $self->getPluginObject(), $location
     );
-    logDebug("Metadata:", Dumper $metadata);
+    fwLogDebug("Metadata:", Dumper $metadata);
     if (!$metadata) {
         return undef;
     }

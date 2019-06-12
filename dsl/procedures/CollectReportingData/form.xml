@@ -54,17 +54,17 @@
     <htmlDocumentation>Allows user to provide perl script for payload customization.
 This method will be invoked by plugin with 2 parameters. 1st parameter is context object, 2nd is payload object.
 Method should be named "transform", and should return payload object. In this example myTimestamp field will be added to payload object:
-&lt;pre&gt;
+<pre>
   sub transform {
       my ($context, $payload) = @_;
-      $payload-&gt;{myTimestamp} = $context-&gt;one();
+      $payload->{myTimestamp} = $context->one();
       return $payload;
   }
   sub one {
       my ($context) = @_;
       return time();
   }
-&lt;/pre&gt;
+</pre>
 </htmlDocumentation>
     <documentation>Perl code to transform report payload.</documentation>
     <label>Transformation script:</label>
@@ -105,7 +105,7 @@ Method should be named "transform", and should return payload object. In this ex
     <type>checkbox</type>
     <property>debugLevel</property>
     <required>0</required>
-    <documentation>If checked, the log level will be set to "Debug".</documentation>
+    <documentation>If checked, the log level will be set to "Debug" for the job.</documentation>
     <label>Debug:</label>
     <checkedValue>1</checkedValue>
     <initiallyChecked>false</initiallyChecked>
@@ -115,14 +115,14 @@ Method should be named "transform", and should return payload object. In this ex
     <type>entry</type>
     <property>releaseName</property>
     <required>0</required>
-    <documentation>DevOpsInsightServer datasource specific field.</documentation>
+    <documentation>Name of the CloudBees Flow release collected data relates to.</documentation>
     <label>Release Name:</label>
   </formElement>
   <formElement>
     <type>entry</type>
     <property>releaseProjectName</property>
     <required>0</required>
-    <documentation>DevOpsInsightServer datasource specific field.</documentation>
+    <documentation>Name of the CloudBees Flow release project collected data relates to.</documentation>
     <label>Release Project Name:</label>
   </formElement>
 </editor>

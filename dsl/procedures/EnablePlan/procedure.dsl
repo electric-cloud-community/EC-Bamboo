@@ -1,6 +1,6 @@
 // This procedure.dsl was generated automatically
 // === procedure_autogen starts ===
-procedure 'EnablePlan', description: 'Enables build plan.', {
+procedure 'EnablePlan', description: 'This procedure enables build plan.', {
 
     step 'EnablePlan', {
         description = ''
@@ -8,7 +8,7 @@ procedure 'EnablePlan', description: 'Enables build plan.', {
         shell = 'ec-perl'
 
         }
-// === procedure_autogen ends, checksum: e32b4fe57f679943d877bf309b8eb3e3 ===
+// === procedure_autogen ends, checksum: be72adfdc468565dac1413f0c2fdb274 ===
 // Do not update the code above the line
 // procedure properties declaration can be placed in here, like
 // property 'property name', value: "value"

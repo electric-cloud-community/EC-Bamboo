@@ -1,6 +1,6 @@
 // This procedure.dsl was generated automatically
 // === procedure_autogen starts ===
-procedure 'CollectReportingData', description: 'Collects reporting data for "build" type', {
+procedure 'CollectReportingData', description: 'This procedure collects reporting data for the DevOpsInsight Dashboards. It collects build results with optional tests run details.', {
 
     step 'CollectReportingData', {
         description = ''
@@ -8,7 +8,7 @@ procedure 'CollectReportingData', description: 'Collects reporting data for "bui
         shell = 'ec-perl'
 
         }
-// === procedure_autogen ends, checksum: 14eece1323982158197a13a47596d301 ===
+// === procedure_autogen ends, checksum: a66176a09aa81a3269767492b511a6d2 ===
 // Do not update the code above the line
 // procedure properties declaration can be placed in here, like
 // property 'property name', value: "value"

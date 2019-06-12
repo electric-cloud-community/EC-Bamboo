@@ -51,7 +51,7 @@ void validatePluginParams(Map pluginParameters) {
 
 def getCreateActualParameters(Map pluginParameters) {
     return [
-            config               : pluginParameters.configName,
+            config               : pluginParameters.config,
             projectKey           : pluginParameters.projectKey,
             planKey              : pluginParameters.planKey,
             initialRetrievalCount: pluginParameters.initialRetrievalCount,
@@ -68,7 +68,7 @@ def getCreateActualParameters(Map pluginParameters) {
 
 def getModifyActualParameters(Map pluginParameters) {
     return [
-            config             : pluginParameters.configName,
+            config             : pluginParameters.config,
             projectKey         : pluginParameters.projectKey,
             planKey            : pluginParameters.planKey,
             retrieveTestResults: pluginParameters.retrieveTestResults,
@@ -193,7 +193,7 @@ def pluginName = 'EC-Bamboo'
 
 // Extract the parameters expected through the form XML
 // EC-Bamboo params:
-// configName
+// config
 // projectKey
 // planKey
 // frequency

@@ -8,6 +8,7 @@ __PACKAGE__->defineClass({
 use strict;
 use warnings;
 use FlowPDF::Log;
+use FlowPDF::Log::FW;
 use JSON;
 use ElectricCommander;
 use Data::Dumper;
@@ -17,7 +18,7 @@ sub setOutputParameter {
     my ($self, $name, $value, $attach_params) = @_;
 
     if (!defined $value){
-        logDebug("Will not save undefined value for outputParameter '$name'");
+        fwLogDebug("Will not save undefined value for outputParameter '$name'");
         return;
     };
 
@@ -32,7 +33,7 @@ sub setOutputParameter {
 
         # 0E0 can be returned by EC::Bootstrap function and means parameter was not really set
         if ($is_set && $is_set ne '0E0'){
-            logDebug("Output parameter '$name' has been set to '$value'" . (defined $attach_params ? " and attached to " . Dumper($attach_params) : ''));
+            fwLogDebug("Output parameter '$name' has been set to '$value'" . (defined $attach_params ? " and attached to " . Dumper($attach_params) : ''));
         }
         elsif (!$is_set){
             logWarning("Cannot set output parameter '$name' to '$value'" . (defined $attach_params ? " with the following attached params: " . Dumper($attach_params) : ''));
@@ -43,7 +44,7 @@ sub setOutputParameter {
 
         1;
     } or do {
-        logDebug("Output parameter '$name' can't be saved : $@");
+        fwLogDebug("Output parameter '$name' can't be saved : $@");
         return 0;
     };
 

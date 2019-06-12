@@ -55,6 +55,7 @@ __PACKAGE__->defineClass({
 use FlowPDF::Client::REST::Auth;
 use FlowPDF::ComponentManager;
 use FlowPDF::Log;
+use FlowPDF::Log::FW;
 use strict;
 use warnings;
 use LWP::UserAgent;
@@ -145,7 +146,7 @@ sub new {
     }
     # end of validation
 
-    logDebug("Creating FlowPDF::Client::Rest with params: ", Dumper $params);
+    fwLogDebug("Creating FlowPDF::Client::Rest with params: ", Dumper $params);
 
     my $restAuth = FlowPDF::Client::REST::Auth->new({
         authValues => {},
@@ -156,9 +157,9 @@ sub new {
         ua   => $params->{ua} || LWP::UserAgent->new()
     };
     if ($params->{proxy}) {
-        logDebug("Loading Proxy Component on demand.");
+        fwLogDebug("Loading Proxy Component on demand.");
         my $proxy = FlowPDF::ComponentManager->loadComponent('FlowPDF::Component::Proxy', $params->{proxy});
-        logDebug("Proxy component has been loaded.");
+        fwLogDebug("Proxy component has been loaded.");
         $proxy->apply();
         $creationParams->{ua} = $proxy->augment_lwp($creationParams->{ua});
         $creationParams->{proxy} = $params->{proxy};
@@ -188,9 +189,9 @@ sub new {
                     croak "$p is mandatory for oauth component";
                 }
             }
-            logDebug("Loading FlowPDF::Component::OAuth");
+            fwLogDebug("Loading FlowPDF::Component::OAuth");
             $oauth = FlowPDF::ComponentManager->loadComponent('FlowPDF::Component::OAuth', $auth->{oauth});
-            logDebug("OAuth component has been loaded.");
+            fwLogDebug("OAuth component has been loaded.");
             $restAuthValues->{oauthComponent} = $oauth;
         }
         elsif ($auth->{type} eq 'basic') {

@@ -64,7 +64,7 @@
       <type>entry</type>
       <property>initialRetrievalCount</property>
       <required>0</required>
-      <documentation>Count of old builds to retrieve from server on the first run. If omited it will be set to 10.</documentation>
+      <documentation>Count of old builds to retrieve from server on the first run. If omitted it will be set to 10.</documentation>
       <label>Initial Count:</label>
       <value>10</value>
     </formElement>

@@ -1,12 +1,13 @@
 package com.electriccloud.plugin.spec
 
 import com.electriccloud.plugins.annotations.Sanity
+import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Stepwise
 import spock.lang.Unroll
 
 @Stepwise
-class RunPlan extends PluginTestHelper {
+class RunPlanSuite extends PluginTestHelper {
 
     static String procedureName = 'RunPlan'
     static String projectName = "EC-Specs $procedureName"
@@ -47,9 +48,9 @@ class RunPlan extends PluginTestHelper {
 
     static def buildParameters = [
             // Here effective is only second parameter, so we can check parser too
-            valid              : "bamboo.variable.TEST_MESSAGE=hello\nbamboo.variable.FAIL_MESSAGE=Expected failure",
-            valid_flow_fallback: "bamboo.variable.TEST_MESSAGE=hello;#;#;#bamboo.variable.FAIL_MESSAGE=Expected failure",
-            timeout            : "bamboo.variable.TEST_MESSAGE=hello\nbamboo.variable.SLEEP_TIME=35"
+            valid              : "TEST_MESSAGE=hello\nFAIL_MESSAGE=Expected failure",
+            valid_flow_fallback: "TEST_MESSAGE=hello;#;#;#FAIL_MESSAGE=Expected failure",
+            timeout            : "TEST_MESSAGE=hello\nSLEEP_TIME=35"
     ]
 
     static defaultResultPropertyPath = 'runResult'

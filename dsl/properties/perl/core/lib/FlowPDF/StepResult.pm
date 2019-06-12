@@ -31,6 +31,7 @@ use Carp;
 use Data::Dumper;
 use FlowPDF::StepResult::Action;
 use FlowPDF::Log;
+use FlowPDF::Log::FW;
 use FlowPDF::EF::OutputParameters;
 use FlowPDF::Helpers qw/inArray/;
 
@@ -47,7 +48,7 @@ sub getCacheForAction {
 sub setCacheForAction {
     my ($self, $actionType, $name, $value) = @_;
 
-    logDebug("Parameters for set cache: '$actionType', '$name', '$value'");
+    fwLogDebug("Parameters for set cache: '$actionType', '$name', '$value'");
     my $cache = $self->getCache();
     my $line = $self->getCacheForAction($actionType, $name);
     if ($line) {
@@ -503,7 +504,7 @@ sub apply {
             else {
                 $line = $right;
             }
-            logDebug("Got line: $line\n");
+            fwLogDebug("Got line: $line\n");
             $ec->setProperty($left, $line);
         }
         elsif ($currentAction eq 'setOutputParameter') {
@@ -614,7 +615,7 @@ sub applyIfNotApplied {
 
     my $actions = $self->getActions();
     if (@$actions and !$self->getIsApplied()) {
-        logDebug("Executing auto-apply for FlowPDF::StepResult object.");
+        fwLogDebug("Executing auto-apply for FlowPDF::StepResult object.");
         return $self->apply();
     }
     return $self;

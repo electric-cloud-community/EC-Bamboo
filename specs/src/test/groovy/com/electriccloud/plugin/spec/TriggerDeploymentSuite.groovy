@@ -1,12 +1,13 @@
 package com.electriccloud.plugin.spec
 
 import com.electriccloud.plugins.annotations.Sanity
+import spock.lang.IgnoreRest
 import spock.lang.Shared
 import spock.lang.Stepwise
 import spock.lang.Unroll
 
 @Stepwise
-class TriggerDeployment extends BambooHelper {
+class TriggerDeploymentSuite extends BambooHelper {
 
     static String procedureName = 'TriggerDeployment'
     static String projectName = "EC-Specs $procedureName"
@@ -24,16 +25,18 @@ class TriggerDeployment extends BambooHelper {
 
     // All deployment projects are linked to the Valid Plan
     static def bambooDeploymentProjects = [
-            valid  : 'Deployment Project',
-            long   : 'Long Deployment project',
-            failing: 'Failing deployment project'
+            valid     : 'Deployment Project',
+            long      : 'Long Deployment project',
+            failing   : 'Failing deployment project',
+            unexisting: randomize('unexisting')
     ]
 
     // Every deployment project is linked to different environment
     static def bambooEnvironments = [
             'valid'  : 'Stage',
             'long'   : 'Production',
-            'failing': 'Production2'
+            'failing': 'Production2',
+            unexisting: randomize('unexisting')
     ]
 
     // All deployment projects are linked to successful plan
@@ -147,6 +150,7 @@ class TriggerDeployment extends BambooHelper {
     }
 
     @Unroll
+    @IgnoreRest
     def "#caseId. TriggerDeployment - Negative"() {
         given:
         resultFormat == 'none'
@@ -161,7 +165,7 @@ class TriggerDeployment extends BambooHelper {
             deploymentEnvironmentName = bambooEnvironments[anotherEnvCase]
         }
 
-        if (versionCase == 'unexisting') {
+        if (versionCase == 'unexisting' || projectCase == 'unexisting') {
             deploymentVersionName = randomize("unexisting")
         } else {
             deploymentVersionName = getVersionNameForDeploymentProject(deploymentProjectName)
@@ -188,15 +192,17 @@ class TriggerDeployment extends BambooHelper {
         assert getProcedureJobStepSummary(procedureName, result.jobId) =~ expectedSummary
 
         where:
-        caseId       | projectCase | environmentCase  | versionCase  | waitTimeout | expectedOutcome | expectedSummary
+        caseId       | projectCase  | environmentCase  | versionCase  | waitTimeout | expectedOutcome | expectedSummary
         // Failing
-        'CHANGEME_3' | 'failing'   | 'valid'          | 'valid'      | 0           | 'warning'       | 'not finished successfully'
+        'CHANGEME_3' | 'failing'    | 'valid'          | 'valid'      | 0           | 'warning'       | 'not finished successfully'
         // Timeout
-        'CHANGEME_4' | 'long'      | 'valid'          | 'valid'      | 1           | 'error'         | 'Exceeded the wait timeout'
+        'CHANGEME_4' | 'long'       | 'valid'          | 'valid'      | 1           | 'error'         | 'Exceeded the wait timeout'
         // Wrong environment
-        'CHANGEME_5' | 'valid'     | 'anotherProject' | 'valid'      | 0           | 'error'         | "Can't find environment "
+        'CHANGEME_5' | 'valid'      | 'anotherProject' | 'valid'      | 0           | 'error'         | "Can't find environment "
         // Unexisting version
-        'CHANGEME_6' | 'valid'     | 'valid'          | 'unexisting' | 0           | 'error'         | "Can't find version "
+        'CHANGEME_6' | 'valid'      | 'valid'          | 'unexisting' | 0           | 'error'         | "Can't find version "
+        // Unexisting project
+        'CHANGEME_7' | 'unexisting' | 'valid'          | 'valid'      | 0           | 'error'         | "Can't find deployment project "
     }
 
     /**
@@ -207,8 +213,9 @@ class TriggerDeployment extends BambooHelper {
      */
     String getVersionNameForDeploymentProject(String deploymentProjectName) {
         if (existingVersions[deploymentProjectName] == null) {
-            existingVersions[deploymentProjectName] = createVersion(deploymentProjectName, (String) successfulBuildRun['key'])
+            existingVersions[deploymentProjectName] = createRelease(deploymentProjectName, (String) successfulBuildRun['key'])
         }
+
         return existingVersions[deploymentProjectName]['name']
     }
 }

@@ -1,6 +1,6 @@
 // This procedure.dsl was generated automatically
 // === procedure_autogen starts ===
-procedure 'GetDeploymentProjectsForPlan', description: 'Requests and returns list of all deployment projects linked to this build plan.', {
+procedure 'GetDeploymentProjectsForPlan', description: 'This procedure returns information about deployment projects linked to this build plan.', {
 
     step 'GetDeploymentProjectsForPlan', {
         description = ''
@@ -11,7 +11,7 @@ procedure 'GetDeploymentProjectsForPlan', description: 'Requests and returns lis
 
     formalOutputParameter 'deploymentProjectKeys',
         description: 'List of comma-separated deployment project keys for the plan'
-// === procedure_autogen ends, checksum: 2706417be3516d652282dccc810982e4 ===
+// === procedure_autogen ends, checksum: 20769c572d0107e7784e6abcc60e5e48 ===
 // Do not update the code above the line
 // procedure properties declaration can be placed in here, like
 // property 'property name', value: "value"

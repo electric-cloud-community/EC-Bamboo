@@ -1,6 +1,3 @@
-# This is default sample specification
-# Feel free to change it
-# Call ecpdk showdoc pluginspec to see the list of available fields and their description
 pluginName: EC-Bamboo
 description: CloudBees Flow Plugin for Atlassian Bamboo
 version: 1.5.0
@@ -10,9 +7,7 @@ supportLevel: 10
 metafile: { ecSupportLevel: 10 }
 category: Build
 
-# This is a declaration for the plugin configuration
 configuration:
-  # Shell to be used for checking connection
   shell: ec-perl
   parameters:
     - name: config
@@ -98,7 +93,7 @@ procedures:
     outputParameters: {planKeys: 'List of comma-separated plan keys'}
 
   - name: GetPlanDetails
-    description: Gets build plan details.
+    description: This procedure prints Bamboo build plan details.
     hasConfig: true
     shell: ec-perl
     parameters:
@@ -131,7 +126,7 @@ procedures:
         value: /myJob/plan
 
   - name: GetPlanRuns
-    description: Returns information about build plan runs byt project key and plan key.
+    description: This procedure returns information about runs on Bamboo build plan.
     hasConfig: true
     shell: ec-perl
     parameters:
@@ -145,6 +140,11 @@ procedures:
         documentation: Short name of plan to get details.
         type: entry
         required: true
+      - name : maxResults
+        label: Max Results
+        documentation: Limit the count of retrieved plan results by this value. Set to '0' to retrieve all results.
+        value: 25
+        type: entry
       - name: buildState
         label: Build State Filter
         documentation: Get only plan runs with this state
@@ -179,7 +179,7 @@ procedures:
     }
 
   - name: RunPlan
-    description: Runs build plan by plan key and project key.
+    description: This procedure runs Bamboo build plan.
     hasConfig: true
     shell: ec-perl
     parameters:
@@ -201,22 +201,21 @@ procedures:
       - name: additionalBuildVariables
         label: Additional Variables
         htmlDocumentation: |
-          Additional variables for this Run specified as name-value pairs, with 1 pair per line. <br/>If not specified, the default variables for the definition will be used. <br/>Example: <br/>
+          Override global and/or plan variables for this Run. New values should be specified as name-value pairs, with 1 pair per line.<br/>Example: <br/>
             <b>system.debug=true</b> <br/>
             <b>BuildConfiguration=debug</b> <br/>
             <b>BuildPlatform=x64</b> <br/>
-           Variables defined in Bamboo as global variables or plan variables MUST be prefixed with bamboo.variable ie. bamboo.variable.myVariable=valueForMyVariable
         documentation: |
-          Additional variables for this Run specified as name-value pairs, with 1 pair per line. <br/>If not specified, the default variables for the definition will be used. <br/>Example: <br/>
-            <b>system.debug=true</b> <br/>
-            <b>BuildConfiguration=debug</b> <br/>
-            <b>BuildPlatform=x64</b> <br/>
-           Variables defined in Bamboo as global variables or plan variables MUST be prefixed with bamboo.variable ie. bamboo.variable.myVariable=valueForMyVariable
+          Override global and/or plan variables for this Run. New values should be specified as name-value pairs, with 1 pair per line.<br/>Example: <br/>
+            <b>system.debug=true</b>
+            <b>BuildConfiguration=debug</b>
+            <b>BuildPlatform=x64</b>
         type: textarea
         required: false
         collection: 1
         collectionName: Parameter name
         collectionValue: Parameter value
+        # This is a workaround for CEV-21967
         collectionEntrySeparator: ;#;#;#
         collectionValueSeparator: =
       - name: waitForBuild
@@ -262,7 +261,7 @@ procedures:
     }
 
   - name: EnablePlan
-    description: Enables build plan.
+    description: This procedure enables build plan.
     hasConfig: true
     shell: ec-perl
     parameters:
@@ -278,7 +277,7 @@ procedures:
         required: true
 
   - name: DisablePlan
-    description: Disables build plan.
+    description: This procedure disables build plan.
     hasConfig: true
     shell: ec-perl
     parameters:
@@ -294,7 +293,7 @@ procedures:
         required: true
 
   - name: TriggerDeployment
-    description: Runs deployment plan.
+    description: This procedure runs Bamboo deployment plan.
     hasConfig: true
     shell: ec-perl
     parameters:
@@ -356,7 +355,7 @@ procedures:
     }
 
   - name: GetDeploymentProjectsForPlan
-    description: Requests and returns list of all deployment projects linked to this build plan.
+    description: This procedure returns information about deployment projects linked to this build plan.
     hasConfig: true
     shell: ec-perl
     parameters:
@@ -395,8 +394,8 @@ procedures:
       deploymentProjectKeys: 'List of comma-separated deployment project keys for the plan',
     }
 
-  - name: CreateVersion
-    description: Creates new version (release) from the successful build result
+  - name: CreateRelease
+    description: This procedure creates new release (version) from the build plan result.
     hasConfig: true
     shell: ec-perl
     parameters:
@@ -450,7 +449,7 @@ procedures:
       version: 'Name of the created version.'
     }
   - name: CollectReportingData
-    description: Collects reporting data for "build" type
+    description: This procedure collects reporting data for the DevOpsInsight Dashboards. It collects build results with optional tests run details.
     hasConfig: true
     shell: ec-perl
     parameters:
@@ -526,7 +525,7 @@ procedures:
         required: false
       - name: debugLevel
         label: Debug
-        documentation: If checked, the log level will be set to "Debug".
+        documentation: If checked, the log level will be set to "Debug" for the job.
         type: checkbox
         initiallyChecked: false
         checkedValue: 1
@@ -534,16 +533,16 @@ procedures:
         required: false
       - name: releaseName
         label: Release Name
-        documentation: DevOpsInsightServer datasource specific field.
+        documentation: Name of the CloudBees Flow release collected data relates to.
         required: false
         type: entry
       - name: releaseProjectName
         label: Release Project Name
-        documentation: DevOpsInsightServer datasource specific field.
+        documentation: Name of the CloudBees Flow release project collected data relates to.
         required: false
         type: entry
   - name: ValidateCRDParams
-    description: Validates collect reporting data params.
+    description: Service procedure to check parameter values passed for DOISDataSource creation.
     hasConfig: true
     shell: ec-perl
     parameters:

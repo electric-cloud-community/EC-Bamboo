@@ -4,8 +4,8 @@ import com.electriccloud.plugins.annotations.Sanity
 import spock.lang.Shared
 import spock.lang.Unroll
 
-class CreateVersionSuite extends BambooHelper {
-    static procedureName = 'CreateVersion'
+class CreateReleaseSuite extends BambooHelper {
+    static procedureName = 'CreateRelease'
     static projectName = "EC-Specs $procedureName"
 
     static def procedureParams = [
@@ -71,7 +71,7 @@ class CreateVersionSuite extends BambooHelper {
 
     @Sanity
     @Unroll
-    def "#caseId. CreateVersion - Sanity - positive"() {
+    def "#caseId. CreateRelease - Sanity - positive"() {
         given:
         def project = deploymentProjects[deploymentProject]
         deploymentProjectName = project['name']
@@ -125,7 +125,7 @@ class CreateVersionSuite extends BambooHelper {
 
 
     @Unroll
-    def "#caseId. CreateVersion - Sanity - negative"() {
+    def "#caseId. CreateRelease - Sanity - negative"() {
         given:
         def project = deploymentProjects[deploymentProject]
         deploymentProjectName = project['name']
@@ -137,7 +137,7 @@ class CreateVersionSuite extends BambooHelper {
 
         if (versionName == 'existing') {
             if (!existingVersionName) {
-                def newVersion = createVersion(
+                def newVersion = createRelease(
                         deploymentProjects['valid']['name'],
                         (String) buildRunSuccessful['key']
                 )
