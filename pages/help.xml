@@ -34,7 +34,7 @@
 
     
     <li><a href="#procedures">Plugin Procedures</a></li>
-    <li>Build Plans management<br/><i>These procedures help in managing a Build process.</i></li><ul><li><a href="#RunPlan">RunPlan</a></li><li><a href="#EnablePlan">EnablePlan</a></li><li><a href="#DisablePlan">DisablePlan</a></li><li><a href="#GetAllPlans">GetAllPlans</a></li><li><a href="#GetPlanDetails">GetPlanDetails</a></li><li><a href="#GetPlanRuns">GetPlanRuns</a></li></ul><li>Deployment Plans management<br/><i>These procedures help in managing a Deployment process.</i></li><ul><li><a href="#GetDeploymentProjectsForPlan">GetDeploymentProjectsForPlan</a></li><li><a href="#CreateRelease">CreateRelease</a></li><li><a href="#TriggerDeployment">TriggerDeployment</a></li></ul><li>Other</li><ul><li><a href="#CollectReportingData">CollectReportingData</a></li><li><a href="#ValidateCRDParams">ValidateCRDParams</a></li></ul>
+    <li>Build Plans management<br/><i>These procedures help in managing a Build process.</i></li><ul><li><a href="#RunPlan">RunPlan</a></li><li><a href="#EnablePlan">EnablePlan</a></li><li><a href="#DisablePlan">DisablePlan</a></li><li><a href="#GetAllPlans">GetAllPlans</a></li><li><a href="#GetPlanDetails">GetPlanDetails</a></li><li><a href="#GetPlanRuns">GetPlanRuns</a></li></ul><li>Deployment Plans management<br/><i>These procedures help in managing a Deployment process.</i></li><ul><li><a href="#GetDeploymentProjectsForPlan">GetDeploymentProjectsForPlan</a></li><li><a href="#CreateRelease">CreateRelease</a></li><li><a href="#TriggerDeployment">TriggerDeployment</a></li></ul><li>Other</li><ul><li><a href="#CollectReportingData">CollectReportingData</a></li></ul>
 
     
     
@@ -1101,60 +1101,6 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
 </p>
 
         </p>
-        
-    </div>
-
-    
-    <div id="ValidateCRDParams">
-        <h2>ValidateCRDParams</h2>
-        
-        
-        <p>Service procedure to check parameter values passed for DOISDataSource creation.</p>
-        
-        
-        <h3>ValidateCRDParams Parameters</h3>
-        <table class="grid">
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            </thead>
-            <tbody>
-            
-            <tr>
-                
-                <td class="required">Configuration Name</td>
-                <td>Previously defined configuration for the plugin</td>
-                
-            </tr>
-            
-            <tr>
-                
-                <td class="required">Project Key</td>
-                <td>Project key (short name) of project that contains build plan.</td>
-                
-            </tr>
-            
-            <tr>
-                
-                <td >Plan Key</td>
-                <td>Short name of plan to get details. Might be simply planKey or composite planKey-jobKey.</td>
-                
-            </tr>
-            
-            <tr>
-                
-                <td >Polling Frequency</td>
-                <td>Polling frequency (in minutes) for retrieving defects from Bamboo.</td>
-                
-            </tr>
-            
-            </tbody>
-        </table>
-
-        
-
         
     </div>
 
