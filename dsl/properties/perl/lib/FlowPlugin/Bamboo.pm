@@ -668,7 +668,7 @@ sub collectReportingData {
 
     my $reporting = FlowPDF::ComponentManager->loadComponent('FlowPlugin::Bamboo::Reporting', {
         reportObjectTypes     => [ 'build' ],
-        initialRetrievalCount => $params->{initialRecordsCount},
+        initialRetrievalCount => $params->{initialRetrievalCount},
         metadataUniqueKey     => $requestKey,
         payloadKeys           => [ 'startTime' ]
     }, $self);

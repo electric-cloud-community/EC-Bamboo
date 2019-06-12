@@ -1,5 +1,3 @@
-Bamboo is a continuous integration (CI) server that can be used to automate the release management for a software application, creating a continuous delivery pipeline.
-What does this mean?
-CI is a software development methodology in which a build, unit tests and integration tests are performed, or triggered, whenever code is committed to the repository, to ensure that new changes integrate well into the existing code base. Integration builds provide early 'fail fast' feedback on the quality of new changes.
-Release management describes the steps that are typically performed to release a software application, including building and functional testing, tagging releases, assigning versions, and deploying and activating the new version in production.
+<p>This plugin integrates CloudBees Flow with Atlassian Bamboo.</p>
+<p>Atlassian Bamboo is a continuous integration (CI) and deployment (CD) server that can be used to automate the release management for a software application, creating a continuous delivery pipeline.</p>
 <p>For more information about Atlassian Bamboo go to <a href="https://www.atlassian.com/software/bamboo" target="_blank">Bamboo home page</a>. For better Atlassian Bamboo understanding go to  <a href="https://confluence.atlassian.com/bamboo/understanding-the-bamboo-ci-server-289277285.html" target="_blank">Atlassian Documentation</a></p>

@@ -48,10 +48,8 @@
 
     
     <h1>Overview</h1>
-    <p><p>Bamboo is a continuous integration (CI) server that can be used to automate the release management for a software application, creating a continuous delivery pipeline.
-What does this mean?
-CI is a software development methodology in which a build, unit tests and integration tests are performed, or triggered, whenever code is committed to the repository, to ensure that new changes integrate well into the existing code base. Integration builds provide early 'fail fast' feedback on the quality of new changes.
-Release management describes the steps that are typically performed to release a software application, including building and functional testing, tagging releases, assigning versions, and deploying and activating the new version in production.</p>
+    <p><p>This plugin integrates CloudBees Flow with Atlassian Bamboo.</p>
+<p>Atlassian Bamboo is a continuous integration (CI) and deployment (CD) server that can be used to automate the release management for a software application, creating a continuous delivery pipeline.</p>
 <p>For more information about Atlassian Bamboo go to <a href="https://www.atlassian.com/software/bamboo" target="_blank">Bamboo home page</a>. For better Atlassian Bamboo understanding go to  <a href="https://confluence.atlassian.com/bamboo/understanding-the-bamboo-ci-server-289277285.html" target="_blank">Atlassian Documentation</a></p>
 </p>
     <div id="SupportedVersions">
@@ -824,6 +822,10 @@ Release management describes the steps that are typically performed to release a
         <p>This procedure collects reporting data for the DevOpsInsight Dashboards. It collects build results with optional tests run details.</p>
         
         
+            <p>This procedure collects reporting data for the DevOps Insight Dashboards.
+Collected build results (with optional tests run details) will be displayed on the Release Command Center dashboard.</p>
+
+        
         <h3>CollectReportingData Parameters</h3>
         <table class="grid">
             <thead>
@@ -941,6 +943,19 @@ Method should be named &quot;transform&quot;, and should return payload object. 
             
             </tbody>
         </table>
+        
+        <p>
+            <p>Normally, this procedure will be used as a DOIS DataSource.
+You can follow the CloudBees Flow user guide to add the datasource.</p>
+<p>
+<img src="../../plugins/@PLUGIN_KEY@/images/CollectReportingData/DataSourceForm.png" />
+</p>
+<p>After the DataSource schedule run, you will see something like this on the dashboard.</p>
+<p>
+<img src="../../plugins/@PLUGIN_KEY@/images/CollectReportingData/ReleaseCommandCenter.png" />
+</p>
+
+        </p>
         
     </div>
 
