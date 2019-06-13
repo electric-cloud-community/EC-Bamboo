@@ -1,26 +1,29 @@
 1.5.0:
   - Added Result Format and Result Property Sheet parameters for all the procedures which returns information from Bamboo.
   - |
-    <ul>Following procedures now produce output parameters:
-      <li>GetAllPlans</li>
-      <li>GetPlanDetails</li>
-      <li>GetPlanRuns</li>
-      <li>RunPlan</li>
+    <p>New procedures for the deployment process automation:</p>
+    <ul>
+      <li>GetDeploymentProjectsForPlan</li>
+      <li>CreateRelease</li>
+      <li>TriggerDeployment</li>
     </ul>
   - |
-    <ul>Introduced enhancements for the RunPlan procedure:
+    <p>Introduced enhancements for the RunPlan procedure:</p>
+    <ul>
       <li>Posibility to run a build against custom VCS revision (branch).</li>
       <li>Supplying the additional run variables for the build.</li>
       <li>Showing live progress as the Plan Build runs.</li>
       <li>Posibility to omit waiting for the Plan Run to finish.</li>
     </ul>
   - |
-    <ul>New procedures for the deployment process automation:
-      <li>GetDeploymentProjectsForPlan</li>
-      <li>CreateRelease</li>
-      <li>TriggerDeployment</li>
+    <p>Following procedures now produce output parameters:</p>
+    <ul>
+      <li>GetAllPlans</li>
+      <li>GetPlanDetails</li>
+      <li>GetPlanRuns</li>
+      <li>RunPlan</li>
     </ul>
-  - New procedure CollectReportingData for the DevOpsInsightServer integration was added.
+  - New procedure CollectReportingData for the DevOps Insight Server integration was added.
   - Proxy support was added.
   - Cleanup was performed.
 1.4.2:

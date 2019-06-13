@@ -22,6 +22,8 @@ proceduresGrouping:
        - GetDeploymentProjectsForPlan
        - CreateRelease
        - TriggerDeployment
+excludeProcedures:
+  - ValidateCRDParams
 
 chapters:
   - name: 'Supported Versions'

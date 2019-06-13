@@ -30,7 +30,7 @@
   <formElement>
     <type>entry</type>
     <property>frequency</property>
-    <documentation>Polling frequency (in minutes) for retrieving defects from JIRA.</documentation>
+    <documentation>Polling frequency (in minutes) for retrieving defects from Bamboo.</documentation>
     <label>Polling Frequency:</label>
     <value>30</value>
   </formElement>

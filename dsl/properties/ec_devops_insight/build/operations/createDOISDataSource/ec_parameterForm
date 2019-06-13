@@ -74,7 +74,7 @@
         <property>frequency</property>
         <required>1</required>
         <documentation>
-            Polling frequency (in minutes) for retrieving defects from JIRA.
+            Polling frequency (in minutes) for retrieving defects from Bamboo.
         </documentation>
         <value>30</value>
     </formElement>

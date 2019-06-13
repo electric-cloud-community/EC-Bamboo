@@ -34,7 +34,7 @@
 
     
     <li><a href="#procedures">Plugin Procedures</a></li>
-    <li>Build Plans management<br/><i>These procedures help in managing a Build process.</i></li><ul><li><a href="#RunPlan">RunPlan</a></li><li><a href="#EnablePlan">EnablePlan</a></li><li><a href="#DisablePlan">DisablePlan</a></li><li><a href="#GetAllPlans">GetAllPlans</a></li><li><a href="#GetPlanDetails">GetPlanDetails</a></li><li><a href="#GetPlanRuns">GetPlanRuns</a></li></ul><li>Deployment Plans management<br/><i>These procedures help in managing a Deployment process.</i></li><ul><li><a href="#GetDeploymentProjectsForPlan">GetDeploymentProjectsForPlan</a></li><li><a href="#CreateRelease">CreateRelease</a></li><li><a href="#TriggerDeployment">TriggerDeployment</a></li></ul><li>Other</li><ul><li><a href="#CollectReportingData">CollectReportingData</a></li><li><a href="#ValidateCRDParams">ValidateCRDParams</a></li></ul>
+    <li>Build Plans management<br/><i>These procedures help in managing a Build process.</i></li><ul><li><a href="#RunPlan">RunPlan</a></li><li><a href="#EnablePlan">EnablePlan</a></li><li><a href="#DisablePlan">DisablePlan</a></li><li><a href="#GetAllPlans">GetAllPlans</a></li><li><a href="#GetPlanDetails">GetPlanDetails</a></li><li><a href="#GetPlanRuns">GetPlanRuns</a></li></ul><li>Deployment Plans management<br/><i>These procedures help in managing a Deployment process.</i></li><ul><li><a href="#GetDeploymentProjectsForPlan">GetDeploymentProjectsForPlan</a></li><li><a href="#CreateRelease">CreateRelease</a></li><li><a href="#TriggerDeployment">TriggerDeployment</a></li></ul><li>Other</li><ul><li><a href="#CollectReportingData">CollectReportingData</a></li></ul>
 
     
     
@@ -93,7 +93,7 @@
         </p>
 
         <h3>Creating Plugin Configurations</h3>
-        <p>To create plugin configurations in ElectricFlow,
+        <p>To create plugin configurations in CloudBees Flow,
             do these steps:</p>
 
         <li>Go to <b>Administration</b> &gt; <b>Plugins</b> to open the Plugin Manager.</li>
@@ -261,6 +261,32 @@
             
             </tbody>
         </table>
+
+        
+        <h4>Output Parameters</h4>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                <td>buildResultKey</td>
+                <td>Composite key for the Run Result.</td>
+            </tr>
+            
+            <tr>
+                <td>buildUrl</td>
+                <td>Link to the result page.</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -313,6 +339,9 @@
             
             </tbody>
         </table>
+
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -365,6 +394,9 @@
             
             </tbody>
         </table>
+
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -424,6 +456,27 @@
             
             </tbody>
         </table>
+
+        
+        <h4>Output Parameters</h4>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                <td>planKeys</td>
+                <td>List of comma-separated plan keys</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -490,6 +543,9 @@
             
             </tbody>
         </table>
+
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -570,6 +626,32 @@
             
             </tbody>
         </table>
+
+        
+        <h4>Output Parameters</h4>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                <td>resultKeys</td>
+                <td>List of comma-separated plan build result keys.</td>
+            </tr>
+            
+            <tr>
+                <td>latestResultKey</td>
+                <td>Key for the latest build run.</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -636,6 +718,27 @@
             
             </tbody>
         </table>
+
+        
+        <h4>Output Parameters</h4>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                <td>deploymentProjectKeys</td>
+                <td>List of comma-separated deployment project keys for the plan</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -716,6 +819,27 @@
             
             </tbody>
         </table>
+
+        
+        <h4>Output Parameters</h4>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                <td>version</td>
+                <td>Name of the created version.</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -803,6 +927,32 @@
             
             </tbody>
         </table>
+
+        
+        <h4>Output Parameters</h4>
+        <table class="grid">
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            
+            <tr>
+                <td>deploymentResultKey</td>
+                <td>Key of the deployment result.</td>
+            </tr>
+            
+            <tr>
+                <td>deploymentResultUrl</td>
+                <td>URL to the deployment result report.</td>
+            </tr>
+            
+            </tbody>
+        </table>
+        
+
         
         <p>
             <h4>Usage Example</h4>
@@ -821,10 +971,6 @@
         
         <p>This procedure collects reporting data for the DevOpsInsight Dashboards. It collects build results with optional tests run details.</p>
         
-        
-            <p>This procedure collects reporting data for the DevOps Insight Dashboards.
-Collected build results (with optional tests run details) will be displayed on the Release Command Center dashboard.</p>
-
         
         <h3>CollectReportingData Parameters</h3>
         <table class="grid">
@@ -943,6 +1089,9 @@ Method should be named &quot;transform&quot;, and should return payload object. 
             
             </tbody>
         </table>
+
+        
+
         
         <p>
             <p>Normally, this procedure will be used as a DOIS DataSource.
@@ -950,63 +1099,8 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
 <p>
 <img src="../../plugins/@PLUGIN_KEY@/images/CollectReportingData/DataSourceForm.png" />
 </p>
-<p>After the DataSource schedule run, you will see something like this on the dashboard.</p>
-<p>
-<img src="../../plugins/@PLUGIN_KEY@/images/CollectReportingData/ReleaseCommandCenter.png" />
-</p>
 
         </p>
-        
-    </div>
-
-    
-    <div id="ValidateCRDParams">
-        <h2>ValidateCRDParams</h2>
-        
-        
-        <p>Service procedure to check parameter values passed for DOISDataSource creation.</p>
-        
-        
-        <h3>ValidateCRDParams Parameters</h3>
-        <table class="grid">
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            </thead>
-            <tbody>
-            
-            <tr>
-                
-                <td class="required">Configuration Name</td>
-                <td>Previously defined configuration for the plugin</td>
-                
-            </tr>
-            
-            <tr>
-                
-                <td class="required">Project Key</td>
-                <td>Project key (short name) of project that contains build plan.</td>
-                
-            </tr>
-            
-            <tr>
-                
-                <td >Plan Key</td>
-                <td>Short name of plan to get details. Might be simply planKey or composite planKey-jobKey.</td>
-                
-            </tr>
-            
-            <tr>
-                
-                <td >Polling Frequency</td>
-                <td>Polling frequency (in minutes) for retrieving defects from JIRA.</td>
-                
-            </tr>
-            
-            </tbody>
-        </table>
         
     </div>
 
@@ -1030,15 +1124,16 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
         
         <li>Added Result Format and Result Property Sheet parameters for all the procedures which returns information from Bamboo.</li>
         
-        <li><ul>Following procedures now produce output parameters:
-  <li>GetAllPlans</li>
-  <li>GetPlanDetails</li>
-  <li>GetPlanRuns</li>
-  <li>RunPlan</li>
+        <li><p>New procedures for the deployment process automation:</p>
+<ul>
+  <li>GetDeploymentProjectsForPlan</li>
+  <li>CreateRelease</li>
+  <li>TriggerDeployment</li>
 </ul>
 </li>
         
-        <li><ul>Introduced enhancements for the RunPlan procedure:
+        <li><p>Introduced enhancements for the RunPlan procedure:</p>
+<ul>
   <li>Posibility to run a build against custom VCS revision (branch).</li>
   <li>Supplying the additional run variables for the build.</li>
   <li>Showing live progress as the Plan Build runs.</li>
@@ -1046,14 +1141,16 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
 </ul>
 </li>
         
-        <li><ul>New procedures for the deployment process automation:
-  <li>GetDeploymentProjectsForPlan</li>
-  <li>CreateRelease</li>
-  <li>TriggerDeployment</li>
+        <li><p>Following procedures now produce output parameters:</p>
+<ul>
+  <li>GetAllPlans</li>
+  <li>GetPlanDetails</li>
+  <li>GetPlanRuns</li>
+  <li>RunPlan</li>
 </ul>
 </li>
         
-        <li>New procedure CollectReportingData for the DevOpsInsightServer integration was added.</li>
+        <li>New procedure CollectReportingData for the DevOps Insight Server integration was added.</li>
         
         <li>Proxy support was added.</li>
         
