@@ -667,10 +667,10 @@ sub collectReportingData {
     my $requestKey = $params->{projectKey} . ($params->{planKey} ? '-' . $params->{planKey} : '');
 
     my $reporting = FlowPDF::ComponentManager->loadComponent('FlowPlugin::Bamboo::Reporting', {
-        reportObjectTypes     => [ 'build' ],
-        initialRetrievalCount => $params->{initialRetrievalCount},
-        metadataUniqueKey     => $requestKey,
-        payloadKeys           => [ 'startTime' ]
+        reportObjectTypes   => [ 'build' ],
+        initialRecordsCount => $params->{initialRecordsCount},
+        metadataUniqueKey   => $requestKey,
+        payloadKeys         => [ 'startTime' ]
     }, $self);
 
     $reporting->CollectReportingData();
@@ -747,7 +747,7 @@ sub getBuildRunsAfter {
         for my $buildResult (@{$buildResults->{results}{result}}) {
             my $parsed = _planBuildResultToShortInfo($buildResult, ['labels']);
 
-            if ($self->compareISODateTimes($afterTime, $parsed->{buildStartedTime}) > 0) {
+            if ($self->compareISODateTimes($afterTime, $parsed->{buildStartedTime}) >= 0) {
                 $reachedGivenTime = 1;
                 last;
             }

@@ -54,7 +54,7 @@ def getCreateActualParameters(Map pluginParameters) {
             config               : pluginParameters.config,
             projectKey           : pluginParameters.projectKey,
             planKey              : pluginParameters.planKey,
-            initialRetrievalCount: pluginParameters.initialRetrievalCount,
+            initialRecordsCount: pluginParameters.initialRecordsCount,
             retrieveTestResults  : pluginParameters.retrieveTestResults,
             testCategory         : pluginParameters.testCategory,
             transformScript      : pluginParameters.transformScript,
