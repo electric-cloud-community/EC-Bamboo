@@ -32,7 +32,7 @@ sub buildDataset {
             releaseUri          => _buildRunBuildURL($params, $row),
             releaseProjectName  => $params->{releaseProjectName} || '',
             pluginConfiguration => $params->{config},
-            baseDrilldownUrl    => $params->{baseDrilldownUrl} || $params->{endpoint},
+            baseDrilldownUrl    => _buildRunBuildURL($params, $row),
             buildNumber         => $row->{buildNumber},
             timestamp           => $row->{buildStartedTime},
             endTime             => $row->{buildCompletedTime},
@@ -90,8 +90,10 @@ sub _buildRunBuildURL {
     my $drilldownURL = $params->{baseDrilldownUrl};
     $drilldownURL ||= $params->{endpoint};
 
+    my $buildSourceKey = $params->{projectKey} . ($params->{planKey} ? ('-' . $params->{planKey}) : '');
+
     $drilldownURL =~ s|/+$||;
-    return $drilldownURL . '/browse/' . $buildInfo->{key};
+    return $drilldownURL . '/browse/' . $buildSourceKey;
 }
 
 sub getRecordsAfter {
