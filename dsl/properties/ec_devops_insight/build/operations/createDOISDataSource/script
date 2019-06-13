@@ -49,17 +49,17 @@ void validatePluginParams(Map pluginParameters) {
 
 def getCreateActualParameters(Map pluginParameters) {
     return [
-            config               : pluginParameters.config,
-            projectKey           : pluginParameters.projectKey,
-            planKey              : pluginParameters.planKey,
-            initialRecordsCount: pluginParameters.initialRecordsCount,
-            retrieveTestResults  : pluginParameters.retrieveTestResults,
-            testCategory         : pluginParameters.testCategory,
-            transformScript      : pluginParameters.transformScript,
-            metadataPropertyPath : pluginParameters.metadataPropertyPath,
-            baseDrilldownUrl     : pluginParameters.baseDrilldownUrl,
-            previewMode          : '0',
-            debugLevel           : '0',
+            config              : pluginParameters.config,
+            projectKey          : pluginParameters.projectKey,
+            planKey             : pluginParameters.planKey,
+            initialRecordsCount : pluginParameters.initialRecordsCount,
+            retrieveTestResults : pluginParameters.retrieveTestResults,
+            testCategory        : pluginParameters.testCategory,
+            transformScript     : pluginParameters.transformScript,
+            metadataPropertyPath: pluginParameters.metadataPropertyPath,
+            baseDrilldownUrl    : pluginParameters.baseDrilldownUrl,
+            previewMode         : '0',
+            debugLevel          : '0',
     ]
 }
 
@@ -149,27 +149,16 @@ def scheduleName = args.scheduleName;
 def scheduleProjectName = args.scheduleProjectName;
 
 def procedureExists(String prjct, String prcdr) {
-    def projects = getProjects();
+    // Unexisting project will be handled by call
+    def procedures = getProcedures(projectName: prjct)
 
-    def proj = projects.grep({ it.projectName == prjct });
-    if (!proj.size()) {
-        return false
-    }
-
-    def procedures = getProcedures(projectName: prjct);
-
-    def proc = false;
+    def proc = false
     procedures.each {
         if (it.procedureName == prcdr) {
-            proc = true;
+            proc = true
         }
     }
-
-    if (!proc) {
-        return false;
-    }
-
-    return true;
+    return proc;
 }
 
 if (procedureExists(scheduleProjectName, scheduleName)) {
