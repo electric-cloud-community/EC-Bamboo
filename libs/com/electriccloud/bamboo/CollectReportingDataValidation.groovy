@@ -46,7 +46,7 @@ class CollectReportingDataValidation {
                 config               : pluginParameters.config,
                 projectKey           : pluginParameters.projectKey,
                 planKey              : pluginParameters.planKey,
-                initialRetrievalCount: pluginParameters.initialRetrievalCount,
+                initialRecordsCount: pluginParameters.initialRecordsCount,
                 transformScript      : pluginParameters.transformScript,
                 metadataPropertyPath : pluginParameters.metadataPropertyPath,
                 baseDrilldownUrl     : pluginParameters.baseDrilldownUrl,

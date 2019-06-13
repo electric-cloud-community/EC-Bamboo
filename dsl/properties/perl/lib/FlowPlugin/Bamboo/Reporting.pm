@@ -29,10 +29,11 @@ sub buildDataset {
             pluginName          => '@PLUGIN_NAME@',
             projectName         => $context->retrieveCurrentProjectName(),
             releaseName         => $params->{releaseName} || '',
-            releaseUri          => _buildRunBuildURL($params, $row),
+            # This probably should be <projectName>-<planName>
+            releaseUri          => ($params->{projectKey} . ($params->{planKey} ? '-' . $params->{planKey} : '')),
             releaseProjectName  => $params->{releaseProjectName} || '',
             pluginConfiguration => $params->{config},
-            baseDrilldownUrl    => $params->{baseDrilldownUrl} || $params->{endpoint},
+            baseDrilldownUrl    => ($params->{baseDrilldownUrl} || $params->{endpoint}) . '/browse/',
             buildNumber         => $row->{buildNumber},
             timestamp           => $row->{buildStartedTime},
             endTime             => $row->{buildCompletedTime},
@@ -40,7 +41,7 @@ sub buildDataset {
             buildStatus         => $buildStateMapping{$row->{buildState} || 'Unknown'},
             launchedBy          => 'N/A',
             jobName             => $row->{key},
-            duration            => $row->{buildDurationInSeconds},
+            duration            => $row->{buildDuration},
             tags                => $row->{labels} || '',
             sourceUrl           => $row->{url},
         );
@@ -86,12 +87,14 @@ sub buildDataset {
 }
 
 sub _buildRunBuildURL {
-    my ($params, $buildInfo) = @_;
+    my ($params) = @_;
     my $drilldownURL = $params->{baseDrilldownUrl};
     $drilldownURL ||= $params->{endpoint};
 
+    my $buildSourceKey = $params->{projectKey} . ($params->{planKey} ? ('-' . $params->{planKey}) : '');
+
     $drilldownURL =~ s|/+$||;
-    return $drilldownURL . '/browse/' . $buildInfo->{key};
+    return $drilldownURL . '/browse/' . $buildSourceKey;
 }
 
 sub getRecordsAfter {

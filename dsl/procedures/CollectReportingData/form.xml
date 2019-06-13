@@ -71,7 +71,7 @@ Method should be named "transform", and should return payload object. In this ex
   </formElement>
   <formElement>
     <type>entry</type>
-    <property>initialRetrievalCount</property>
+    <property>initialRecordsCount</property>
     <required>0</required>
     <documentation>Count of old builds to retrieve from server on the first run. If omited it will be set to 10.</documentation>
     <label>Initial Count:</label>

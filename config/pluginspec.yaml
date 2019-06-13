@@ -499,7 +499,7 @@ procedures:
                 return time();
             }
           </pre>
-      - name: initialRetrievalCount
+      - name: initialRecordsCount
         label: Initial Count
         documentation: Count of old builds to retrieve from server on the first run. If omited it will be set to 10.
         type: entry
