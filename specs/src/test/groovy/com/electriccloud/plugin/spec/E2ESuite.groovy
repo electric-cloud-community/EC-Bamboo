@@ -42,7 +42,8 @@ class E2ESuite extends PluginTestHelper {
 
         def pipelineStatus = getPipelineRuntimeDetails(resp['flowRuntime']['flowRuntimeId'])
         then:
+        println(getPipelineLink(projectName, pipelineName, resp['flowRuntime']['flowRuntimeId']))
 
-        assert pipelineStatus['flowRuntime']['status'] == 'success'
+        assert pipelineStatus['flowRuntime']['status'][0] == 'success'
     }
 }
