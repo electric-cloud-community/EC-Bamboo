@@ -1,14 +1,18 @@
-def deploymentProj = 'Deployment Project'
+def projName = args.projectName ?: 'Bamboo E2E pipeline'
+def pipeName = args.pipelineName ?: 'Bamboo E2E pipeline'
+def resName = args.resourceName ?: 'local'
 def configName = args.configName ?: 'config'
-def bambooProject = 'PROJECT'
-def bambooPlan = 'PLAN'
+def bambooProject = args.bambooBuildProject ?: 'PROJECT'
+def bambooPlan = args.bambooBuildPlan ?: 'PLAN'
+def bambooDeploymentProj = args.bambooDeploymentProject ?: 'Deployment Project'
+def bambooDeploymentEnvironment = args.bambooDeployEnvironment ?: 'Stage'
 
-project 'Default', {
+project projName, {
     description = 'Default project created during installation.'
-    resourceName = null
+    resourceName = resName
     workspaceName = null
 
-    pipeline 'Bamboo', {
+    pipeline pipeName, {
         description = ''
         disableMultipleActiveRuns = '0'
         disableRestart = '0'
@@ -29,11 +33,11 @@ project 'Default', {
             condition = null
             duration = null
             parallelToPrevious = null
-            pipelineName = 'Bamboo'
+            pipelineName = pipeName
             plannedEndDate = null
             plannedStartDate = null
             precondition = null
-            resourceName = null
+            resourceName = resName
             waitForPlannedStartDate = '0'
 
             gate 'PRE', {
@@ -268,11 +272,11 @@ project 'Default', {
             condition = null
             duration = null
             parallelToPrevious = null
-            pipelineName = 'Bamboo'
+            pipelineName = pipeName
             plannedEndDate = null
             plannedStartDate = null
             precondition = null
-            resourceName = null
+            resourceName = resName
             waitForPlannedStartDate = '0'
 
             gate 'PRE', {
@@ -285,81 +289,13 @@ project 'Default', {
                 precondition = null
             }
 
-            task 'EnablePlan', {
-                description = ''
-                actionLabelText = null
-                actualParameter = [
-                        'config': configName,
-                        'planKey': bambooPlan,
-                        'projectKey': bambooProject,
-                ]
-                advancedMode = '0'
-                afterLastRetry = null
-                allowOutOfOrderRun = '0'
-                allowSkip = null
-                alwaysRun = '0'
-                condition = null
-                deployerExpression = null
-                deployerRunType = null
-                disableFailure = null
-                duration = null
-                emailConfigName = null
-                enabled = '1'
-                environmentName = null
-                environmentProjectName = null
-                environmentTemplateName = null
-                environmentTemplateProjectName = null
-                errorHandling = 'stopOnError'
-                gateCondition = null
-                gateType = null
-                groupName = null
-                groupRunType = null
-                insertRollingDeployManualStep = '0'
-                instruction = null
-                notificationEnabled = null
-                notificationTemplate = null
-                parallelToPrevious = null
-                plannedEndDate = null
-                plannedStartDate = null
-                precondition = null
-                requiredApprovalsCount = null
-                resourceName = ''
-                retryCount = null
-                retryInterval = null
-                retryType = null
-                rollingDeployEnabled = null
-                rollingDeployManualStepCondition = null
-                skippable = '0'
-                snapshotName = null
-                stageSummaryParameters = null
-                startingStage = null
-                subErrorHandling = null
-                subapplication = null
-                subpipeline = null
-                subpluginKey = 'EC-Bamboo'
-                subprocedure = 'EnablePlan'
-                subprocess = null
-                subproject = null
-                subrelease = null
-                subreleasePipeline = null
-                subreleasePipelineProject = null
-                subreleaseSuffix = null
-                subservice = null
-                subworkflowDefinition = null
-                subworkflowStartingState = null
-                taskProcessType = null
-                taskType = 'PLUGIN'
-                triggerType = null
-                useApproverAcl = '0'
-                waitForPlannedStartDate = '0'
-            }
 
             task 'DisablePlan', {
                 description = ''
                 actionLabelText = null
                 actualParameter = [
-                        'config': configName,
-                        'planKey': bambooPlan,
+                        'config'    : configName,
+                        'planKey'   : bambooPlan,
                         'projectKey': bambooProject,
                 ]
                 advancedMode = '0'
@@ -422,6 +358,75 @@ project 'Default', {
                 useApproverAcl = '0'
                 waitForPlannedStartDate = '0'
             }
+
+            task 'EnablePlan', {
+                description = ''
+                actionLabelText = null
+                actualParameter = [
+                        'config'    : configName,
+                        'planKey'   : bambooPlan,
+                        'projectKey': bambooProject,
+                ]
+                advancedMode = '0'
+                afterLastRetry = null
+                allowOutOfOrderRun = '0'
+                allowSkip = null
+                alwaysRun = '0'
+                condition = null
+                deployerExpression = null
+                deployerRunType = null
+                disableFailure = null
+                duration = null
+                emailConfigName = null
+                enabled = '1'
+                environmentName = null
+                environmentProjectName = null
+                environmentTemplateName = null
+                environmentTemplateProjectName = null
+                errorHandling = 'stopOnError'
+                gateCondition = null
+                gateType = null
+                groupName = null
+                groupRunType = null
+                insertRollingDeployManualStep = '0'
+                instruction = null
+                notificationEnabled = null
+                notificationTemplate = null
+                parallelToPrevious = null
+                plannedEndDate = null
+                plannedStartDate = null
+                precondition = null
+                requiredApprovalsCount = null
+                resourceName = ''
+                retryCount = null
+                retryInterval = null
+                retryType = null
+                rollingDeployEnabled = null
+                rollingDeployManualStepCondition = null
+                skippable = '0'
+                snapshotName = null
+                stageSummaryParameters = null
+                startingStage = null
+                subErrorHandling = null
+                subapplication = null
+                subpipeline = null
+                subpluginKey = 'EC-Bamboo'
+                subprocedure = 'EnablePlan'
+                subprocess = null
+                subproject = null
+                subrelease = null
+                subreleasePipeline = null
+                subreleasePipelineProject = null
+                subreleaseSuffix = null
+                subservice = null
+                subworkflowDefinition = null
+                subworkflowStartingState = null
+                taskProcessType = null
+                taskType = 'PLUGIN'
+                triggerType = null
+                useApproverAcl = '0'
+                waitForPlannedStartDate = '0'
+            }
         }
 
         stage 'Build Plan', {
@@ -431,11 +436,11 @@ project 'Default', {
             condition = null
             duration = null
             parallelToPrevious = null
-            pipelineName = 'Bamboo'
+            pipelineName = pipeName
             plannedEndDate = null
             plannedStartDate = null
             precondition = null
-            resourceName = null
+            resourceName = resName
             waitForPlannedStartDate = '0'
 
             gate 'PRE', {
@@ -599,15 +604,11 @@ project 'Default', {
                 actionLabelText = null
                 actualParameter = [
                         'commandToRun': '''my $prev = \'$[/myPipelineRuntime/stages/PlanDetails/tasks/GetPlanRuns/job/outputParameters/latestResultKey]\';
-
 my $new = \'$[/myStageRuntime/tasks/GetPlanRuns/job/outputParameters/latestResultKey]\';
-
 print "Checking $prev eq $new\\n";
-
 if($prev eq $new){
-  die "Something went wrong";
+  die "Something went wrong. Build number was not changed";
 }
-
 exit 0;''',
                         'shellToUse'  : 'ec-perl',
                 ]
@@ -680,11 +681,11 @@ exit 0;''',
             condition = null
             duration = null
             parallelToPrevious = null
-            pipelineName = 'Bamboo'
+            pipelineName = pipeName
             plannedEndDate = null
             plannedStartDate = null
             precondition = null
-            resourceName = null
+            resourceName = resName
             waitForPlannedStartDate = '0'
 
             gate 'PRE', {
@@ -773,7 +774,7 @@ exit 0;''',
                 actionLabelText = null
                 actualParameter = [
                         'config'               : configName,
-                        'deploymentProjectName': deploymentProj,
+                        'deploymentProjectName': bambooDeploymentProj,
                         'planBuildKey'         : '$[/myPipelineRuntime/stages["Build Plan"]/tasks/GetPlanRuns/job/outputParameters/latestResultKey]',
                         'requestVersionName'   : '1',
                         'resultFormat'         : 'json',
@@ -845,8 +846,8 @@ exit 0;''',
                 actionLabelText = null
                 actualParameter = [
                         'config'                   : configName,
-                        'deploymentEnvironmentName': 'Stage',
-                        'deploymentProjectName'    : deploymentProj,
+                        'deploymentEnvironmentName': bambooDeploymentEnvironment,
+                        'deploymentProjectName'    : bambooDeploymentProj,
                         'deploymentVersionName'    : '$[/myStageRuntime/tasks/CreateVersion/job/outputParameters/version]',
                         'resultFormat'             : 'json',
                         'resultPropertySheet'      : '/myJob/deploymentResult',
@@ -916,11 +917,10 @@ exit 0;''',
         }
 
         // Custom properties
-
         property 'ec_counters', {
-
             // Custom properties
-            pipelineCounter = '6'
+            pipelineCounter = '1'
         }
+
     }
 }
