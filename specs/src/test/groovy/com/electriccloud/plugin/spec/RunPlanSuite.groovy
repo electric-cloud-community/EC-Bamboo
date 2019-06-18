@@ -185,6 +185,7 @@ class RunPlanSuite extends PluginTestHelper {
     }
 
     @Unroll
+    @IgnoreRest
     def "#caseId. RunPlan - Custom revisions"() {
         given:
         def project = bambooProjects['valid']
@@ -213,8 +214,8 @@ class RunPlanSuite extends PluginTestHelper {
 
         where:
         caseId       | customRevision | expectedOutcome | expectedSummary
-        'CHANGEME_6' | 'valid'        | 'success'       | 'Build result information saved to the properties'
-        'CHANGEME_7' | 'valid_hash'   | 'success'       | 'Build result information saved to the properties'
+        'CHANGEME_6' | 'valid'        | 'success'       | "Completed with Success. Build Result Key: '[A-Z]+-[A-Z]+-[0-9]+'"
+        'CHANGEME_7' | 'valid_hash'   | 'success'       | "Completed with Success. Build Result Key: '[A-Z]+-[A-Z]+-[0-9]+'"
         'CHANGEME_8' | 'mailformed'   | 'warning'       | 'Build was not started'
         'CHANGEME_9' | 'unexisting'   | 'warning'       | 'Build was not started'
     }
