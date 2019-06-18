@@ -16,10 +16,10 @@ use URI::Escape qw/uri_escape_utf8/;
 # Service function that is being used to set some metadata for a plugin.
 sub pluginInfo {
     return {
-        pluginName      => '@PLUGIN_KEY@',
-        pluginVersion   => '@PLUGIN_VERSION@',
-        configFields    => [ 'config' ],
-        configLocations => [ 'ec_plugin_cfgs' ],
+        pluginName          => '@PLUGIN_KEY@',
+        pluginVersion       => '@PLUGIN_VERSION@',
+        configFields        => [ 'config' ],
+        configLocations     => [ 'ec_plugin_cfgs' ],
         defaultConfigValues => {
             authScheme => AUTH_SCHEME_VALUE_FOR_BASIC_AUTH
         }
@@ -36,10 +36,16 @@ sub init {
     eval {
         my $debugToPropertyXpath = $context->getEc->getProperty($propLocation);
         my $debugToProperty = $debugToPropertyXpath->findvalue('//value')->string_value();;
-        if (defined $debugToProperty && $debugToProperty ne ''){
+        if (defined $debugToProperty && $debugToProperty ne '') {
             FlowPDF::Log::setLogToProperty($debugToProperty);
+            FlowPDF::Log::FW::setLogToProperty($debugToProperty);
         }
     };
+
+    # Show framework logs when debug level is set to "Trace"
+    if ($params->{debugLevel} >= FlowPDF::Log::TRACE) {
+        FlowPDF::Log::FW::setLogLevel(FlowPDF::Log::TRACE);
+    }
 
     $self->{restClient} = FlowPlugin::REST->new($context, {
         APIBase     => '/rest/api/latest/',
@@ -54,7 +60,7 @@ sub init {
 
 sub config {
     my $self = shift;
-    unless ($self->{_config}){
+    unless ($self->{_config}) {
         $self->{_config} = $self->getContext()->getConfigValues();
     }
     return $self->{_config};
@@ -116,7 +122,7 @@ sub getAllPlans {
         $params->{resultFormat},
         $params->{resultPropertySheet},
         \@infoToSave
-    ) and logInfo("Plan(s) information was saved to properties.");
+    );
 
     # Saving outcome properties and parameters
     my $planKeysStr = join(', ', map {$_->{key}} @infoToSave);
@@ -169,14 +175,13 @@ sub getPlanDetails {
         $params->{resultPropertySheet},
         $infoToSave
     );
-    logInfo("Plan information was saved to properties.");
 
     # Saving outcome properties and parameters
     $stepResult->setOutputParameter('planKeys', $infoToSave->{key});
 
     $stepResult->setJobStepOutcome('success');
-    $stepResult->setJobStepSummary("Build Plan details was saved to properties.");
-    $stepResult->setJobSummary("Info about $planKey was saved to property(ies)");
+    $stepResult->setJobStepSummary("Received info about $infoToSave->{key}.");
+    $stepResult->setJobSummary("Received info about $infoToSave->{key}.");
 
     $stepResult->apply();
 }
@@ -192,7 +197,7 @@ sub getDeploymentProjectsForPlan {
 
     my $planKey = "$params->{projectKey}-$params->{planKey}";
 
-    logInfo("Requesting information about $planKey");
+    logInfo("Requesting information deployment projects for plan $planKey");
     my $deployProjectsRefs = $self->client->get("/deploy/project/forPlan", { planKey => $planKey });
     return unless defined $deployProjectsRefs;
 
@@ -219,7 +224,7 @@ sub getDeploymentProjectsForPlan {
     my @deploymentProjectKeys = map {$_->{key}} @infoToSave;
     $stepResult->setOutputParameter('deploymentProjectKeys', join(', ', @deploymentProjectKeys));
 
-    my $summary = "Deployment projects info saved to properties.";
+    my $summary = "Deployment projects info saved to property(ies).";
     logInfo($summary);
     $stepResult->setJobStepOutcome('success');
     $stepResult->setJobStepSummary($summary);
@@ -250,7 +255,7 @@ sub getPlanRuns {
         $requestParameters{buildstate} = $params->{buildState};
     }
 
-    # Requesting and formatting information
+    logInfo("Requesting and formatting information");
     my @infoToSave = ();
     my $response = $self->client->get("/result/$planKey", \%requestParameters, undef, {
         errorHook => {
@@ -266,7 +271,7 @@ sub getPlanRuns {
 
     for my $buildResult (@{$response->{results}{result}}) {
         logInfo("Found build result: '$buildResult->{key}'");
-        push(@infoToSave, _planBuildResultToShortInfo($buildResult, ['artifacts', 'labels']));
+        push(@infoToSave, _planBuildResultToShortInfo($buildResult, [ 'artifacts', 'labels' ]));
     }
 
     # When have no information
@@ -284,7 +289,6 @@ sub getPlanRuns {
         $params->{resultPropertySheet},
         \@infoToSave
     );
-    logInfo("Plan run(s) information was saved to properties.");
 
     # Saving outcome properties and parameters
     my $buildKeysStr = join(', ', map {$_->{key}} @infoToSave);
@@ -319,10 +323,12 @@ sub createRelease {
     my $planKey = join('-', $project, $plan);
     logInfo("Plan key : $planKey");
 
+    logInfo("Requesting deployment projects for plan '$planKey'");
     my $deployProjectsRefs = $self->client->get("/deploy/project/forPlan", { planKey => $planKey });
     return unless defined $deployProjectsRefs;
 
     # Filtering one that have same name
+    logDebug("Filtering returned projects to one with name '$params->{deploymentProjectName}'");
     my ($deploymentProject) = grep {$_->{name} eq $params->{deploymentProjectName}} @$deployProjectsRefs;
 
     if (!defined $deploymentProject) {
@@ -331,8 +337,12 @@ sub createRelease {
             "Can't find deployment project with name '$params->{deploymentProjectName}' for plan '$planKey'"
         );
     }
+
     my $deploymentProjectId = $deploymentProject->{id};
+    logDebug("Deployment project id: $deploymentProjectId");
+
     if (!$params->{versionName} && $params->{requestVersionName}) {
+        logInfo("Requesting next version name for $deploymentProject->{name}");
         my $nextVersionRequest = $self->client->get("/deploy/projectVersioning/$deploymentProjectId/nextVersion", {
             # Can't see any difference with/without this but as we have it, let's specify
             resultKey => $params->{planBuildKey}
@@ -341,6 +351,9 @@ sub createRelease {
         $params->{versionName} = $nextVersionRequest->{nextVersionName};
     }
 
+    logInfo("Next version name is '$params->{versionName}'");
+
+    logInfo("Creating version");
     my $createVersionResponse = $self->client->post("/deploy/project/$deploymentProjectId/version", undef,
         # Content
         {
@@ -356,7 +369,6 @@ sub createRelease {
     return unless defined $createVersionResponse;
 
     logInfo("Created version: $params->{versionName}");
-
     my $shortInfo = _versionToShortInfo($createVersionResponse);
 
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $shortInfo);
@@ -476,7 +488,7 @@ sub runPlan {
     });
     return unless defined $buildInfo;
 
-    my $infoToSave = _planBuildResultToShortInfo($buildInfo, ['artifacts', 'labels']);
+    my $infoToSave = _planBuildResultToShortInfo($buildInfo, [ 'artifacts', 'labels' ]);
 
     # Save properties
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $infoToSave);
@@ -494,8 +506,8 @@ sub runPlan {
     }
 
     $stepResult->setJobStepOutcome('success');
-    $stepResult->setJobSummary("Build result information saved to the properties");
-    $stepResult->setJobStepSummary('Build result information saved to the properties');
+    $stepResult->setJobSummary('Completed with Success');
+    $stepResult->setJobStepSummary("Completed with Success. Build Result Key: '$infoToSave->{key}'");
     $stepResult->apply();
 }
 
@@ -509,15 +521,28 @@ sub triggerDeployment {
     $params->{resultFormat} ||= 'json';
     $params->{resultPropertySheet} ||= '/myJob/deploymentResult';
 
-    # Get deployment project
+    # We need to get ID of:
+    # - Deployment project
+    # - Environment
+    # - Version
+    # The only way to get the deployment project is to get all and then filter it by ourselves
+    # Environment information is by default included to the project
+    # To get version Id should perform additional request
+    # * For all available versions (<6.2.5)
+
+    # Get deployment project from the whole list
+
+    logInfo("Requesting deployment projects available for user");
     my $allProjects = $self->client->get('/deploy/project/all');
     return unless defined $allProjects;
 
+    logInfo("Filtering to the one with name '$params->{deploymentProjectName}'");
     my ($project) = grep {$_->{name} eq $params->{deploymentProjectName}} @$allProjects;
     if (!defined $project) {
-        logInfo("Here are names of all projects returned by Bamboo: ", (map { $_->{name} } @$allProjects) );
+        logInfo("Here are names of all projects returned by Bamboo: ", (map {$_->{name}} @$allProjects));
         return $self->setStepResultFields($stepResult, 'error', "Can't find deployment project '$params->{deploymentProjectName}'.");
     }
+    logInfo("Project key: " . $project->{name});
     logTrace("Project", $project);
 
     # Get environment
@@ -560,7 +585,7 @@ sub triggerDeployment {
                 # Updating progress property
                 $stepResult->setJobStepSummary("Deployment is finished. Requesting result.");
                 $stepResult->applyAndFlush();
-                logInfo("Build finished");
+                logInfo("Deployment finished.");
                 last;
             }
 
@@ -574,9 +599,11 @@ sub triggerDeployment {
         }
     }
 
+    logInfo("Requesting deployment result");
     my $deploymentResult = $self->client->get("/deploy/result/$deploymentResultId");
     my $shortInfo = _deploymentResultToShortInfo($deploymentResult);
 
+    logInfo("Saving result properties");
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $shortInfo);
 
     my $bambooResultURL = $params->{endpoint}
@@ -596,8 +623,8 @@ sub triggerDeployment {
     }
 
     $stepResult->setJobStepOutcome('success');
-    $stepResult->setJobSummary("Deployment result information saved to the properties.");
-    $stepResult->setJobStepSummary('Deployment result information saved to the properties.');
+    $stepResult->setJobSummary("Finished with Success.");
+    $stepResult->setJobStepSummary("Finished with Success. Deployment result key: '$shortInfo->{key}'");
     $stepResult->apply();
 }
 
@@ -609,6 +636,7 @@ sub enablePlan {
 
     my $planKey = "$params->{projectKey}-$params->{planKey}";
 
+    logInfo("Setting enable flag for plan $planKey");
     my $result = $self->client->post("/plan/$planKey/enable");
     return if (!defined $result || $result ne '1');
 
@@ -629,6 +657,7 @@ sub disablePlan {
 
     my $planKey = "$params->{projectKey}-$params->{planKey}";
 
+    logInfo("Removing enable flag for plan $planKey");
     my $result = $self->client->delete("/plan/$planKey/enable");
     return if (!defined $result || $result ne '1');
 
@@ -657,7 +686,6 @@ sub checkConnection {
 sub collectReportingData {
     my FlowPlugin::Bamboo $self = shift;
     my $params = shift;
-    my FlowPDF::StepResult $stepResult = shift;
     $self->init($params);
 
     if ($params->{debugLevel}) {
@@ -683,7 +711,7 @@ sub validateCRDParams {
     $self->init($params);
 
     my @required = qw/config projectKey/;
-    for my $param (@required){
+    for my $param (@required) {
         bailOut("Parameter $params is mandatory") unless $params->{$param};
     }
 
@@ -745,7 +773,7 @@ sub getBuildRunsAfter {
         $haveMoreResults = $buildResults->{results}{size} >= $requestPackSize;
 
         for my $buildResult (@{$buildResults->{results}{result}}) {
-            my $parsed = _planBuildResultToShortInfo($buildResult, ['labels']);
+            my $parsed = _planBuildResultToShortInfo($buildResult, [ 'labels' ]);
 
             if ($self->compareISODateTimes($afterTime, $parsed->{buildStartedTime}) >= 0) {
                 $reachedGivenTime = 1;
@@ -909,31 +937,31 @@ sub _planBuildResultToShortInfo {
     /;
 
     my %result = (
-        url             => $buildInfo->{link}{href},
-        planKey         => $buildInfo->{plan}{key},
+        url     => $buildInfo->{link}{href},
+        planKey => $buildInfo->{plan}{key},
     );
 
     if ($buildInfo->{buildTestSummary} && $buildInfo->{buildTestSummary} ne 'No tests found') {
         push(@oneToOne,
             qw/buildTestSummary
-               successfulTestCount
-               failedTestCount
-               quarantinedTestCount
-               skippedTestCount/
+                successfulTestCount
+                failedTestCount
+                quarantinedTestCount
+                skippedTestCount/
         );
 
         $result{totalTestsCount} = ($buildInfo->{successfulTestCount} || 0)
-                                 + ($buildInfo->{failedTestCount} || 0)
-                                 + ($buildInfo->{quarantinedTestCount} || 0)
-                                 + ($buildInfo->{skippedTestCount} || 0)
+            + ($buildInfo->{failedTestCount} || 0)
+            + ($buildInfo->{quarantinedTestCount} || 0)
+            + ($buildInfo->{skippedTestCount} || 0)
     }
 
     if (defined $expanded && ref $expanded eq 'ARRAY') {
         for my $section (@$expanded) {
             if ($section eq 'labels' && $buildInfo->{labels}{size} > 0) {
-                $result{labels} = join (', ', map { $_->{name} } @{$buildInfo->{labels}});
+                $result{labels} = join(', ', map {$_->{name}} @{$buildInfo->{labels}});
             }
-            elsif ($section eq 'artifacts' && $buildInfo->{artifacts}{size}){
+            elsif ($section eq 'artifacts' && $buildInfo->{artifacts}{size}) {
                 $result{artifacts} = $buildInfo->{artifacts}{artifact};
             }
         }
@@ -962,8 +990,8 @@ sub _deploymentProjectToShortInfo {
     my @environments = ();
     my @environmentNames = ();
     for my $env (@{$deploymentProject->{environments}}) {
-        push (@environmentNames, $env->{name});
-        push (@environments, {
+        push(@environmentNames, $env->{name});
+        push(@environments, {
             id                  => $env->{id},
             key                 => $env->{key}{key},
             name                => $env->{name},
@@ -1035,6 +1063,7 @@ sub saveResultProperties {
     if ($resultFormat eq 'json') {
         my $encodedResult = JSON::encode_json($result);
         $stepResult->setOutcomeProperty($resultProperty, $encodedResult);
+        logInfo("Result was saved to the property '$resultProperty'");
         return 1;
     }
 
@@ -1044,10 +1073,10 @@ sub saveResultProperties {
         for my $property (keys %$properties) {
             my $value = $properties->{$property};
             next unless (defined $value);
-
             logDebug("Saving property '$property' with value '$value'");
             $stepResult->setOutcomeProperty($property, $value);
         }
+        logInfo("Result was saved under the propertySheet '$resultProperty'");
     }
 
     $stepResult->apply();
