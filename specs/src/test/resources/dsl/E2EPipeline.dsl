@@ -214,7 +214,7 @@ exit 0;''',
                         'planKey'            : bambooPlan,
                         'projectKey'         : bambooProject,
                         'resultFormat'       : 'none',
-                        'resultPropertySheet': '/myJob/deploymentProjectKeys',
+                        'resultPropertySheet': '/myJob/deploymentProjects',
                 ]
                 alwaysRun = '0'
                 enabled = '1'
