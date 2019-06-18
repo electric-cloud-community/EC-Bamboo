@@ -298,4 +298,46 @@ class PluginTestHelper extends PluginSpockTestSupport {
         return getJobProperty("/myJob/steps/RunProcedure/steps/$procedureName/summary", jobId)
     }
 
+
+
+    def runPipeline(projectName, pipelineName, stagesToRun = []){
+        def stagesDsl = ''
+        if (stagesToRun.size() > 0){
+            stagesDsl = ", stagesToRun: '" + stagesToRun.join(',') + "'"
+        }
+
+        logger.info("Running pipeline: \"$pipelineName\" with stages: $stagesToRun")
+
+        def resp = dsl """
+                    runPipeline(
+                        projectName: '$projectName',
+                        pipelineName: '$pipelineName',
+                        $stagesDsl
+                    )
+            """
+        waitUntil {
+            pipelineCompleted(resp)
+        }
+
+        // Display pipeline stages and tasks logs
+        stagesToRun.each { stage ->
+            def tasks = getPipelineTasks(stage, resp.flowRuntime.flowRuntimeId)
+            def delimeter1 = "**************" * 5
+            def delimeter2 = "==============" * 5
+            logger.info("$delimeter1")
+            logger.info("STAGE: $stage:")
+            logger.info("$delimeter1\n")
+            logger.info("\ttasks:".toUpperCase())
+            tasks.each { task ->
+                logger.info("$delimeter2")
+                logger.info("\t$task.taskName:")
+                logger.info("$delimeter2")
+                logger.info(getJobLogs(task.jobId) as String)
+            }
+
+        }
+        return resp
+    }
+
+
 }
