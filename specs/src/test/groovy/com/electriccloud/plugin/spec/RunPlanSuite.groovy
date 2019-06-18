@@ -185,7 +185,6 @@ class RunPlanSuite extends PluginTestHelper {
     }
 
     @Unroll
-    @IgnoreRest
     def "#caseId. RunPlan - Custom revisions"() {
         given:
         def project = bambooProjects['valid']
