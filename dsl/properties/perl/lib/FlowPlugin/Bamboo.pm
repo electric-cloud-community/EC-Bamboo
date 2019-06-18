@@ -38,13 +38,13 @@ sub init {
         my $debugToProperty = $debugToPropertyXpath->findvalue('//value')->string_value();;
         if (defined $debugToProperty && $debugToProperty ne '') {
             FlowPDF::Log::setLogToProperty($debugToProperty);
-            $FlowPDF::Log::FW::LOG_TO_PROPERTY = $debugToProperty;
+            FlowPDF::Log::FW::setLogToProperty($debugToProperty);
         }
     };
 
-    # Show framework log when debug level is set to "Trace"
+    # Show framework logs when debug level is set to "Trace"
     if ($params->{debugLevel} >= FlowPDF::Log::TRACE) {
-        $FlowPDF::Log::FW::LOG_LEVEL = FlowPDF::Log::TRACE;
+        FlowPDF::Log::FW::setLogLevel(FlowPDF::Log::TRACE);
     }
 
     $self->{restClient} = FlowPlugin::REST->new($context, {
