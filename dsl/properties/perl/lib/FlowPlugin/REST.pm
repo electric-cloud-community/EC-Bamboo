@@ -25,11 +25,12 @@ sub new {
 
     my FlowPDF::Config $config = $context->getConfigValues();
 
-    # Should create logger before initializing
-    my $debugLog = 0;
-    if (!$params->{debug}) {
-        $debugLog = $config->getParameter('debugLevel')->getValue() if $config->isParameterExists('debugLevel');
-    }
+    my $debugLog = $params->{debug}
+        ? $params->{debug}
+        : ($config->isParameterExists('debugLevel'))
+          ? $config->getParameter('debugLevel')->getValue() || 0
+          : 0;
+
     my $logger = FlowPDF::Log->new({ level => $debugLog });
 
     my $self = {
