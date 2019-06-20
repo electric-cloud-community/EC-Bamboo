@@ -243,7 +243,7 @@ class PluginTestHelper extends PluginSpockTestSupport {
     def getStepSummary(def jobId, def stepName) {
         assert jobId
         def summary
-        def property = "/myJob/jobSteps/$stepName/summary"
+        def property = "/myJob/jobSteps/RunProcedure/steps/$stepName/summary"
         try {
             summary = getJobProperty(property, jobId)
         } catch (Throwable e) {
