@@ -19,6 +19,7 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
             C388091: [ids: 'C388091', description: 'GetAllPlans: get plans - property format: json'],
             C388092: [ids: 'C388092', description: 'GetAllPlans: get plans - property format: propertySheet'],
             C388093: [ids: 'C388093', description: 'GetAllPlans: get plans - property format: propertySheet'],
+            C388096: [ids: 'C388096', description: 'GetAllPlans: get all plans, projectKey - empty '],
 
     ]
 
@@ -64,7 +65,8 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         def jobProperties = getJobProperties(result.jobId)
         def jsonBamboResponse = bambooClient.getPlans(projectKey)
 
-        def plansInfo = jsonBamboResponse.plans.plan
+        def plansInfo = projectKey ? jsonBamboResponse.plans.plan : jsonBamboResponse.projects.project[0].plans.plan
+
         // procedure doesn't use all fields from response
         // and save only part of them:
         plansInfo.each {
@@ -88,9 +90,10 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
             }
         }
 
-        def plansKey = jsonBamboResponse.plans.plan.collect { it.key}
+        def plansKey = projectKey ? jsonBamboResponse.plans.plan.collect { it.key} : jsonBamboResponse.projects.project[0].plans.plan.collect { it.key}
         def propertyName = resultPropertySheet.split("/")[2]
 
+        projectKey = '' ?: 'PROJECT'
         then: "Verify results"
 
         testCaseHelper.addExpectedResult("Job status: success")
@@ -141,5 +144,40 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         TC.C388091 | CONFIG_NAME  | 'PROJECT'      | 'json'          | '/myJob/plans'       | 'Found 4 plan(s).'
         TC.C388092 | CONFIG_NAME  | 'PROJECT'      | 'propertySheet' | '/myJob/plans'       | 'Found 4 plan(s).'
         TC.C388093 | CONFIG_NAME  | 'PROJECT'      | 'none'          | '/myJob/plans'       | 'Found 4 plan(s).'
+        TC.C388096 | CONFIG_NAME  | ''             | 'json'          | '/myJob/plans'       | 'Found 4 plan(s).'
+    }
+
+    @NewFeature(pluginVersion = "1.5.0")
+    @Unroll
+    def 'CreatePoolMember: Negative #caseId.ids #caseId.description'() {
+        testCaseHelper.createNewTestCase(caseId.ids, caseId.description)
+
+        given: "Tests parameters for procedure LTM CreatePoolMemberTests"
+        def runParams = [
+                config : configName,
+                projectKey : projectKey,
+                resultFormat : resultFormat,
+                resultPropertySheet : resultPropertySheet,
+        ]
+
+        when: "Run procedure"
+
+        testCaseHelper.addStepContent("Run procedure $procedureName with parameters:", runParams)
+        def result = runProcedure(projectName, procedureName, runParams)
+        def jobSummary = getStepSummary(result.jobId, procedureName)
+
+        def outputParameters = getJobOutputParameters(result.jobId, 1)
+        def jobProperties = getJobProperties(result.jobId)
+
+        then: "Verify results"
+
+        testCaseHelper.addExpectedResult("Job status: success")
+        assert result.outcome == 'error'
+
+        cleanup:
+
+        where:
+        caseId     | configName   | projectKey     | resultFormat    | resultPropertySheet  | expectedSummary
+        TC.C388092 | CONFIG_NAME  | 'empty'        | 'propertySheet' | '/myJob/plans'       | 'Found 4 plan(s).'
     }
 }
