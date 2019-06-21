@@ -92,47 +92,46 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         def propertyName = resultPropertySheet.split("/")[2]
 
         then: "Verify results"
-        verifyAll {
-            testCaseHelper.addExpectedResult("Job status: success")
-            result.outcome == 'success'
 
-            testCaseHelper.addExpectedResult("Job Summary: $expectedSummary")
-            jobSummary == expectedSummary
+        testCaseHelper.addExpectedResult("Job status: success")
+        assert result.outcome == 'success'
 
-            testCaseHelper.addExpectedResult("OutputParameter planKeys should contans actual value, list of all projects keys : $plansKey")
-            outputParameters.planKeys.split(', ') - plansKey == []
+        testCaseHelper.addExpectedResult("Job Summary: $expectedSummary")
+        assert jobSummary == expectedSummary
 
-            if (resultFormat == 'json') {
-                testCaseHelper.addExpectedResult("Job property $propertyName: $jsonBamboResponse")
-                new JsonSlurper().parseText(jobProperties[propertyName]) == plansInfo
+        testCaseHelper.addExpectedResult("OutputParameter planKeys should contans actual value, list of all projects keys : $plansKey")
+        assert outputParameters.planKeys.split(', ') - plansKey == []
+
+        if (resultFormat == 'json') {
+            testCaseHelper.addExpectedResult("Job property $propertyName: $jsonBamboResponse")
+            assert new JsonSlurper().parseText(jobProperties[propertyName]) == plansInfo
+        }
+
+        if (resultFormat == 'propertySheet') {
+            def mapPlansInfo = [:]
+            plansInfo.each{
+                // TODO: return condition
+//                if (!it.description){
+                it.remove('description')
+//                }
+                mapPlansInfo[it['key']] = it
             }
-
-            if (resultFormat == 'propertySheet') {
-                def mapPlansInfo = [:]
-                plansInfo.each{
-//                    if (!it.description){
-                        it.remove('description')
-//                    }
-                    mapPlansInfo[it['key']] = it
+            mapPlansInfo.each{ k, v ->
+                testCaseHelper.addExpectedResult("Job property $propertyName - $k: ${mapPlansInfo[k]}")
+                mapPlansInfo[k].each {k1, v1 ->
+                    assert mapPlansInfo[k][k1].toString() == jobProperties[propertyName][k][k1]
                 }
-                mapPlansInfo.each{ k, v ->
-                    testCaseHelper.addExpectedResult("Job property $propertyName - $k: ${mapPlansInfo[k]}")
-                    mapPlansInfo[k].each {k1, v1 ->
-                        assert mapPlansInfo[k][k1].toString() == jobProperties[propertyName][k][k1]
-                    }
-                }
-                testCaseHelper.addExpectedResult("Job property $propertyName - keys: ${jobProperties[propertyName]['keys']}")
-                jobProperties[propertyName]['keys'].split(',') == plansKey
             }
+            testCaseHelper.addExpectedResult("Job property $propertyName - keys: ${jobProperties[propertyName]['keys']}")
+            assert jobProperties[propertyName]['keys'].split(',') == plansKey
+        }
 
 
-            testCaseHelper.addExpectedResult("Job logs: Found project: '$projectKey'")
-            result.logs.contains("Found project: '$projectKey'")
-            plansKey.each {
-                testCaseHelper.addExpectedResult("Job logs: Found plan: '$it'")
-                result.logs.contains("Found plan: '$it'")
-            }
-
+        testCaseHelper.addExpectedResult("Job logs: Found project: '$projectKey'")
+        assert result.logs.contains("Found project: '$projectKey'")
+        plansKey.each {
+            testCaseHelper.addExpectedResult("Job logs: Found plan: '$it'")
+            assert result.logs.contains("Found plan: '$it'")
         }
 
         cleanup:
