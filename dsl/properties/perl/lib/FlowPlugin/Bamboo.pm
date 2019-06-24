@@ -867,7 +867,6 @@ sub _planToShortInfo {
 
         shortName
         buildName
-        description
 
         averageBuildTimeInSeconds
 
@@ -879,8 +878,11 @@ sub _planToShortInfo {
     /;
 
     my %shortInfo = (
-        url        => $plan->{link}{href},
-        stagesSize => $plan->{stages}{size},
+        url             => $plan->{link}{href},
+        stagesSize      => $plan->{stages}{size},
+
+        # 'description' is a predefined field in Flow
+        planDescription => $plan->{description}
     );
 
     $shortInfo{$_} = $plan->{$_} for (@oneToOne);
