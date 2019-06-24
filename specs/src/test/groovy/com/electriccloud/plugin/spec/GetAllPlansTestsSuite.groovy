@@ -1,6 +1,7 @@
 package com.electriccloud.plugin.spec
 
 import com.electriccloud.plugins.annotations.NewFeature
+import com.electriccloud.plugins.annotations.Sanity
 import spock.lang.*
 import groovy.json.JsonSlurper
 
@@ -20,12 +21,30 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
             C388092: [ids: 'C388092', description: 'GetAllPlans: get plans - property format: propertySheet'],
             C388093: [ids: 'C388093', description: 'GetAllPlans: get plans - property format: propertySheet'],
             C388096: [ids: 'C388096', description: 'GetAllPlans: get all plans, projectKey - empty '],
-
+            C388097: [ids: 'C388097', description: 'empty config'],
+            C388098: [ids: 'C388098', description: 'wrong config'],
+            C388099: [ids: 'C388099', description: 'wrong project'],
+            C388100: [ids: 'C388100', description: 'wrong result format'],
     ]
 
     static def testCaseHelper
     static def bambooClient
     static def commanderAddress = System.getProperty("COMMANDER_SERVER")
+
+    static def expectedSummaries = [
+            default:     "Found 4 plan(s).",
+            wrongPoject: "Can't find project by key: wrong",
+    ]
+
+    static def expectedLogs = [
+            default:     "'Found 4 plan(s).'",
+            defaultError:"Possible exception in logs; check job",
+            emptyConfig: "Parameter 'config' of procedure 'GetAllPlans' is marked as required, but it does not have a value. Aborting with fatal error.",
+            wrongConfig: "Can't get config: Config does not exist",
+            wrongPoject: "Can\\'t find project by key: wrong"
+    ]
+
+
 
 
     def doSetupSpec() {
@@ -39,7 +58,99 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
     def doCleanupSpec() {
         testCaseHelper.createTestCases()
         deleteConfiguration(PLUGIN_NAME, CONFIG_NAME)
-//        conditionallyDeleteProject(projectName)
+        conditionallyDeleteProject(projectName)
+    }
+
+    @Sanity
+    @Unroll
+    def 'CreatePoolMember: Sanity #caseId.ids #caseId.description'() {
+
+        given: "Tests parameters for procedure LTM CreatePoolMemberTests"
+        def runParams = [
+                config : configName,
+                projectKey : projectKey,
+                resultFormat : resultFormat,
+                resultPropertySheet : resultPropertySheet,
+        ]
+
+        when: "Run procedure"
+
+        def result = runProcedure(projectName, procedureName, runParams)
+        def jobSummary = getStepSummary(result.jobId, procedureName)
+
+        def outputParameters = getJobOutputParameters(result.jobId, 1)
+        def jobProperties = getJobProperties(result.jobId)
+        def jsonBamboResponse = bambooClient.getPlans(projectKey)
+
+        def plansInfo = projectKey ? jsonBamboResponse.plans.plan : jsonBamboResponse.projects.project[0].plans.plan
+
+        // procedure doesn't use all fields from response
+        // and save only part of them:
+        plansInfo.each {
+            it.remove('expand')
+            it.remove('project')
+            it.remove('shortKey')
+            it.url = it.link.href.replace(commanderAddress, 'bamboo-server')
+            if (!it.description) {
+                it.description = null
+            }
+            it.remove('link')
+            it.remove('isFavourite')
+            it.remove('isActive')
+            it.remove('actions')
+            it.stagesSize = it.stages.size
+            it.remove('stages')
+            it.remove('branches')
+            it.remove('planKey')
+            if (resultFormat == 'propertySheet') {
+                it.averageBuildTimeInSeconds = Math.round(it.averageBuildTimeInSeconds).toString()
+            }
+        }
+
+        def plansKey = projectKey ? jsonBamboResponse.plans.plan.collect { it.key} : jsonBamboResponse.projects.project[0].plans.plan.collect { it.key}
+        def propertyName = resultPropertySheet.split("/")[2]
+
+        projectKey = '' ?: 'PROJECT'
+        then: "Verify results"
+
+        assert result.outcome == 'success'
+
+        assert jobSummary == expectedSummary
+
+        assert outputParameters.planKeys.split(', ') - plansKey == []
+
+        if (resultFormat == 'json') {
+            assert new JsonSlurper().parseText(jobProperties[propertyName]) == plansInfo
+        }
+
+        if (resultFormat == 'propertySheet') {
+            def mapPlansInfo = [:]
+            plansInfo.each{
+                // TODO: return condition http://jira.electric-cloud.com/browse/ECBAMBOO-31
+//                if (!it.description){
+                it.remove('description')
+//                }
+                mapPlansInfo[it['key']] = it
+            }
+            mapPlansInfo.each{ k, v ->
+                mapPlansInfo[k].each {k1, v1 ->
+                    assert mapPlansInfo[k][k1].toString() == jobProperties[propertyName][k][k1]
+                }
+            }
+            assert jobProperties[propertyName]['keys'].split(',') == plansKey
+        }
+
+
+        assert result.logs.contains("Found project: '$projectKey'")
+        plansKey.each {
+            assert result.logs.contains("Found plan: '$it'")
+        }
+
+        cleanup:
+
+        where:
+        caseId     | configName   | projectKey     | resultFormat    | resultPropertySheet  | expectedSummary
+        TC.C388091 | CONFIG_NAME  | 'PROJECT'      | 'json'          | '/myJob/plans'       | expectedSummaries.default
     }
 
     @NewFeature(pluginVersion = "1.5.0")
@@ -113,7 +224,7 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         if (resultFormat == 'propertySheet') {
             def mapPlansInfo = [:]
             plansInfo.each{
-                // TODO: return condition
+                // TODO: return condition http://jira.electric-cloud.com/browse/ECBAMBOO-31
 //                if (!it.description){
                 it.remove('description')
 //                }
@@ -141,10 +252,10 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
 
         where:
         caseId     | configName   | projectKey     | resultFormat    | resultPropertySheet  | expectedSummary
-        TC.C388091 | CONFIG_NAME  | 'PROJECT'      | 'json'          | '/myJob/plans'       | 'Found 4 plan(s).'
-        TC.C388092 | CONFIG_NAME  | 'PROJECT'      | 'propertySheet' | '/myJob/plans'       | 'Found 4 plan(s).'
-        TC.C388093 | CONFIG_NAME  | 'PROJECT'      | 'none'          | '/myJob/plans'       | 'Found 4 plan(s).'
-        TC.C388096 | CONFIG_NAME  | ''             | 'json'          | '/myJob/plans'       | 'Found 4 plan(s).'
+        TC.C388091 | CONFIG_NAME  | 'PROJECT'      | 'json'          | '/myJob/plans'       | expectedSummaries.default
+        TC.C388092 | CONFIG_NAME  | 'PROJECT'      | 'propertySheet' | '/myJob/plans'       | expectedSummaries.default
+        TC.C388093 | CONFIG_NAME  | 'PROJECT'      | 'none'          | '/myJob/plans'       | expectedSummaries.default
+        TC.C388096 | CONFIG_NAME  | ''             | 'json'          | '/myJob/plans'       | expectedSummaries.default
     }
 
     @NewFeature(pluginVersion = "1.5.0")
@@ -166,18 +277,21 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         def result = runProcedure(projectName, procedureName, runParams)
         def jobSummary = getStepSummary(result.jobId, procedureName)
 
-        def outputParameters = getJobOutputParameters(result.jobId, 1)
-        def jobProperties = getJobProperties(result.jobId)
-
         then: "Verify results"
 
-        testCaseHelper.addExpectedResult("Job status: success")
+        testCaseHelper.addExpectedResult("Job status: error")
         assert result.outcome == 'error'
 
-        cleanup:
-
+        testCaseHelper.addExpectedResult("Job Summary: $expectedSummary")
+        assert jobSummary == expectedSummary
+        testCaseHelper.addExpectedResult("Job status: $expectedLog")
+        assert result.logs.contains(expectedLog)
         where:
-        caseId     | configName   | projectKey     | resultFormat    | resultPropertySheet  | expectedSummary
-        TC.C388092 | CONFIG_NAME  | 'empty'        | 'propertySheet' | '/myJob/plans'       | 'Found 4 plan(s).'
+        caseId     | configName   | projectKey     | resultFormat    | resultPropertySheet  | expectedSummary               | expectedLog
+        TC.C388097 | ''           | 'PROJECT'      | 'propertySheet' | '/myJob/plans'       | null                          | expectedLogs.defaultError
+        TC.C388098 | 'wrong'      | 'PROJECT'      | 'propertySheet' | '/myJob/plans'       | null                          | expectedLogs.defaultError
+        TC.C388099 | CONFIG_NAME  | 'wrong'        | 'propertySheet' | '/myJob/plans'       | expectedSummaries.wrongPoject | expectedLogs.wrongPoject
+        TC.C388100 | CONFIG_NAME  | 'PROJECT'      | 'wrong'         | '/myJob/plans'       | expectedSummaries.default     | expectedLogs.default
+
     }
 }
