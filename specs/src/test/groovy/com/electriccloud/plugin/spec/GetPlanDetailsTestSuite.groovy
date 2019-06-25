@@ -348,7 +348,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         TC.C388108 | CONFIG_NAME  | ''             | 'PLAN'  | 'json'          | '/myJob/plan'        | 'error'         | null                        | expectedLogs.defaultError
         TC.C388109 | CONFIG_NAME  | 'PROJECT'      | ''      | 'json'          | '/myJob/plan'        | 'error'         | null                        | expectedLogs.defaultError
         TC.C388110 | 'wrong'      | 'PROJECT'      | 'PLAN'  | 'json'          | '/myJob/plan'        | 'error'         | null                        | expectedLogs.defaultError
-//        http://jira.electric-cloud.com/browse/ECBAMBOO-34
+//        http://jira.electric-cloud.com/browse/ECBAMBOO-35
         TC.C388111 | CONFIG_NAME  | 'WRONG'        | 'PLAN'  | 'json'          | '/myJob/plan'        | 'error'         | expectedSummaries.notFound  | expectedLogs.notFound
         TC.C388112 | CONFIG_NAME  | 'PROJECT'      | 'WRONG' | 'json'          | '/myJob/plan'        | 'error'         | expectedSummaries.notFound  | expectedLogs.notFound
 //        http://jira.electric-cloud.com/browse/ECBAMBOO-32
