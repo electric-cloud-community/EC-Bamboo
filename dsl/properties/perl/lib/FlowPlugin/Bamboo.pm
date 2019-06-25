@@ -1052,6 +1052,9 @@ sub saveResultProperties {
     if (!defined $resultFormat) {
         bailOut("No result format was supplied to saveResultProperties()");
     }
+    elsif ($resultFormat !~ m/^(?:none|propertySheet|json)$/s) {
+        bailOut("Wrong Result Property Format provided. Has to be one of 'none', 'propertySheet', 'json'");
+    }
 
     if ($resultFormat eq 'none') {
         logInfo("Will not save the results. 'Do Not Save The Result' was chosen for Result Format.");
@@ -1066,10 +1069,8 @@ sub saveResultProperties {
         my $encodedResult = JSON::encode_json($result);
         $stepResult->setOutcomeProperty($resultProperty, $encodedResult);
         logInfo("Result was saved to the property '$resultProperty'");
-        return 1;
     }
-
-    if ($resultFormat eq 'propertySheet') {
+    elsif ($resultFormat eq 'propertySheet') {
         my $properties = transformToProperties($resultProperty, $result, 'key');
 
         for my $property (keys %$properties) {
