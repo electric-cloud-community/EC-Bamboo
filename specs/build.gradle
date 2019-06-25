@@ -25,6 +25,10 @@ dependencies {
     compile 'com.jayway.restassured:rest-assured:2.4.0'
 
     compile 'com.electriccloud:ec-specs-plugins-core:1.9.1'
+
+    compile 'com.atlassian.bamboo:bamboo-specs-api:6.8.1'
+    compile 'com.atlassian.bamboo:bamboo-specs:6.8.1'
+
 }
 
 test {

@@ -19,7 +19,7 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
     static def TC = [
             C388091: [ids: 'C388091', description: 'GetAllPlans: get plans - property format: json'],
             C388092: [ids: 'C388092', description: 'GetAllPlans: get plans - property format: propertySheet'],
-            C388093: [ids: 'C388093', description: 'GetAllPlans: get plans - property format: propertySheet'],
+            C388093: [ids: 'C388093', description: 'GetAllPlans: get plans - property format: none'],
             C388096: [ids: 'C388096', description: 'GetAllPlans: get all plans, projectKey - empty '],
             C388097: [ids: 'C388097', description: 'empty config'],
             C388098: [ids: 'C388098', description: 'wrong config'],
@@ -29,7 +29,6 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
 
     static def testCaseHelper
     static def bambooClient
-    static def commanderAddress = System.getProperty("COMMANDER_SERVER")
 
     static def expectedSummaries = [
             default:     "Found 4 plan(s).",
@@ -63,7 +62,7 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
 
     @Sanity
     @Unroll
-    def 'CreatePoolMember: Sanity #caseId.ids #caseId.description'() {
+    def 'GetAllPlans: Sanity #caseId.ids #caseId.description'() {
 
         given: "Tests parameters for procedure LTM CreatePoolMemberTests"
         def runParams = [
@@ -155,7 +154,7 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
 
     @NewFeature(pluginVersion = "1.5.0")
     @Unroll
-    def 'CreatePoolMember: Positive #caseId.ids #caseId.description'() {
+    def 'GetAllPlans: Positive #caseId.ids #caseId.description'() {
         testCaseHelper.createNewTestCase(caseId.ids, caseId.description)
 
         given: "Tests parameters for procedure LTM CreatePoolMemberTests"
@@ -260,7 +259,7 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
 
     @NewFeature(pluginVersion = "1.5.0")
     @Unroll
-    def 'CreatePoolMember: Negative #caseId.ids #caseId.description'() {
+    def 'GetAllPlans: Negative #caseId.ids #caseId.description'() {
         testCaseHelper.createNewTestCase(caseId.ids, caseId.description)
 
         given: "Tests parameters for procedure LTM CreatePoolMemberTests"
