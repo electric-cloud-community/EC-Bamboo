@@ -1052,7 +1052,7 @@ sub saveResultProperties {
     if (!defined $resultFormat) {
         bailOut("No result format was supplied to saveResultProperties()");
     }
-    elsif ($resultFormat !~ /^(none|propertySheet|json)$/){
+    elsif ($resultFormat !~ m/^(?:none|propertySheet|json)$/s) {
         bailOut("Wrong Result Property Format provided. Has to be one of 'none', 'propertySheet', 'json'");
     }
 
