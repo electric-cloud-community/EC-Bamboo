@@ -166,11 +166,7 @@ sub getPlanDetails {
 
     logInfo("Found plan: '$response->{key}'");
 
-    print "bEFORE: " . Dumper($response);
-
     my $infoToSave = _planToShortInfo($response, [ 'stages' ]);
-
-    print "AFTER:" . Dumper ($infoToSave);
 
     # Save to a properties
     $self->saveResultProperties(
