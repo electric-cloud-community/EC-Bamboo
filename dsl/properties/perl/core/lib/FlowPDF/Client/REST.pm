@@ -190,7 +190,7 @@ sub new {
                 }
             }
             fwLogDebug("Loading FlowPDF::Component::OAuth");
-            $oauth = FlowPDF::ComponentManager->loadComponent('FlowPDF::Component::OAuth', $auth->{oauth});
+            $oauth = FlowPDF::ComponentManager->loadComponent('FlowPDF::Component::OAuth', $auth);
             fwLogDebug("OAuth component has been loaded.");
             $restAuthValues->{oauthComponent} = $oauth;
         }

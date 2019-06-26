@@ -874,7 +874,8 @@ sub newRESTClient {
     fwLogDebug("REST client creation parameters are: ", Dumper $creationParams);
 
     if ($params->{oauth}) {
-        $creationParams->{oauth} = $params->{oauth};
+        $creationParams->{auth} = $params->{oauth};
+        $creationParams->{auth}->{type} = 'oauth';
     }
     my $retval = FlowPDF::Client::REST->new($creationParams);
     return $retval;

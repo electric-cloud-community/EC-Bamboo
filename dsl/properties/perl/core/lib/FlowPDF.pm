@@ -115,7 +115,7 @@ use FlowPDF::ContextFactory;
 use FlowPDF::ComponentManager;
 use FlowPDF::Helpers qw/inArray/;
 
-our $VERSION = '1.1.9';
+our $VERSION = '1.1.10';
 
 # We need to do an autoflush for STDOUT and STDERR to not mess up output streams.
 # $| is a local variable for currently selected file descriptor.

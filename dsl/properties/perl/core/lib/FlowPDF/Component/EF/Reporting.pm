@@ -327,7 +327,7 @@ __PACKAGE__->defineClass({
     metadataUniqueKey     => FlowPDF::Types::Scalar(),
     # an array reference of strings for report object types, like ['build', 'quality'];
     reportObjectTypes     => FlowPDF::Types::ArrayrefOf(FlowPDF::Types::Scalar()),
-    initialRetrievalCount => FlowPDF::Types::Scalar(),
+    initialRecordsCount   => FlowPDF::Types::Scalar(),
     pluginName            => FlowPDF::Types::Scalar(),
     pluginObject          => FlowPDF::Types::Any(),
     transformer           => FlowPDF::Types::Reference('FlowPDF::Component::EF::Reporting::Transformer'),
@@ -361,9 +361,6 @@ sub init {
         bailOut("ReportObjectTypes are expected to be an ARRAY reference.");
     }
     $self->setReportObjectTypes($initParams->{reportObjectTypes});
-    if ($initParams->{initialRetrievalCount}) {
-        $self->setInitialRetrievalCount($initParams->{initialRetrievalCount});
-    }
 
     $self->setPluginObject($pluginObject);
     if ($initParams->{metadataUniqueKey}) {
@@ -372,12 +369,22 @@ sub init {
     if ($initParams->{payloadKeys}) {
         $self->setPayloadKeys($initParams->{payloadKeys});
     }
-    # TODO: think about potential pitfalls of this.
+
     if ($class ne __PACKAGE__) {
         bless $self, $class;
     };
 
     my $runtimeParameters = $pluginObject->getContext()->getRuntimeParameters();
+
+    if ($runtimeParameters->{initialRecordsCount}) {
+        $self->setInitialRecordsCount($runtimeParameters->{initialRecordsCount});
+    }
+    elsif ($initParams->{initialRecordsCount}) {
+        $self->setInitialRecordsCount($initParams->{initialRecordsCount});
+    }
+    else {
+        $self->setInitialRecordsCount(0);
+    }
 
     if ($runtimeParameters->{transformScript}) {
         my $transformer = FlowPDF::Component::EF::Reporting::Transformer->new({
@@ -481,10 +488,10 @@ sub CollectReportingData {
     if (FlowPDF::Component::EF::Reporting->isPreview()) {
         $stepResult->setJobStepSummary("Preview mode is in effect. Without it you would have:");
     }
-    my $runtimeParameters = $pluginObject->getContext()->getRuntimeParameters();
-    if (!$runtimeParameters->{initialRetrievalCount}) {
-        $runtimeParameters->{initialRetrievalCount} = 0;
-    }
+    # my $runtimeParameters = $pluginObject->getContext()->getRuntimeParameters();
+    # if (!$runtimeParameters->{initialRecordsCount}) {
+    #     $runtimeParameters->{initialRecordsCount} = 0;
+    # }
     # 1. Getting metadata from location.
     logDebug("Checking for metadata");
     my $metadata = $metadataFactory->newFromLocation();
@@ -524,7 +531,7 @@ sub CollectReportingData {
     }
     else {
         logDebug("No metadata, retrieving records");
-        $records = $self->initialGetRecords($pluginObject, $runtimeParameters->{initialRecordsCount});
+        $records = $self->initialGetRecords($pluginObject, $self->getInitialRecordsCount());
         logDebug("Records:", Dumper $records);
     }
 
