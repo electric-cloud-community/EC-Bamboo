@@ -134,8 +134,8 @@ class GetPlanDetailsSuite extends PluginTestHelper {
         where:
         caseId       | projectKey                   | planKey                   | expectedOutcome | expectedSummary
         'CHANGEME_1' | bambooProjects['valid']      | bambooPlans['empty']      | 'error'         | ""
-        'CHANGEME_2' | bambooProjects['valid']      | bambooPlans['unexisting'] | 'warning'       | "Plan '$projectKey-$planKey' was not found"
-        'CHANGEME_2' | bambooProjects['unexisting'] | bambooPlans['valid']      | 'warning'       | "Plan '$projectKey-$planKey' was not found"
+        'CHANGEME_2' | bambooProjects['valid']      | bambooPlans['unexisting'] | 'error'       | "Plan '$projectKey-$planKey' was not found"
+        'CHANGEME_2' | bambooProjects['unexisting'] | bambooPlans['valid']      | 'error'       | "Plan '$projectKey-$planKey' was not found"
     }
 
 }
