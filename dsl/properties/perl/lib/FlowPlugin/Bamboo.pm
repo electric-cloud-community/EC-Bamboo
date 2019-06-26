@@ -896,6 +896,8 @@ sub _planToShortInfo {
                     for my $k (keys %$stage) {
                         delete $stage->{$k} if ref $stage->{$k};
                     }
+                    # Removing service property
+                    delete $stage->{expand};
                 }
                 # Save cleaned result
                 $shortInfo{stages} = \@stages;
@@ -1122,11 +1124,13 @@ sub transformToProperties {
         }
         # Array of maps without ids
         elsif (ref $object->[0] eq 'HASH') {
-            for my $item (@$object) {
+            for (my $i = 0; $i < scalar(@$object); $i++) {
+                my $item = $object->[$i];
                 for my $key (keys %$item) {
-                    $adopt->(transformToProperties($currentPath . "/$key", $item->{$key}));
+                    $adopt->(transformToProperties($currentPath . "/$i/$key", $item->{$key}));
                 }
             }
+            $result{$currentPath . "/count"} = scalar(@$object);
         }
         # Array of arrays
         elsif (ref $object->[0] eq 'ARRAY') {
