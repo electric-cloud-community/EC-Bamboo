@@ -1094,8 +1094,6 @@ sub transformToProperties {
 
     $IdKeyName ||= 'key';
 
-    print " $currentPath : $object \n";
-
     my %result = ();
     my $adopt = sub {
         my ($flattened) = @_;
