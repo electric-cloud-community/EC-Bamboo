@@ -1,5 +1,12 @@
 package com.electriccloud.plugin.spec
 
+import com.atlassian.bamboo.specs.api.BambooSpec
+import com.atlassian.bamboo.specs.api.builders.plan.Job
+import com.atlassian.bamboo.specs.api.builders.plan.Plan
+import com.atlassian.bamboo.specs.api.builders.plan.Stage
+import com.atlassian.bamboo.specs.api.builders.project.Project
+import com.atlassian.bamboo.specs.builders.task.ScriptTask
+import com.atlassian.bamboo.specs.util.BambooServer
 import groovy.json.JsonBuilder
 import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.Method
@@ -10,7 +17,14 @@ import static groovyx.net.http.Method.GET
 import static groovyx.net.http.Method.POST
 import static groovyx.net.http.Method.DELETE
 
+/**
+ * https://docs.atlassian.com/atlassian-bamboo/REST/6.8.0/
+ * https://docs.atlassian.com/bamboo-specs-docs/6.8.1/specs-java.html
+ */
+@BambooSpec
 class BambooClient {
+
+    static def commanderAddress = System.getProperty("COMMANDER_SERVER")
 
     def protocol
     def host
@@ -69,5 +83,41 @@ class BambooClient {
         return result
     }
 
+    def getPlanDetails(def project, def plan){
+        def query = [expand: "stages.stage"]
+        def result = doHttpRequest(GET, "/rest/api/latest/plan/$project-$plan", query)
+        return result
+    }
+
+    def createPlan(def projectKey, def planKey, def planName = 'Test QA plan', def countOfStages=0){
+        def bambooServer = new BambooServer("http://$commanderAddress:8085")
+        Stage[] stagesArray = []
+
+        def task1 = new ScriptTask()
+                .description("Running a simple command")
+                .inlineBody("#!/bin/bash\necho \'Hello Bamboo!\'")
+
+        for (def i=0; i<countOfStages; i++){
+            def job = new Job("Job$i", "JOB$i")
+                    .tasks(task1)
+
+            def stage = new Stage("Stage$i")
+                    .description("Stage $i")
+                    .jobs(job)
+
+            stagesArray += stage
+        }
+
+        def project = new Project().key(projectKey)
+        def plan = new Plan(project, planName, planKey)
+                .stages(stagesArray)
+        bambooServer.publish(plan)
+        return plan
+    }
+
+    def deletePlan(def project, def plan) {
+        def result = doHttpRequest(DELETE, "/rest/api/latest/plan/$project-$plan")
+        return result
+    }
 
 }
