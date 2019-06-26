@@ -294,9 +294,8 @@ sub getPlanRuns {
     my $buildKeysStr = join(', ', map {$_->{key}} @infoToSave);
     $stepResult->setOutputParameter('resultKeys', $buildKeysStr);
 
-    # Look for the latest key
-    my @sortedKeys = sort map {$_->{key}} @infoToSave;
-    $stepResult->setOutputParameter('latestResultKey', $sortedKeys[$#sortedKeys]);
+    # The list comes sorted
+    $stepResult->setOutputParameter('latestResultKey', $infoToSave[0]->{key});
 
     $stepResult->setJobStepOutcome('success');
     $stepResult->setJobStepSummary('Plan run(s) information was saved to properties.');
