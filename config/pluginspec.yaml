@@ -168,7 +168,7 @@ procedures:
       - name: resultPropertySheet
         label: Result Property Sheet
         documentation: Property sheet to store the results. Each plan run will be saved under a separate property (property sheet). Additionally, the planKeys property will contain comma-separated plan keys.
-        value: /myJob/resultKeys
+        value: /myJob/planRuns
         type: entry
         required: false
         dependsOn: resultFormat

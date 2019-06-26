@@ -243,7 +243,7 @@ sub getPlanRuns {
 
     # Setting default parameters
     $params->{resultFormat} ||= 'json';
-    $params->{resultPropertySheet} ||= '/myJob/plans';
+    $params->{resultPropertySheet} ||= '/myJob/planRuns';
 
     my $planKey = "$params->{projectKey}-$params->{planKey}";
     my %requestParameters = (
