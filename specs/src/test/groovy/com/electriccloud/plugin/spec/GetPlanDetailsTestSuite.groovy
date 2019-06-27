@@ -38,7 +38,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
     static def bambooClient
 
     static def expectedSummaries = [
-            default:     "Build Plan details was saved to properties.",
+            default:     "Received info about PROJECTKEY-PLANKEY.",
             wrongPoject: "Can't find project by key: wrong",
             notFound: "Plan 'PROJECTKEY-PLANKEY' was not found",
     ]
@@ -104,33 +104,50 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         plansInfo.remove('isFavourite')
         plansInfo.remove('isActive')
         plansInfo.remove('actions')
+        plansInfo.planDescription = plansInfo.description
+        plansInfo.remove('description')
+        plansInfo.averageBuildTimeInSeconds = Math.round(plansInfo.averageBuildTimeInSeconds)
+        plansInfo.stagesSize = plansInfo.stages.size
+        if (!plansInfo.planDescription && resultFormat == 'propertySheet'){
+            plansInfo.remove('planDescription')
+        }
 
         if (plansInfo.stages.size) {
-            plansInfo.stagesSize = plansInfo.stages.size
             plansInfo.stageNames = plansInfo.stages.stage.collect { it.name }
+
             if (resultFormat == 'propertySheet') {
-                plansInfo.stageNames = "'" + plansInfo.stageNames.join(',') + "'"
+                plansInfo.stageNames = plansInfo.stageNames.collect{ "'$it'"}.join(', ')
+                def tmpStages = plansInfo.stages.stage
+                def stageNumber = 0
+                plansInfo.stages = [:]
+                for (def stage in tmpStages) {
+                    plansInfo.stages[stageNumber.toString()] = [:]
+                    if (stage.description) {
+                        plansInfo.stages[stageNumber.toString()].stageDescription  = stage.description
+                    }
+                    plansInfo.stages[stageNumber.toString()].name = stage.name
+
+                    stageNumber++
+                }
+                plansInfo.stages.count = plansInfo.stagesSize
             }
+
             if (resultFormat == 'json') {
                 plansInfo.stageNames = plansInfo.stageNames.collect { "'$it'"}.join(', ')
-            }
-            plansInfo.stages = plansInfo.stages.stage.collect {
-                [name: it.name, expand: it.expand, description: it.description]
+                plansInfo.stages = plansInfo.stages.stage.collect {
+                    [name: it.name, stageDescription: it.description]
+                }
             }
         }
-        if (plansInfo.stages.size == 0 && resultFormat == 'json') {
-            plansInfo.stagesSize = plansInfo.stages.size
+        if (plansInfo.stages.size == 0){
             plansInfo.remove('stages')
+            plansInfo.remove('size')
         }
 
         plansInfo.remove('branches')
         plansInfo.remove('planKey')
         plansInfo.remove('variableContext')
         // <-------------------->
-
-        if (resultFormat == 'propertySheet') {
-            plansInfo.averageBuildTimeInSeconds = Math.round(plansInfo.averageBuildTimeInSeconds).toString()
-        }
 
         def propertyName = resultPropertySheet.split("/")[2]
 
@@ -146,23 +163,8 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
             assert new JsonSlurper().parseText(jobProperties[propertyName]) == plansInfo
         }
 
-
         if (resultFormat == 'propertySheet') {
-            // TODO: return condition http://jira.electric-cloud.com/browse/ECBAMBOO-31
-//            if (!it.description){
-            plansInfo.remove('description')
-//          }
-            plansInfo.each {k, v ->
-                if (k != 'stages') {
-                    assert plansInfo[k].toString() == jobProperties[propertyName][k]
-                }
-                else {
-                    v[0].each { k1, v1 ->
-                        assert plansInfo[k][k1][0].toString() == jobProperties[propertyName][k][k1]
-                    }
-                }
-
-            }
+            assertRecursively(plansInfo, jobProperties[propertyName])
         }
 
         for (log in expectedLog) {
@@ -175,7 +177,6 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
 
         where:
         caseId     | configName   | projectKey     | planKey | resultFormat    | resultPropertySheet  | expectedSummary             | expectedLog
-//  http://jira.electric-cloud.com/browse/ECBAMBOO-34
         TC.C388101 | CONFIG_NAME  | 'PROJECT'      | 'PLAN'  | 'json'          | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
     }
 
@@ -220,33 +221,52 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         plansInfo.remove('isFavourite')
         plansInfo.remove('isActive')
         plansInfo.remove('actions')
+        plansInfo.planDescription = plansInfo.description
+        plansInfo.remove('description')
+        plansInfo.averageBuildTimeInSeconds = Math.round(plansInfo.averageBuildTimeInSeconds)
+        plansInfo.stagesSize = plansInfo.stages.size
+        if (!plansInfo.planDescription && resultFormat == 'propertySheet'){
+            plansInfo.remove('planDescription')
+        }
 
         if (plansInfo.stages.size) {
-            plansInfo.stagesSize = plansInfo.stages.size
             plansInfo.stageNames = plansInfo.stages.stage.collect { it.name }
+
             if (resultFormat == 'propertySheet') {
-                plansInfo.stageNames = "'" + plansInfo.stageNames.join(',') + "'"
+                plansInfo.stageNames = plansInfo.stageNames.collect{ "'$it'"}.join(', ')
+                def tmpStages = plansInfo.stages.stage
+                def stageNumber = 0
+                plansInfo.stages = [:]
+                for (def stage in tmpStages) {
+                    plansInfo.stages[stageNumber.toString()] = [:]
+                    if (stage.description) {
+                        plansInfo.stages[stageNumber.toString()].stageDescription = stage.description
+                    }
+                    plansInfo.stages[stageNumber.toString()].name = stage.name
+
+                    stageNumber++
+                }
+                plansInfo.stages.count = plansInfo.stagesSize
             }
+
             if (resultFormat == 'json') {
                 plansInfo.stageNames = plansInfo.stageNames.collect { "'$it'"}.join(', ')
-            }
-            plansInfo.stages = plansInfo.stages.stage.collect {
-                [name: it.name, expand: it.expand, description: it.description]
+                plansInfo.stages = plansInfo.stages.stage.collect {
+//                    it.description ? [name: it.name, stageDescription: it.description] : [name: it.name]
+                    [name: it.name, stageDescription: it.description]
+
+                }
             }
         }
-        if (plansInfo.stages.size == 0 && resultFormat == 'json') {
-            plansInfo.stagesSize = plansInfo.stages.size
+        if (plansInfo.stages.size == 0){
             plansInfo.remove('stages')
+            plansInfo.remove('size')
         }
 
         plansInfo.remove('branches')
         plansInfo.remove('planKey')
         plansInfo.remove('variableContext')
         // <-------------------->
-
-        if (resultFormat == 'propertySheet') {
-            plansInfo.averageBuildTimeInSeconds = Math.round(plansInfo.averageBuildTimeInSeconds).toString()
-        }
 
         def propertyName = resultPropertySheet.split("/")[2]
 
@@ -261,28 +281,11 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
 
 
         if (resultFormat == 'json') {
-            testCaseHelper.addExpectedResult("Job property $propertyName: $plansInfo")
             assert new JsonSlurper().parseText(jobProperties[propertyName]) == plansInfo
         }
 
-
         if (resultFormat == 'propertySheet') {
-            // TODO: return condition http://jira.electric-cloud.com/browse/ECBAMBOO-31
-//            if (!it.description){
-            plansInfo.remove('description')
-//          }
-            plansInfo.each {k, v ->
-                testCaseHelper.addExpectedResult("Job property $propertyName - $k: ${plansInfo[k].toString()}")
-                if (k != 'stages') {
-                    assert plansInfo[k].toString() == jobProperties[propertyName][k]
-                }
-                else {
-                    v[0].each { k1, v1 ->
-                        assert plansInfo[k][k1][0].toString() == jobProperties[propertyName][k][k1]
-                    }
-                }
-
-            }
+            assertRecursively(plansInfo, jobProperties[propertyName])
         }
 
         for (log in expectedLog) {
@@ -296,16 +299,13 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
 
         where:
         caseId     | configName   | projectKey     | planKey | resultFormat    | resultPropertySheet  | expectedSummary             | expectedLog
-//  http://jira.electric-cloud.com/browse/ECBAMBOO-34
         TC.C388101 | CONFIG_NAME  | 'PROJECT'      | 'PLAN'  | 'json'          | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
         TC.C388102 | CONFIG_NAME  | 'PROJECT'      | 'PLAN'  | 'propertySheet' | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
-//  http://jira.electric-cloud.com/browse/ECBAMBOO-34 for case  C388103
         TC.C388103 | CONFIG_NAME  | 'PROJECT'      | 'QA2'   | 'propertySheet' | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
         TC.C388104 | CONFIG_NAME  | 'PROJECT'      | 'QA0'   | 'propertySheet' | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
         TC.C388105 | CONFIG_NAME  | 'PROJECT'      | 'QA2'   | 'json'          | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
         TC.C388106 | CONFIG_NAME  | 'PROJECT'      | 'QA0'   | 'json'          | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
     }
-
 
     @NewFeature(pluginVersion = "1.5.0")
     @Unroll
@@ -335,10 +335,12 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         testCaseHelper.addExpectedResult("Job status: $expectedOutcome")
         assert result.outcome == expectedOutcome
 
-        testCaseHelper.addExpectedResult("Job Summary: $expectedSummary")
-        assert jobSummary == expectedSummary
-                .replace("PROJECTKEY", projectKey)
-                .replace("PLANKEY", planKey)
+        if (expectedSummary) {
+            testCaseHelper.addExpectedResult("Job Summary: $expectedSummary")
+            assert jobSummary == expectedSummary
+                    .replace("PROJECTKEY", projectKey)
+                    .replace("PLANKEY", planKey)
+        }
 
         testCaseHelper.addExpectedResult("Job status: $expectedLog")
         assert result.logs.contains(expectedLog.replace("PROJECTKEY", projectKey).replace("PLANKEY", planKey))
@@ -348,12 +350,21 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         TC.C388108 | CONFIG_NAME  | ''             | 'PLAN'  | 'json'          | '/myJob/plan'        | 'error'         | null                        | expectedLogs.defaultError
         TC.C388109 | CONFIG_NAME  | 'PROJECT'      | ''      | 'json'          | '/myJob/plan'        | 'error'         | null                        | expectedLogs.defaultError
         TC.C388110 | 'wrong'      | 'PROJECT'      | 'PLAN'  | 'json'          | '/myJob/plan'        | 'error'         | null                        | expectedLogs.defaultError
-//        http://jira.electric-cloud.com/browse/ECBAMBOO-35
         TC.C388111 | CONFIG_NAME  | 'WRONG'        | 'PLAN'  | 'json'          | '/myJob/plan'        | 'error'         | expectedSummaries.notFound  | expectedLogs.notFound
         TC.C388112 | CONFIG_NAME  | 'PROJECT'      | 'WRONG' | 'json'          | '/myJob/plan'        | 'error'         | expectedSummaries.notFound  | expectedLogs.notFound
-//        http://jira.electric-cloud.com/browse/ECBAMBOO-32
-        TC.C388113 | CONFIG_NAME  | 'PROJECT'      | 'PLAN'  | 'wrong'         | '/myJob/plan'        | 'error'         | expectedSummaries.default   | expectedLogs.default
+        TC.C388113 | CONFIG_NAME  | 'PROJECT'      | 'PLAN'  | 'wrong'         | '/myJob/plan'        | 'error'         | null                        | ''
 
+    }
+
+    def assertRecursively(def map, def map2){
+        for (def entry in map) {
+            if (entry.value instanceof Map){
+                assertRecursively(entry.value, map2[entry.key])
+            }
+            else{
+                assert entry.value.toString() == map2[entry.key]
+            }
+        }
     }
 
 }
