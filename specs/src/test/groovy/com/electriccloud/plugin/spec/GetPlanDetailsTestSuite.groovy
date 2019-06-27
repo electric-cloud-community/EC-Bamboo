@@ -281,6 +281,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
 
 
         if (resultFormat == 'json') {
+            testCaseHelper.addExpectedResult("Job property $propertyName: $plansInfo")
             assert new JsonSlurper().parseText(jobProperties[propertyName]) == plansInfo
         }
 
@@ -362,6 +363,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
                 assertRecursively(entry.value, map2[entry.key])
             }
             else{
+                testCaseHelper.addExpectedResult("Job property $entry.key: $entry.value")
                 assert entry.value.toString() == map2[entry.key]
             }
         }
