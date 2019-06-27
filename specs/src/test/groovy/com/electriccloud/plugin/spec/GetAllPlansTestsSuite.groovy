@@ -31,12 +31,12 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
     static def bambooClient
 
     static def expectedSummaries = [
-            default:     "Found 4 plan(s).",
+            default:     "Found COUNT plan(s).",
             wrongPoject: "Can't find project by key: wrong",
     ]
 
     static def expectedLogs = [
-            default:     "'Found 4 plan(s).'",
+            default:     "'Found COUNT plan(s).'",
             defaultError:"Possible exception in logs; check job",
             emptyConfig: "Parameter 'config' of procedure 'GetAllPlans' is marked as required, but it does not have a value. Aborting with fatal error.",
             wrongConfig: "Can't get config: Config does not exist",
@@ -101,8 +101,13 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
             it.remove('stages')
             it.remove('branches')
             it.remove('planKey')
+            it.planDescription = it.description
+            it.remove('description')
             if (resultFormat == 'propertySheet') {
                 it.averageBuildTimeInSeconds = Math.round(it.averageBuildTimeInSeconds).toString()
+                if (!it.planDescription){
+                    it.remove('planDescription')
+                }
             }
         }
 
@@ -114,7 +119,7 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
 
         assert result.outcome == 'success'
 
-        assert jobSummary == expectedSummary
+        assert jobSummary == expectedSummary.replace('COUNT', plansInfo.size().toString())
 
         assert outputParameters.planKeys.split(', ') - plansKey == []
 
@@ -125,10 +130,6 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         if (resultFormat == 'propertySheet') {
             def mapPlansInfo = [:]
             plansInfo.each{
-                // TODO: return condition http://jira.electric-cloud.com/browse/ECBAMBOO-31
-//                if (!it.description){
-                it.remove('description')
-//                }
                 mapPlansInfo[it['key']] = it
             }
             mapPlansInfo.each{ k, v ->
@@ -195,8 +196,13 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
             it.remove('stages')
             it.remove('branches')
             it.remove('planKey')
+            it.planDescription = it.description
+            it.remove('description')
             if (resultFormat == 'propertySheet') {
                 it.averageBuildTimeInSeconds = Math.round(it.averageBuildTimeInSeconds).toString()
+                if (!it.planDescription){
+                    it.remove('planDescription')
+                }
             }
         }
 
@@ -209,8 +215,8 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         testCaseHelper.addExpectedResult("Job status: success")
         assert result.outcome == 'success'
 
-        testCaseHelper.addExpectedResult("Job Summary: $expectedSummary")
-        assert jobSummary == expectedSummary
+        testCaseHelper.addExpectedResult("Job Summary: ${expectedSummary.replace('COUNT', plansInfo.size().toString())}")
+        assert jobSummary == expectedSummary.replace('COUNT', plansInfo.size().toString())
 
         testCaseHelper.addExpectedResult("OutputParameter planKeys should contans actual value, list of all projects keys : $plansKey")
         assert outputParameters.planKeys.split(', ') - plansKey == []
@@ -223,10 +229,6 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         if (resultFormat == 'propertySheet') {
             def mapPlansInfo = [:]
             plansInfo.each{
-                // TODO: return condition http://jira.electric-cloud.com/browse/ECBAMBOO-31
-//                if (!it.description){
-                it.remove('description')
-//                }
                 mapPlansInfo[it['key']] = it
             }
             mapPlansInfo.each{ k, v ->
@@ -290,7 +292,7 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         TC.C388097 | ''           | 'PROJECT'      | 'propertySheet' | '/myJob/plans'       | null                          | expectedLogs.defaultError
         TC.C388098 | 'wrong'      | 'PROJECT'      | 'propertySheet' | '/myJob/plans'       | null                          | expectedLogs.defaultError
         TC.C388099 | CONFIG_NAME  | 'wrong'        | 'propertySheet' | '/myJob/plans'       | expectedSummaries.wrongPoject | expectedLogs.wrongPoject
-        TC.C388100 | CONFIG_NAME  | 'PROJECT'      | 'wrong'         | '/myJob/plans'       | expectedSummaries.default     | expectedLogs.default
+        TC.C388100 | CONFIG_NAME  | 'PROJECT'      | 'wrong'         | '/myJob/plans'       | null                          | ''
 
     }
 }
