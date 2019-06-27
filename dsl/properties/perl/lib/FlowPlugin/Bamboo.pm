@@ -898,6 +898,10 @@ sub _planToShortInfo {
                     }
                     # Removing service property
                     delete $stage->{expand};
+
+                    # 'description' is a predefined field in Flow
+                    $stage->{stageDescription} = $stage->{description};
+                    delete $stage->{description};
                 }
                 # Save cleaned result
                 $shortInfo{stages} = \@stages;
