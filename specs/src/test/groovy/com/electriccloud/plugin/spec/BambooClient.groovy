@@ -85,6 +85,16 @@ class BambooClient {
         }
     }
 
+    def getPlanRuns(def project, def plan, def maxResult, def buildState){
+        def query = [expand: "results.result.artifacts,results.result.labels",
+                     'max-results': maxResult]
+        if (buildState != 'All'){
+            query += [buildstate: buildState]
+        }
+        def result = doHttpRequest(GET, "/rest/api/latest/result/$project-$plan", query)
+        return result
+    }
+
     def getPlans(def project){
         def query = project ? [expand: "plans.plan"] : [expand: "projects.project.plans.plan"]
         def result = doHttpRequest(GET, "/rest/api/latest/project/$project", query)
