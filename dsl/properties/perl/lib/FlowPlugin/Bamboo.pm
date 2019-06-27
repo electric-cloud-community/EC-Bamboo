@@ -260,7 +260,7 @@ sub getPlanRuns {
     my $response = $self->client->get("/result/$planKey", \%requestParameters, undef, {
         errorHook => {
             404 => sub {
-                $stepResult->setJobStepOutcome('warning');
+                $stepResult->setJobStepOutcome('error');
                 $stepResult->setJobSummary("Plan '$planKey' was not found.");
                 $stepResult->setJobStepSummary("Plan '$planKey' was not found.");
                 return;
