@@ -1,12 +1,20 @@
 package com.electriccloud.plugin.spec
 
 import com.atlassian.bamboo.specs.api.BambooSpec
+import com.atlassian.bamboo.specs.api.builders.Variable
 import com.atlassian.bamboo.specs.api.builders.plan.Job
 import com.atlassian.bamboo.specs.api.builders.plan.Plan
 import com.atlassian.bamboo.specs.api.builders.plan.Stage
+import com.atlassian.bamboo.specs.api.builders.plan.artifact.Artifact
 import com.atlassian.bamboo.specs.api.builders.project.Project
+import com.atlassian.bamboo.specs.builders.repository.git.GitRepository
+import com.atlassian.bamboo.specs.builders.task.CleanWorkingDirectoryTask
+import com.atlassian.bamboo.specs.builders.task.CommandTask
 import com.atlassian.bamboo.specs.builders.task.ScriptTask
+import com.atlassian.bamboo.specs.builders.task.TestParserTask
+import com.atlassian.bamboo.specs.builders.task.VcsCheckoutTask
 import com.atlassian.bamboo.specs.util.BambooServer
+import com.atlassian.bamboo.specs.util.SendQueue
 import groovy.json.JsonBuilder
 import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.Method
