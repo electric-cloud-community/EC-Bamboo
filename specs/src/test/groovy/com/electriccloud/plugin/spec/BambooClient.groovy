@@ -133,6 +133,61 @@ class BambooClient {
         return plan
     }
 
+    def createPlanForRun(def projectKey, def planKey, def planName ){
+        def bambooServer = new BambooServer("http://$commanderAddress:8085")
+        def taskClean1 = new CleanWorkingDirectoryTask()
+                .description("Clean")
+                .enabled(true)
+        def project = new Project().key(projectKey)
+        def artifact = new Artifact("simplejar")
+                .location("build/libs/")
+                .copyPattern("*.jar")
+                .required(true)
+                .shared(true)
+
+        def plan = new Plan(project, planName, planKey)
+                .variables(
+                        new Variable('FAIL_MESSAGE', ''),
+                        new Variable('SLEEP_TIME', ''),
+                        new Variable('TEST_MESSAGE', '')
+                )
+                .planRepositories(new GitRepository()
+                        .name("Sample Gradle build2")
+                        .url('https://github.com/horodchukanton/gradle-test-build.git')
+                )
+        bambooServer.publish(plan)
+
+
+        def taskSourceCodeCheckout2 = new VcsCheckoutTask()
+                .description('Checkout')
+                .addCheckoutOfRepository('Sample Gradle build2')
+
+
+        def taskCommand3 = new CommandTask()
+                .description('Gradle Build')
+                .executable('gradlew')
+                .argument('build -PvariablesSource=environment')
+                .environmentVariables('TEST_MESSAGE=${bamboo.TEST_MESSAGE} SLEEP_TIME=${bamboo.SLEEP_TIME} FAIL_MESSAGE=${bamboo.FAIL_MESSAGE}')
+
+        def taskJUnitParser4 = TestParserTask.createJUnitParserTask()
+                .description("Collect JUnit results")
+                .resultDirectories("**/build/test-results/test/*.xml")
+
+
+        def job = new Job("Default Job", "JOB1")
+                .tasks(taskClean1, taskSourceCodeCheckout2, taskCommand3, taskJUnitParser4)
+                .artifacts(artifact)
+
+        def stage = new Stage("Stage1")
+                .description("Stage 1")
+                .jobs(job)
+
+        plan.stages(stage)
+
+        bambooServer.publish(plan)
+        return plan
+    }
+
     def deletePlan(def project, def plan) {
         def result = doHttpRequest(DELETE, "/rest/api/latest/plan/$project-$plan")
         return result
