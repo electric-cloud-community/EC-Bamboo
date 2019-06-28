@@ -1,5 +1,8 @@
-package com.electriccloud.plugin.spec
+package com.electriccloud.plugin.spec.qaTests
 
+import com.electriccloud.plugin.spec.BambooClient
+import com.electriccloud.plugin.spec.PluginTestHelper
+import com.electriccloud.plugin.spec.TestCaseHelper
 import com.electriccloud.plugins.annotations.NewFeature
 import com.electriccloud.plugins.annotations.Sanity
 import spock.lang.*
@@ -56,7 +59,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         bambooClient = new BambooClient('http', commanderAddress,  '8085', '', BAMBOO_USERNAME, BAMBOO_PASSWORD)
         bambooClient.createPlan('PROJECT', 'QA0', 'Plan without stages', 0)
         bambooClient.createPlan('PROJECT', 'QA2', 'Plan with some (2) stages', 2)
-        createConfiguration(CONFIG_NAME)
+        createConfiguration(PluginTestHelper.CONFIG_NAME)
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: procedureName, params: getAllPlansParams]
 
     }
@@ -65,7 +68,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         testCaseHelper.createTestCases()
         bambooClient.deletePlan('PROJECT', 'QA0')
         bambooClient.deletePlan('PROJECT', 'QA2')
-        deleteConfiguration(PLUGIN_NAME, CONFIG_NAME)
+        deleteConfiguration(PluginTestHelper.PLUGIN_NAME, PluginTestHelper.CONFIG_NAME)
         conditionallyDeleteProject(projectName)
     }
 
@@ -96,7 +99,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         plansInfo.remove('expand')
         plansInfo.remove('project')
         plansInfo.remove('shortKey')
-        plansInfo.url = plansInfo.link.href.replace(commanderAddress, 'bamboo-server')
+        plansInfo.url = plansInfo.link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
         if (!plansInfo.description) {
             plansInfo.description = null
         }
@@ -176,8 +179,8 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         cleanup:
 
         where:
-        caseId     | configName   | projectKey     | planKey | resultFormat    | resultPropertySheet  | expectedSummary             | expectedLog
-        TC.C388101 | CONFIG_NAME  | 'PROJECT'      | 'PLAN'  | 'json'          | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
+        caseId     | configName                   | projectKey | planKey | resultFormat | resultPropertySheet | expectedSummary           | expectedLog
+        TC.C388101 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'PLAN'  | 'json'       | '/myJob/plan'       | expectedSummaries.default | expectedLogs.default
     }
 
     @NewFeature(pluginVersion = "1.5.0")
@@ -213,7 +216,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         plansInfo.remove('expand')
         plansInfo.remove('project')
         plansInfo.remove('shortKey')
-        plansInfo.url = plansInfo.link.href.replace(commanderAddress, 'bamboo-server')
+        plansInfo.url = plansInfo.link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
         if (!plansInfo.description) {
             plansInfo.description = null
         }
@@ -299,13 +302,13 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         cleanup:
 
         where:
-        caseId     | configName   | projectKey     | planKey | resultFormat    | resultPropertySheet  | expectedSummary             | expectedLog
-        TC.C388101 | CONFIG_NAME  | 'PROJECT'      | 'PLAN'  | 'json'          | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
-        TC.C388102 | CONFIG_NAME  | 'PROJECT'      | 'PLAN'  | 'propertySheet' | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
-        TC.C388103 | CONFIG_NAME  | 'PROJECT'      | 'QA2'   | 'propertySheet' | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
-        TC.C388104 | CONFIG_NAME  | 'PROJECT'      | 'QA0'   | 'propertySheet' | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
-        TC.C388105 | CONFIG_NAME  | 'PROJECT'      | 'QA2'   | 'json'          | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
-        TC.C388106 | CONFIG_NAME  | 'PROJECT'      | 'QA0'   | 'json'          | '/myJob/plan'        | expectedSummaries.default   | expectedLogs.default
+        caseId     | configName                   | projectKey | planKey | resultFormat    | resultPropertySheet | expectedSummary           | expectedLog
+        TC.C388101 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'PLAN'  | 'json'          | '/myJob/plan'       | expectedSummaries.default | expectedLogs.default
+        TC.C388102 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'PLAN'  | 'propertySheet' | '/myJob/plan'       | expectedSummaries.default | expectedLogs.default
+        TC.C388103 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QA2'   | 'propertySheet' | '/myJob/plan'       | expectedSummaries.default | expectedLogs.default
+        TC.C388104 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QA0'   | 'propertySheet' | '/myJob/plan'       | expectedSummaries.default | expectedLogs.default
+        TC.C388105 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QA2'   | 'json'          | '/myJob/plan'       | expectedSummaries.default | expectedLogs.default
+        TC.C388106 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QA0'   | 'json'          | '/myJob/plan'       | expectedSummaries.default | expectedLogs.default
     }
 
     @NewFeature(pluginVersion = "1.5.0")
@@ -346,14 +349,14 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         testCaseHelper.addExpectedResult("Job status: $expectedLog")
         assert result.logs.contains(expectedLog.replace("PROJECTKEY", projectKey).replace("PLANKEY", planKey))
         where:
-        caseId     | configName   | projectKey     | planKey | resultFormat    | resultPropertySheet  | expectedOutcome | expectedSummary             | expectedLog
-        TC.C388107 | ''           | 'PROJECT'      | 'PLAN'  | 'json'          | '/myJob/plan'        | 'error'         | null                        | expectedLogs.defaultError
-        TC.C388108 | CONFIG_NAME  | ''             | 'PLAN'  | 'json'          | '/myJob/plan'        | 'error'         | null                        | expectedLogs.defaultError
-        TC.C388109 | CONFIG_NAME  | 'PROJECT'      | ''      | 'json'          | '/myJob/plan'        | 'error'         | null                        | expectedLogs.defaultError
-        TC.C388110 | 'wrong'      | 'PROJECT'      | 'PLAN'  | 'json'          | '/myJob/plan'        | 'error'         | null                        | expectedLogs.defaultError
-        TC.C388111 | CONFIG_NAME  | 'WRONG'        | 'PLAN'  | 'json'          | '/myJob/plan'        | 'error'         | expectedSummaries.notFound  | expectedLogs.notFound
-        TC.C388112 | CONFIG_NAME  | 'PROJECT'      | 'WRONG' | 'json'          | '/myJob/plan'        | 'error'         | expectedSummaries.notFound  | expectedLogs.notFound
-        TC.C388113 | CONFIG_NAME  | 'PROJECT'      | 'PLAN'  | 'wrong'         | '/myJob/plan'        | 'error'         | null                        | ''
+        caseId     | configName                   | projectKey | planKey | resultFormat | resultPropertySheet | expectedOutcome | expectedSummary            | expectedLog
+        TC.C388107 | ''                           | 'PROJECT'  | 'PLAN'  | 'json'       | '/myJob/plan'       | 'error'         | null                       | expectedLogs.defaultError
+        TC.C388108 | PluginTestHelper.CONFIG_NAME | ''         | 'PLAN'  | 'json'       | '/myJob/plan'       | 'error'         | null                       | expectedLogs.defaultError
+        TC.C388109 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | ''      | 'json'       | '/myJob/plan'       | 'error'         | null                       | expectedLogs.defaultError
+        TC.C388110 | 'wrong'                      | 'PROJECT'  | 'PLAN'  | 'json'       | '/myJob/plan'       | 'error'         | null                       | expectedLogs.defaultError
+        TC.C388111 | PluginTestHelper.CONFIG_NAME | 'WRONG'    | 'PLAN'  | 'json'       | '/myJob/plan'       | 'error'         | expectedSummaries.notFound | expectedLogs.notFound
+        TC.C388112 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'WRONG' | 'json'       | '/myJob/plan'       | 'error'         | expectedSummaries.notFound | expectedLogs.notFound
+        TC.C388113 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'PLAN'  | 'wrong'      | '/myJob/plan'       | 'error'         | null                       | ''
 
     }
 

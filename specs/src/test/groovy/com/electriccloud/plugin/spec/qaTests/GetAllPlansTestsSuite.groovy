@@ -1,5 +1,8 @@
-package com.electriccloud.plugin.spec
+package com.electriccloud.plugin.spec.qaTests
 
+import com.electriccloud.plugin.spec.BambooClient
+import com.electriccloud.plugin.spec.PluginTestHelper
+import com.electriccloud.plugin.spec.TestCaseHelper
 import com.electriccloud.plugins.annotations.NewFeature
 import com.electriccloud.plugins.annotations.Sanity
 import spock.lang.*
@@ -49,14 +52,14 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
     def doSetupSpec() {
         testCaseHelper = new TestCaseHelper(procedureName)
         bambooClient = new BambooClient('http', commanderAddress,  '8085', '', BAMBOO_USERNAME, BAMBOO_PASSWORD)
-        createConfiguration(CONFIG_NAME)
+        createConfiguration(PluginTestHelper.CONFIG_NAME)
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: procedureName, params: getAllPlansParams]
 
     }
 
     def doCleanupSpec() {
         testCaseHelper.createTestCases()
-        deleteConfiguration(PLUGIN_NAME, CONFIG_NAME)
+        deleteConfiguration(PluginTestHelper.PLUGIN_NAME, PluginTestHelper.CONFIG_NAME)
         conditionallyDeleteProject(projectName)
     }
 
@@ -89,7 +92,7 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
             it.remove('expand')
             it.remove('project')
             it.remove('shortKey')
-            it.url = it.link.href.replace(commanderAddress, 'bamboo-server')
+            it.url = it.link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
             if (!it.description) {
                 it.description = null
             }
@@ -149,8 +152,8 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         cleanup:
 
         where:
-        caseId     | configName   | projectKey     | resultFormat    | resultPropertySheet  | expectedSummary
-        TC.C388091 | CONFIG_NAME  | 'PROJECT'      | 'json'          | '/myJob/plans'       | expectedSummaries.default
+        caseId     | configName                   | projectKey | resultFormat | resultPropertySheet | expectedSummary
+        TC.C388091 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'json'       | '/myJob/plans'      | expectedSummaries.default
     }
 
     @NewFeature(pluginVersion = "1.5.0")
@@ -184,7 +187,7 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
             it.remove('expand')
             it.remove('project')
             it.remove('shortKey')
-            it.url = it.link.href.replace(commanderAddress, 'bamboo-server')
+            it.url = it.link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
             if (!it.description) {
                 it.description = null
             }
@@ -252,11 +255,11 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         cleanup:
 
         where:
-        caseId     | configName   | projectKey     | resultFormat    | resultPropertySheet  | expectedSummary
-        TC.C388091 | CONFIG_NAME  | 'PROJECT'      | 'json'          | '/myJob/plans'       | expectedSummaries.default
-        TC.C388092 | CONFIG_NAME  | 'PROJECT'      | 'propertySheet' | '/myJob/plans'       | expectedSummaries.default
-        TC.C388093 | CONFIG_NAME  | 'PROJECT'      | 'none'          | '/myJob/plans'       | expectedSummaries.default
-        TC.C388096 | CONFIG_NAME  | ''             | 'json'          | '/myJob/plans'       | expectedSummaries.default
+        caseId     | configName                   | projectKey | resultFormat    | resultPropertySheet | expectedSummary
+        TC.C388091 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'json'          | '/myJob/plans'      | expectedSummaries.default
+        TC.C388092 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'propertySheet' | '/myJob/plans'      | expectedSummaries.default
+        TC.C388093 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'none'          | '/myJob/plans'      | expectedSummaries.default
+        TC.C388096 | PluginTestHelper.CONFIG_NAME | ''         | 'json'          | '/myJob/plans'      | expectedSummaries.default
     }
 
     @NewFeature(pluginVersion = "1.5.0")
@@ -288,11 +291,11 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         testCaseHelper.addExpectedResult("Job status: $expectedLog")
         assert result.logs.contains(expectedLog)
         where:
-        caseId     | configName   | projectKey     | resultFormat    | resultPropertySheet  | expectedSummary               | expectedLog
-        TC.C388097 | ''           | 'PROJECT'      | 'propertySheet' | '/myJob/plans'       | null                          | expectedLogs.defaultError
-        TC.C388098 | 'wrong'      | 'PROJECT'      | 'propertySheet' | '/myJob/plans'       | null                          | expectedLogs.defaultError
-        TC.C388099 | CONFIG_NAME  | 'wrong'        | 'propertySheet' | '/myJob/plans'       | expectedSummaries.wrongPoject | expectedLogs.wrongPoject
-        TC.C388100 | CONFIG_NAME  | 'PROJECT'      | 'wrong'         | '/myJob/plans'       | null                          | ''
+        caseId     | configName                   | projectKey | resultFormat    | resultPropertySheet | expectedSummary               | expectedLog
+        TC.C388097 | ''                           | 'PROJECT'  | 'propertySheet' | '/myJob/plans'      | null                          | expectedLogs.defaultError
+        TC.C388098 | 'wrong'                      | 'PROJECT'  | 'propertySheet' | '/myJob/plans'      | null                          | expectedLogs.defaultError
+        TC.C388099 | PluginTestHelper.CONFIG_NAME | 'wrong'    | 'propertySheet' | '/myJob/plans'      | expectedSummaries.wrongPoject | expectedLogs.wrongPoject
+        TC.C388100 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'wrong'         | '/myJob/plans'      | null                          | ''
 
     }
 }

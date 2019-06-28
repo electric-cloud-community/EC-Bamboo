@@ -1,5 +1,8 @@
-package com.electriccloud.plugin.spec
+package com.electriccloud.plugin.spec.qaTests
 
+import com.electriccloud.plugin.spec.BambooClient
+import com.electriccloud.plugin.spec.PluginTestHelper
+import com.electriccloud.plugin.spec.TestCaseHelper
 import com.electriccloud.plugins.annotations.NewFeature
 import com.electriccloud.plugins.annotations.Sanity
 import spock.lang.*
@@ -77,7 +80,7 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
 
     def doSetupSpec() {
         testCaseHelper = new TestCaseHelper(procedureName)
-        createConfiguration(CONFIG_NAME)
+        createConfiguration(PluginTestHelper.CONFIG_NAME)
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: procedureName, params: getPlanRunsParams]
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: 'RunPlan', params: runPlanParams]
 
@@ -96,7 +99,7 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
 
     def doCleanupSpec() {
         testCaseHelper.createTestCases()
-        deleteConfiguration(PLUGIN_NAME, CONFIG_NAME)
+        deleteConfiguration(PluginTestHelper.PLUGIN_NAME, PluginTestHelper.CONFIG_NAME)
         conditionallyDeleteProject(projectName)
         bambooClient.deletePlan('PROJECT', 'QARUN0')
         bambooClient.deletePlan('PROJECT', 'QARUN1')
@@ -157,7 +160,7 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
                 }
             }
             planRunsInfo[i].totalTestsCount = planRunsInfo[i].successfulTestCount + planRunsInfo[i].failedTestCount + planRunsInfo[i].quarantinedTestCount + planRunsInfo[i].skippedTestCount
-            planRunsInfo[i].url = planRunsInfo[i].link.href.replace(commanderAddress, 'bamboo-server')
+            planRunsInfo[i].url = planRunsInfo[i].link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
             planRunsInfo[i].planKey = planRunsInfo[i].plan.key
 
             planRunsInfo[i].remove("expand")
@@ -241,8 +244,8 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
         }
 
         where:
-        caseId     | configName   | projectKey     | planKey   | buildState  | maxResults | resultFormat    | resultPropertySheet  | expectedSummary             | expectedLog
-        TC.C388123 | CONFIG_NAME  | 'PROJECT'      | 'QARUN3'  | 'Failed'    | '4'        | 'json'          | '/myJob/PlanRun'     | expectedSummaries.default   | expectedLogs.state
+        caseId     | configName                   | projectKey | planKey  | buildState | maxResults | resultFormat | resultPropertySheet | expectedSummary           | expectedLog
+        TC.C388123 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN3' | 'Failed'   | '4'        | 'json'       | '/myJob/PlanRun'    | expectedSummaries.default | expectedLogs.state
     }
 
     @NewFeature(pluginVersion = "1.5.0")
@@ -304,7 +307,7 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
                 }
             }
             planRunsInfo[i].totalTestsCount = planRunsInfo[i].successfulTestCount + planRunsInfo[i].failedTestCount + planRunsInfo[i].quarantinedTestCount + planRunsInfo[i].skippedTestCount
-            planRunsInfo[i].url = planRunsInfo[i].link.href.replace(commanderAddress, 'bamboo-server')
+            planRunsInfo[i].url = planRunsInfo[i].link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
             planRunsInfo[i].planKey = planRunsInfo[i].plan.key
 
             planRunsInfo[i].remove("expand")
@@ -399,18 +402,18 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
         }
 
         where:
-        caseId     | configName   | projectKey     | planKey   | buildState  | maxResults | resultFormat    | resultPropertySheet  | expectedSummary             | expectedLog
-        TC.C388114 | CONFIG_NAME  | 'PROJECT'      | 'QARUN1'  | 'All'       | '25'       | 'json'          | '/myJob/PlanRun'     | expectedSummaries.default   | expectedLogs.default
-        TC.C388115 | CONFIG_NAME  | 'PROJECT'      | 'QARUN2'  | 'All'       | '25'       | 'json'          | '/myJob/PlanRun'     | expectedSummaries.default   | expectedLogs.default
-        TC.C388116 | CONFIG_NAME  | 'PROJECT'      | 'QARUN1'  | 'All'       | '25'       | 'propertySheet' | '/myJob/PlanRun'     | expectedSummaries.default   | expectedLogs.default
-        TC.C388117 | CONFIG_NAME  | 'PROJECT'      | 'QARUN2'  | 'All'       | '25'       | 'propertySheet' | '/myJob/PlanRun'     | expectedSummaries.default   | expectedLogs.default
+        caseId     | configName                   | projectKey | planKey  | buildState   | maxResults | resultFormat    | resultPropertySheet | expectedSummary           | expectedLog
+        TC.C388114 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN1' | 'All'        | '25'       | 'json'          | '/myJob/PlanRun'    | expectedSummaries.default | expectedLogs.default
+        TC.C388115 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN2' | 'All'        | '25'       | 'json'          | '/myJob/PlanRun'    | expectedSummaries.default | expectedLogs.default
+        TC.C388116 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN1' | 'All'        | '25'       | 'propertySheet' | '/myJob/PlanRun'    | expectedSummaries.default | expectedLogs.default
+        TC.C388117 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN2' | 'All'        | '25'       | 'propertySheet' | '/myJob/PlanRun'    | expectedSummaries.default | expectedLogs.default
 // C388118 runs to long
 //        TC.C388118 | CONFIG_NAME  | 'PROJECT'      | 'QARUN3'  | 'All'       | '25'       | 'propertySheet' | '/myJob/PlanRun'     | expectedSummaries.default   | expectedLogs.default
-        TC.C388119 | CONFIG_NAME  | 'PROJECT'      | 'QARUN3'  | 'All'       | '25'       | 'json'          | '/myJob/PlanRun'     | expectedSummaries.default   | expectedLogs.default
-        TC.C388121 | CONFIG_NAME  | 'PROJECT'      | 'QARUN3'  | 'All'       | '4'        | 'propertySheet' | '/myJob/PlanRun'     | expectedSummaries.default   | expectedLogs.default
-        TC.C388122 | CONFIG_NAME  | 'PROJECT'      | 'QARUN3'  | 'Successful'| '25'       | 'propertySheet' | '/myJob/PlanRun'     | expectedSummaries.default   | expectedLogs.state
-        TC.C388123 | CONFIG_NAME  | 'PROJECT'      | 'QARUN3'  | 'Failed'    | '25'       | 'json'          | '/myJob/PlanRun'     | expectedSummaries.default   | expectedLogs.state
-        TC.C388124 | CONFIG_NAME  | 'PROJECT'      | 'QARUN1'  | 'All'       | '25'       | 'none'          | '/myJob/PlanRun'     | expectedSummaries.default   | expectedLogs.default
+        TC.C388119 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN3' | 'All'        | '25'       | 'json'          | '/myJob/PlanRun'    | expectedSummaries.default | expectedLogs.default
+        TC.C388121 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN3' | 'All'        | '4'        | 'propertySheet' | '/myJob/PlanRun'    | expectedSummaries.default | expectedLogs.default
+        TC.C388122 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN3' | 'Successful' | '25'       | 'propertySheet' | '/myJob/PlanRun'    | expectedSummaries.default | expectedLogs.state
+        TC.C388123 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN3' | 'Failed'     | '25'       | 'json'          | '/myJob/PlanRun'    | expectedSummaries.default | expectedLogs.state
+        TC.C388124 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN1' | 'All'        | '25'       | 'none'          | '/myJob/PlanRun'    | expectedSummaries.default | expectedLogs.default
     }
 
     @NewFeature(pluginVersion = "1.5.0")
@@ -446,23 +449,23 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
 
 
         where:
-        caseId     | configName   | projectKey     | planKey   | buildState  | maxResults | resultFormat    | resultPropertySheet  | expectedOutcome | expectedSummary             | expectedLog
-        TC.C388125 | ''           | 'PROJECT'      | 'QARUN1'  | 'All'       | '25'       | 'json'          | '/myJob/PlanRun'     | 'error'         | null                        | expectedLogs.defaultError
-        TC.C388126 | CONFIG_NAME  | ''             | 'QARUN1'  | 'All'       | '25'       | 'json'          | '/myJob/PlanRun'     | 'error'         | null                        | expectedLogs.defaultError
-        TC.C388127 | CONFIG_NAME  | 'PROJECT'      | ''        | 'All'       | '25'       | 'json'          | '/myJob/PlanRun'     | 'error'         | null                        | expectedLogs.defaultError
-        TC.C388128 | 'wrong'      | 'PROJECT'      | 'QARUN1'  | 'All'       | '25'       | 'json'          | '/myJob/PlanRun'     | 'error'         | null                        | expectedLogs.defaultError
-        TC.C388129 | CONFIG_NAME  | 'WRONG'        | 'QARUN1'  | 'All'       | '25'       | 'json'          | '/myJob/PlanRun'     | 'error'         | expectedSummaries.notFound  | expectedLogs.notFound
-        TC.C388130 | CONFIG_NAME  | 'PROJECT'      | 'WRONG'   | 'All'       | '25'       | 'json'          | '/myJob/PlanRun'     | 'error'         | expectedSummaries.notFound  | expectedLogs.notFound
-        TC.C388131 | CONFIG_NAME  | 'PROJECT'      | 'QARUN1'  | 'All'       | 'wrong'    | 'json'          | '/myJob/PlanRun'     | 'error'         | expectedSummaries.notFound  | expectedLogs.notFound
-        TC.C388132 | CONFIG_NAME  | 'PROJECT'      | 'QARUN1'  | 'wrong'     | '25'       | 'json'          | '/myJob/PlanRun'     | 'error'         | expectedSummaries.wrongState| expectedLogs.wrongState
-        TC.C388133 | CONFIG_NAME  | 'PROJECT'      | 'QARUN1'  | 'All'       | '25'       | 'wrong'         | '/myJob/PlanRun'     | 'error'         | null                        | expectedLogs.defaultError
-        TC.C388134 | CONFIG_NAME  | 'PROJECT'      | 'QARUN0'  | 'All'       | '25'       | 'json'          | '/myJob/PlanRun'     | 'warning'       | expectedSummaries.zeroRun   | expectedSummaries.zeroRun
+        caseId     | configName                   | projectKey | planKey  | buildState | maxResults | resultFormat | resultPropertySheet | expectedOutcome | expectedSummary              | expectedLog
+        TC.C388125 | ''                           | 'PROJECT'  | 'QARUN1' | 'All'      | '25'       | 'json'       | '/myJob/PlanRun'    | 'error'         | null                         | expectedLogs.defaultError
+        TC.C388126 | PluginTestHelper.CONFIG_NAME | ''         | 'QARUN1' | 'All'      | '25'       | 'json'       | '/myJob/PlanRun'    | 'error'         | null                         | expectedLogs.defaultError
+        TC.C388127 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | ''       | 'All'      | '25'       | 'json'       | '/myJob/PlanRun'    | 'error'         | null                         | expectedLogs.defaultError
+        TC.C388128 | 'wrong'                      | 'PROJECT'  | 'QARUN1' | 'All'      | '25'       | 'json'       | '/myJob/PlanRun'    | 'error'         | null                         | expectedLogs.defaultError
+        TC.C388129 | PluginTestHelper.CONFIG_NAME | 'WRONG'    | 'QARUN1' | 'All'      | '25'       | 'json'       | '/myJob/PlanRun'    | 'error'         | expectedSummaries.notFound   | expectedLogs.notFound
+        TC.C388130 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'WRONG'  | 'All'      | '25'       | 'json'       | '/myJob/PlanRun'    | 'error'         | expectedSummaries.notFound   | expectedLogs.notFound
+        TC.C388131 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN1' | 'All'      | 'wrong'    | 'json'       | '/myJob/PlanRun'    | 'error'         | expectedSummaries.notFound   | expectedLogs.notFound
+        TC.C388132 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN1' | 'wrong'    | '25'       | 'json'       | '/myJob/PlanRun'    | 'error'         | expectedSummaries.wrongState | expectedLogs.wrongState
+        TC.C388133 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN1' | 'All'      | '25'       | 'wrong'      | '/myJob/PlanRun'    | 'error'         | null                         | expectedLogs.defaultError
+        TC.C388134 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'QARUN0' | 'All'      | '25'       | 'json'       | '/myJob/PlanRun'    | 'warning'       | expectedSummaries.zeroRun    | expectedSummaries.zeroRun
 
     }
 
     def runPlan(def projectKey, def planKey, def countOfRun=1, def additionalBuildVariables = ''){
         def runParams = [
-                config             : CONFIG_NAME,
+                config             : PluginTestHelper.CONFIG_NAME,
                 projectKey         : projectKey,
                 planKey            : planKey,
                 waitForBuild       : 1,
