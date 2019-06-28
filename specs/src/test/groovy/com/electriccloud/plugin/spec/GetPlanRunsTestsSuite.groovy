@@ -83,7 +83,7 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
 
         bambooClient = new BambooClient('http', commanderAddress,  '8085', '', BAMBOO_USERNAME, BAMBOO_PASSWORD)
         bambooClient.createPlan('PROJECT', 'QARUN0', 'Plan without runs', 1)
-        bambooClient.createPlanForRun('PROJECT', 'QARUN1', 'QA project for runs1')
+        bambooClient.createPlanForRun('PROJECT', 'QARUN1', 'QA project for runs1', ['jar', 'xml'])
         bambooClient.createPlanForRun('PROJECT', 'QARUN2', 'QA project for runs2')
         bambooClient.createPlanForRun('PROJECT', 'QARUN3', 'QA project for runs10')
         runPlan('PROJECT', 'QARUN1')
@@ -132,24 +132,29 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
         for (def i=0; i<planRunsInfo.size(); i++) {
             def artifacts = planRunsInfo[i].artifacts
             if (resultFormat == 'propertySheet') {
-                planRunsInfo[i].artifacts = ['0': [:]]
-                planRunsInfo[i].artifacts['0'].shared = artifacts.artifact[0].shared
-                planRunsInfo[i].artifacts['0'].size = artifacts.artifact[0].size
-                planRunsInfo[i].artifacts['0'].producerJobKey = artifacts.artifact[0].producerJobKey
-                planRunsInfo[i].artifacts['0'].prettySizeDescription = artifacts.artifact[0].prettySizeDescription
-                planRunsInfo[i].artifacts['0'].name = artifacts.artifact[0].name
-                planRunsInfo[i].artifacts['0'].link = artifacts.artifact[0].link
-
+                planRunsInfo[i].artifacts = [:]
+                for (def j=0; j<artifacts.artifact.size(); j++) {
+                    planRunsInfo[i].artifacts["$j"] = [:]
+                    planRunsInfo[i].artifacts["$j"].shared = artifacts.artifact[j].shared
+                    planRunsInfo[i].artifacts["$j"].size = artifacts.artifact[j].size
+                    planRunsInfo[i].artifacts["$j"].producerJobKey = artifacts.artifact[j].producerJobKey
+                    planRunsInfo[i].artifacts["$j"].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
+                    planRunsInfo[i].artifacts["$j"].name = artifacts.artifact[j].name
+                    planRunsInfo[i].artifacts["$j"].link = artifacts.artifact[j].link
+                }
                 planRunsInfo[i].artifacts.count = artifacts.artifact.size().toString()
             }
             if (resultFormat == 'json') {
-                planRunsInfo[i].artifacts = [[:]]
-                planRunsInfo[i].artifacts[0].shared = artifacts.artifact[0].shared
-                planRunsInfo[i].artifacts[0].size = artifacts.artifact[0].size
-                planRunsInfo[i].artifacts[0].producerJobKey = artifacts.artifact[0].producerJobKey
-                planRunsInfo[i].artifacts[0].prettySizeDescription = artifacts.artifact[0].prettySizeDescription
-                planRunsInfo[i].artifacts[0].name = artifacts.artifact[0].name
-                planRunsInfo[i].artifacts[0].link = artifacts.artifact[0].link
+                planRunsInfo[i].artifacts = []
+                for (def j=0; j<artifacts.artifact.size(); j++) {
+                    planRunsInfo[i].artifacts[j] = [:]
+                    planRunsInfo[i].artifacts[j].shared = artifacts.artifact[j].shared
+                    planRunsInfo[i].artifacts[j].size = artifacts.artifact[j].size
+                    planRunsInfo[i].artifacts[j].producerJobKey = artifacts.artifact[j].producerJobKey
+                    planRunsInfo[i].artifacts[j].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
+                    planRunsInfo[i].artifacts[j].name = artifacts.artifact[j].name
+                    planRunsInfo[i].artifacts[j].link = artifacts.artifact[j].link
+                }
             }
             planRunsInfo[i].totalTestsCount = planRunsInfo[i].successfulTestCount + planRunsInfo[i].failedTestCount + planRunsInfo[i].quarantinedTestCount + planRunsInfo[i].skippedTestCount
             planRunsInfo[i].url = planRunsInfo[i].link.href.replace(commanderAddress, 'bamboo-server')
@@ -274,24 +279,29 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
         for (def i=0; i<planRunsInfo.size(); i++) {
             def artifacts = planRunsInfo[i].artifacts
             if (resultFormat == 'propertySheet') {
-                planRunsInfo[i].artifacts = ['0': [:]]
-                planRunsInfo[i].artifacts['0'].shared = artifacts.artifact[0].shared
-                planRunsInfo[i].artifacts['0'].size = artifacts.artifact[0].size
-                planRunsInfo[i].artifacts['0'].producerJobKey = artifacts.artifact[0].producerJobKey
-                planRunsInfo[i].artifacts['0'].prettySizeDescription = artifacts.artifact[0].prettySizeDescription
-                planRunsInfo[i].artifacts['0'].name = artifacts.artifact[0].name
-                planRunsInfo[i].artifacts['0'].link = artifacts.artifact[0].link
-
+                planRunsInfo[i].artifacts = [:]
+                for (def j=0; j<artifacts.artifact.size(); j++) {
+                    planRunsInfo[i].artifacts["$j"] = [:]
+                    planRunsInfo[i].artifacts["$j"].shared = artifacts.artifact[j].shared
+                    planRunsInfo[i].artifacts["$j"].size = artifacts.artifact[j].size
+                    planRunsInfo[i].artifacts["$j"].producerJobKey = artifacts.artifact[j].producerJobKey
+                    planRunsInfo[i].artifacts["$j"].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
+                    planRunsInfo[i].artifacts["$j"].name = artifacts.artifact[j].name
+                    planRunsInfo[i].artifacts["$j"].link = artifacts.artifact[j].link
+                }
                 planRunsInfo[i].artifacts.count = artifacts.artifact.size().toString()
             }
             if (resultFormat == 'json') {
-                planRunsInfo[i].artifacts = [[:]]
-                planRunsInfo[i].artifacts[0].shared = artifacts.artifact[0].shared
-                planRunsInfo[i].artifacts[0].size = artifacts.artifact[0].size
-                planRunsInfo[i].artifacts[0].producerJobKey = artifacts.artifact[0].producerJobKey
-                planRunsInfo[i].artifacts[0].prettySizeDescription = artifacts.artifact[0].prettySizeDescription
-                planRunsInfo[i].artifacts[0].name = artifacts.artifact[0].name
-                planRunsInfo[i].artifacts[0].link = artifacts.artifact[0].link
+                planRunsInfo[i].artifacts = []
+                for (def j=0; j<artifacts.artifact.size(); j++) {
+                    planRunsInfo[i].artifacts[j] = [:]
+                    planRunsInfo[i].artifacts[j].shared = artifacts.artifact[j].shared
+                    planRunsInfo[i].artifacts[j].size = artifacts.artifact[j].size
+                    planRunsInfo[i].artifacts[j].producerJobKey = artifacts.artifact[j].producerJobKey
+                    planRunsInfo[i].artifacts[j].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
+                    planRunsInfo[i].artifacts[j].name = artifacts.artifact[j].name
+                    planRunsInfo[i].artifacts[j].link = artifacts.artifact[j].link
+                }
             }
             planRunsInfo[i].totalTestsCount = planRunsInfo[i].successfulTestCount + planRunsInfo[i].failedTestCount + planRunsInfo[i].quarantinedTestCount + planRunsInfo[i].skippedTestCount
             planRunsInfo[i].url = planRunsInfo[i].link.href.replace(commanderAddress, 'bamboo-server')
