@@ -95,6 +95,12 @@ class BambooClient {
         return result
     }
 
+    def getPlanRunInfo(def runPlaneName){
+        def query = [expand: "results.result.artifacts,results.result.labels"]
+        def result = doHttpRequest(GET, "/rest/api/latest/result/$runPlaneName", query)
+        return result
+    }
+
     def getPlans(def project){
         def query = project ? [expand: "plans.plan"] : [expand: "projects.project.plans.plan"]
         def result = doHttpRequest(GET, "/rest/api/latest/project/$project", query)

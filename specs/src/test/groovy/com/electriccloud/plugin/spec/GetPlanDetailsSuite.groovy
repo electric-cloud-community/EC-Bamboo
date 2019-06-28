@@ -34,7 +34,7 @@ class GetPlanDetailsSuite extends PluginTestHelper {
     static defaultResultPropertyPath = 'plan'
 
     // Procedure parameters
-    String config = CONFIG_NAME
+    String config = PluginTestHelper.CONFIG_NAME
     @Shared
     String projectKey, planKey, resultFormat, resultPropertySheet
 
@@ -43,7 +43,7 @@ class GetPlanDetailsSuite extends PluginTestHelper {
     String resultPropertyPath
 
     def doSetupSpec() {
-        createConfiguration(CONFIG_NAME)
+        createConfiguration(PluginTestHelper.CONFIG_NAME)
 
         // Import procedure project
         importProject(projectName, 'dsl/procedure.dsl', [
@@ -55,7 +55,7 @@ class GetPlanDetailsSuite extends PluginTestHelper {
     }
 
     def doCleanupSpec() {
-        deleteConfiguration(PLUGIN_NAME, config)
+        deleteConfiguration(PluginTestHelper.PLUGIN_NAME, config)
         conditionallyDeleteProject(projectName)
     }
 
@@ -100,10 +100,10 @@ class GetPlanDetailsSuite extends PluginTestHelper {
         }
 
         where:
-        caseId       | config      | project | plan      | resultFormat    | resultPropertyPath
-        'CHANGEME_1' | CONFIG_NAME | 'valid' | 'valid'   | 'json'          | ''
-        'CHANGEME_2' | CONFIG_NAME | 'valid' | 'valid'   | 'propertySheet' | ''
-        'CHANGEME_3' | CONFIG_NAME | 'valid' | 'timeout' | 'propertySheet' | 'result'
+        caseId       | config                       | project | plan      | resultFormat    | resultPropertyPath
+        'CHANGEME_1' | PluginTestHelper.CONFIG_NAME | 'valid' | 'valid'   | 'json'          | ''
+        'CHANGEME_2' | PluginTestHelper.CONFIG_NAME | 'valid' | 'valid'   | 'propertySheet' | ''
+        'CHANGEME_3' | PluginTestHelper.CONFIG_NAME | 'valid' | 'timeout' | 'propertySheet' | 'result'
     }
 
     @Unroll
@@ -113,7 +113,7 @@ class GetPlanDetailsSuite extends PluginTestHelper {
         resultPropertyPath = ''
 
         def procedureParams = [
-                config             : CONFIG_NAME,
+                config             : PluginTestHelper.CONFIG_NAME,
                 projectKey         : projectKey,
                 planKey            : planKey,
                 resultFormat       : resultFormat,
