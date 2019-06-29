@@ -126,6 +126,16 @@ class BambooClient {
 
     }
 
+    def changePlanState(def projectKey, def planKey, def state){
+        if (state == 'enable') {
+            def result = doHttpRequest(POST, "/rest/api/latest/plan/$projectKey-$planKey/enable")
+            return result
+        }
+        if (state == 'disable') {
+            def result = doHttpRequest(DELETE, "/rest/api/latest/plan/$projectKey-$planKey/enable")
+            return result
+        }
+    }
 
     def getPlans(def project){
         def query = project ? [expand: "plans.plan"] : [expand: "projects.project.plans.plan"]
