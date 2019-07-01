@@ -20,14 +20,14 @@ class EnablePlanTestsSuite extends PluginTestHelper{
     ]
 
     static def TC = [
-            C388135: [ids: 'C388135', description: 'Enable disabled plan'],
-            C388136: [ids: 'C388136', description: 'Enable enabled plan'],
-            C388137: [ids: 'C388137', description: 'empty config'],
-            C388138: [ids: 'C388138', description: 'empty projectKey'],
-            C388139: [ids: 'C388139', description: 'empty planKey'],
-            C388140: [ids: 'C388137', description: 'wrong config'],
-            C388141: [ids: 'C388138', description: 'wrong projectKey'],
-            C388142: [ids: 'C388139', description: 'wrong planKey'],
+            C388153: [ids: 'C388153', description: 'Enable disabled plan'],
+            C388154: [ids: 'C388154', description: 'Enable enabled plan'],
+            C388155: [ids: 'C388155', description: 'empty config'],
+            C388156: [ids: 'C388156', description: 'empty projectKey'],
+            C388157: [ids: 'C388157', description: 'empty planKey'],
+            C388158: [ids: 'C388158', description: 'wrong config'],
+            C388159: [ids: 'C388159', description: 'wrong projectKey'],
+            C388160: [ids: 'C388160', description: 'wrong planKey'],
 
 
     ]
@@ -111,7 +111,7 @@ class EnablePlanTestsSuite extends PluginTestHelper{
 
         where:
         caseId     | configName   | projectKey     | planKey         | expectedOutcome | planState | expectedSummary             | expectedLog
-        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | 'QAENABLEPLAN'  | 'success'       | 'disabled'| expectedSummaries.default   | expectedLogs.default
+        TC.C388153 | CONFIG_NAME  | 'PROJECT'      | 'QAENABLEPLAN'  | 'success'       | 'disabled'| expectedSummaries.default   | expectedLogs.default
     }
 
 
@@ -167,8 +167,8 @@ class EnablePlanTestsSuite extends PluginTestHelper{
 
         where:
         caseId     | configName   | projectKey     | planKey         | expectedOutcome | planState | expectedSummary             | expectedLog
-        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | 'QAENABLEPLAN'  | 'success'       | 'disabled'| expectedSummaries.default   | expectedLogs.default
-        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | 'QAENABLEPLAN'  | 'success'       | 'enabled' | expectedSummaries.default   | expectedLogs.default
+        TC.C388153 | CONFIG_NAME  | 'PROJECT'      | 'QAENABLEPLAN'  | 'success'       | 'disabled'| expectedSummaries.default   | expectedLogs.default
+        TC.C388154 | CONFIG_NAME  | 'PROJECT'      | 'QAENABLEPLAN'  | 'success'       | 'enabled' | expectedSummaries.default   | expectedLogs.default
     }
 
     @NewFeature(pluginVersion = "1.5.0")
@@ -212,12 +212,12 @@ class EnablePlanTestsSuite extends PluginTestHelper{
 
         where:
         caseId     | configName   | projectKey     | planKey         | expectedOutcome | planState | expectedSummary             | expectedLog
-        TC.C388135 | ''           | 'PROJECT'      | 'QAENABLEPLAN'  | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
-        TC.C388135 | 'wrong'      | 'PROJECT'      | 'QAENABLEPLAN'  | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
-        TC.C388135 | CONFIG_NAME  | ''             | 'QAENABLEPLAN'  | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
-        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | ''              | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
-        TC.C388135 | CONFIG_NAME  | 'WRONG'        | 'QAENABLEPLAN'  | 'error'         | 'disabled'| expectedSummaries.notFound  | expectedLogs.notFound
-        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | 'WRONG'         | 'error'         | 'disabled'| expectedSummaries.notFound  | expectedLogs.notFound
+        TC.C388155 | ''           | 'PROJECT'      | 'QAENABLEPLAN'  | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
+        TC.C388156 | 'wrong'      | 'PROJECT'      | 'QAENABLEPLAN'  | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
+        TC.C388157 | CONFIG_NAME  | ''             | 'QAENABLEPLAN'  | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
+        TC.C388158 | CONFIG_NAME  | 'PROJECT'      | ''              | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
+        TC.C388159 | CONFIG_NAME  | 'WRONG'        | 'QAENABLEPLAN'  | 'error'         | 'disabled'| expectedSummaries.notFound  | expectedLogs.notFound
+        TC.C388160 | CONFIG_NAME  | 'PROJECT'      | 'WRONG'         | 'error'         | 'disabled'| expectedSummaries.notFound  | expectedLogs.notFound
 
     }
 
