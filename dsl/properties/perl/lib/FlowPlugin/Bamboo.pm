@@ -483,7 +483,7 @@ sub runPlan {
     # Get build info
     #/result/{projectKey}-{buildKey}-{buildNumber : ([0-9]+)|(latest)}?expand&favourite&start-index&max-results
     my $buildInfo = $self->client->get("/result/$queueResponse->{buildResultKey}", {
-        expand => 'results.result.artifacts,results.result.labels'
+        expand => 'artifacts,labels'
     });
     return unless defined $buildInfo;
 
