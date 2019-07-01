@@ -85,6 +85,11 @@ class BambooClient {
         }
     }
 
+    def getDeployment(def id){
+        def result = doHttpRequest(GET, "/rest/api/latest/deploy/result/$id")
+        return result
+    }
+
     def getPlanRuns(def project, def plan, def maxResult, def buildState){
         def query = [expand: "results.result.artifacts,results.result.labels",
                      'max-results': maxResult]
