@@ -47,11 +47,11 @@ class DisablePlanTestsSuite extends PluginTestHelper{
     ]
 
     static def expectedLogs = [
-            default:     'http://bamboo-server:8085/rest/api/latest/plan/PROJECTKEY-PLANKEY/disable',
-            defaultError: "Possible exception in logs; check job",
-            wrongState: "There is no BuildState called 'wrong'",
-            notFound: "Plan \\'PROJECTKEY-PLANKEY\\' was not found",
-            zeroRun: "No results found for plan",
+            default:     ['http://bamboo-server:8085/rest/api/latest/plan/PROJECTKEY-PLANKEY/enable'],
+            defaultError: ["Possible exception in logs; check job"],
+            wrongState: ["There is no BuildState called 'wrong'"],
+            notFound: ["Plan PROJECTKEY-PLANKEY not found"],
+            zeroRun: ["No results found for plan"],
     ]
 
 
