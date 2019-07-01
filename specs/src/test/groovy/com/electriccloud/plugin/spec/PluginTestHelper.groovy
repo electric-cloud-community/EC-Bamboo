@@ -13,7 +13,9 @@ class PluginTestHelper extends PluginSpockTestSupport {
     static String BAMBOO_PASSWORD = getPassword()
 
     static String CONFIG_NAME = 'specConfig'
-    static def commanderAddress = System.getProperty("COMMANDER_SERVER")
+//    static def commanderAddress = System.getProperty("COMMANDER_SERVER")
+    static def commanderAddress = '0.0.0.0'
+
 
     def createConfiguration(String configName = CONFIG_NAME, Map props = [:]) {
         String username = BAMBOO_USERNAME
