@@ -32,7 +32,7 @@ import static groovyx.net.http.Method.DELETE
 @BambooSpec
 class BambooClient {
 
-    static def commanderAddress = System.getProperty("COMMANDER_SERVER")
+    static def commanderAddress = PluginTestHelper.commanderAddress
 
     def protocol
     def host
