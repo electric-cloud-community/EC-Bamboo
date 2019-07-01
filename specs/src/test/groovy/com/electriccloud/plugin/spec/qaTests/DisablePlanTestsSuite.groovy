@@ -110,8 +110,8 @@ class DisablePlanTestsSuite extends PluginTestHelper{
         }
 
         where:
-        caseId     | configName   | projectKey     | planKey         | expectedOutcome | planState | expectedSummary             | expectedLog
-        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | 'QAENABLEPLAN'  | 'success'       | 'enabled' | expectedSummaries.default   | expectedLogs.default
+        caseId     | configName   | projectKey     | planKey          | expectedOutcome | planState | expectedSummary             | expectedLog
+        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | 'QADISABLEPLAN'  | 'success'       | 'enabled' | expectedSummaries.default   | expectedLogs.default
     }
 
     @NewFeature(pluginVersion = "1.5.0")
@@ -121,11 +121,11 @@ class DisablePlanTestsSuite extends PluginTestHelper{
         testCaseHelper.testCasePrecondition('Plan QADISABLEPLAN should exist in project PROJECT')
 
         if (planState == 'disabled') {
-            testCaseHelper.testCasePrecondition('Plan QAENABLEPLAN should be enabled')
+            testCaseHelper.testCasePrecondition('Plan QADISABLEPLAN should be enabled')
             bambooClient.changePlanState(projectKey, planKey, 'disable')
         }
         else{
-            testCaseHelper.testCasePrecondition('Plan QAENABLEPLAN should be disabled')
+            testCaseHelper.testCasePrecondition('Plan QADISABLEPLAN should be disabled')
         }
 
         given: "Tests parameters for procedure"
@@ -164,16 +164,16 @@ class DisablePlanTestsSuite extends PluginTestHelper{
         }
 
         where:
-        caseId     | configName   | projectKey     | planKey         | expectedOutcome | planState | expectedSummary             | expectedLog
-        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | 'QAENABLEPLAN'  | 'success'       | 'enabled' | expectedSummaries.default   | expectedLogs.default
-        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | 'QAENABLEPLAN'  | 'success'       | 'disabled'| expectedSummaries.default   | expectedLogs.default
+        caseId     | configName   | projectKey     | planKey          | expectedOutcome | planState | expectedSummary             | expectedLog
+        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | 'QADISABLEPLAN'  | 'success'       | 'enabled' | expectedSummaries.default   | expectedLogs.default
+        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | 'QADISABLEPLAN'  | 'success'       | 'disabled'| expectedSummaries.default   | expectedLogs.default
     }
 
     @NewFeature(pluginVersion = "1.5.0")
     @Unroll
     def 'DisablePlan: Negative #caseId.ids #caseId.description'() {
         testCaseHelper.createNewTestCase(caseId.ids, caseId.description)
-        testCaseHelper.testCasePrecondition('Plan QAENABLEPLAN should exist in project PROJECT')
+        testCaseHelper.testCasePrecondition('Plan QADISABLEPLAN should exist in project PROJECT')
 
         given: "Tests parameters for procedure"
         def runParams = [
@@ -209,13 +209,13 @@ class DisablePlanTestsSuite extends PluginTestHelper{
         }
 
         where:
-        caseId     | configName   | projectKey     | planKey         | expectedOutcome | planState | expectedSummary             | expectedLog
-        TC.C388135 | ''           | 'PROJECT'      | 'QAENABLEPLAN'  | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
-        TC.C388135 | 'wrong'      | 'PROJECT'      | 'QAENABLEPLAN'  | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
-        TC.C388135 | CONFIG_NAME  | ''             | 'QAENABLEPLAN'  | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
-        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | ''              | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
-        TC.C388135 | CONFIG_NAME  | 'WRONG'        | 'QAENABLEPLAN'  | 'error'         | 'disabled'| expectedSummaries.notFound  | expectedLogs.notFound
-        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | 'WRONG'         | 'error'         | 'disabled'| expectedSummaries.notFound  | expectedLogs.notFound
+        caseId     | configName   | projectKey     | planKey          | expectedOutcome | planState | expectedSummary             | expectedLog
+        TC.C388135 | ''           | 'PROJECT'      | 'QADISABLEPLAN'  | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
+        TC.C388135 | 'wrong'      | 'PROJECT'      | 'QADISABLEPLAN'  | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
+        TC.C388135 | CONFIG_NAME  | ''             | 'QADISABLEPLAN'  | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
+        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | ''               | 'error'         | 'disabled'| null                        | expectedLogs.defaultError
+        TC.C388135 | CONFIG_NAME  | 'WRONG'        | 'QADISABLEPLAN'  | 'error'         | 'disabled'| expectedSummaries.notFound  | expectedLogs.notFound
+        TC.C388135 | CONFIG_NAME  | 'PROJECT'      | 'WRONG'          | 'error'         | 'disabled'| expectedSummaries.notFound  | expectedLogs.notFound
 
     }
 
