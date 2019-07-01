@@ -95,6 +95,38 @@ class BambooClient {
         return result
     }
 
+    def getPlanRunLogs(def runName){
+        def jobName = runName.split('-')
+        jobName = (jobName[0,1] + 'JOB1' + jobName[-1]).join('-')
+        def query = [expand: "logEntries"]
+        def result = doHttpRequest(GET, "/rest/api/latest/result/$jobName", query)
+        return result
+    }
+
+    def getPlanRunVars(def runName){
+        def query = [expand: "variables"]
+        def result = doHttpRequest(GET, "/rest/api/latest/result/$runName", query)
+        return result
+    }
+
+    def getPlanRunInfo(def runPlanName){
+        def query = [expand: "results.result.artifacts,results.result.labels"]
+        def result = doHttpRequest(GET, "/rest/api/latest/result/$runPlanName", query)
+        return result
+    }
+
+    def waitUntiPlanFinished(def runPlanName){
+        for (def i=0; i<20; i++){
+            def status = getPlanRunInfo(runPlanName).buildState
+            if (status == 'Successful') {
+                return status
+            }
+            sleep(5000)
+        }
+
+    }
+
+
     def getPlans(def project){
         def query = project ? [expand: "plans.plan"] : [expand: "projects.project.plans.plan"]
         def result = doHttpRequest(GET, "/rest/api/latest/project/$project", query)
@@ -133,17 +165,32 @@ class BambooClient {
         return plan
     }
 
-    def createPlanForRun(def projectKey, def planKey, def planName ){
+    def createPlanForRun(def projectKey, def planKey, def planName, def listArtifact = ['jar'] ){
         def bambooServer = new BambooServer("http://$commanderAddress:8085")
         def taskClean1 = new CleanWorkingDirectoryTask()
                 .description("Clean")
                 .enabled(true)
         def project = new Project().key(projectKey)
+
         def artifact = new Artifact("simplejar")
                 .location("build/libs/")
                 .copyPattern("*.jar")
                 .required(true)
                 .shared(true)
+
+        def artifactXML = new Artifact("simpleXML")
+                .location("build/test-results/test/")
+                .copyPattern("*.xml")
+                .required(true)
+                .shared(true)
+
+        Artifact[] artifactsArray = []
+        if ('jar' in listArtifact){
+            artifactsArray += artifact
+        }
+        if ('xml' in listArtifact){
+            artifactsArray += artifactXML
+        }
 
         def plan = new Plan(project, planName, planKey)
                 .variables(
@@ -176,7 +223,7 @@ class BambooClient {
 
         def job = new Job("Default Job", "JOB1")
                 .tasks(taskClean1, taskSourceCodeCheckout2, taskCommand3, taskJUnitParser4)
-                .artifacts(artifact)
+                .artifacts(artifactsArray)
 
         def stage = new Stage("Stage1")
                 .description("Stage 1")
