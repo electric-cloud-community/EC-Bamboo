@@ -969,7 +969,12 @@ sub _planBuildResultToShortInfo {
                 $result{labels} = join(', ', map {$_->{name}} @{$buildInfo->{labels}});
             }
             elsif ($section eq 'artifacts' && $buildInfo->{artifacts}{size}) {
-                $result{artifacts} = $buildInfo->{artifacts}{artifact};
+                my @artifacts = @{$buildInfo->{artifacts}{artifact}};
+
+                # Less nested properties
+                $_->{link} = $_->{link}{href} for @artifacts;
+
+                $result{artifacts} = \@artifacts;
             }
         }
     }
