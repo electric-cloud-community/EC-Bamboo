@@ -32,7 +32,7 @@ import static groovyx.net.http.Method.DELETE
 @BambooSpec
 class BambooClient {
 
-    static def commanderAddress = System.getProperty("COMMANDER_SERVER")
+    static def commanderAddress = PluginTestHelper.commanderAddress
 
     def protocol
     def host
@@ -83,6 +83,11 @@ class BambooClient {
                 throw new Exception("[ERROR] Request for '${requestUri}' failed with ${resp.statusLine}, code: ${resp.status}, ${resp}");
             }
         }
+    }
+
+    def getDeployment(def id){
+        def result = doHttpRequest(GET, "/rest/api/latest/deploy/result/$id")
+        return result
     }
 
     def getPlanRuns(def project, def plan, def maxResult, def buildState){

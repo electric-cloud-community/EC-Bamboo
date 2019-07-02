@@ -37,7 +37,14 @@ class RunPlanTestSuite extends PluginTestHelper{
             C388142: [ids: 'C388142', description: 'Run plan, "wait build" false - json'],
             C388143: [ids: 'C388143', description: 'Run plan, "wait build" false - propertySheet'],
             C388144: [ids: 'C388144', description: 'Run plan - all values'],
-            C388145: [ids: 'C388145', description: ''],
+            C388145: [ids: 'C388145', description: 'empty config'],
+            C388146: [ids: 'C388145', description: 'empty projectKey'],
+            C388147: [ids: 'C388145', description: 'empty planKey'],
+            C388148: [ids: 'C388145', description: 'empty waitForBuild'],
+            C388149: [ids: 'C388145', description: 'wrong config'],
+            C388150: [ids: 'C388145', description: 'wrong projectKey'],
+            C388151: [ids: 'C388145', description: 'wrong planKey'],
+            C388152: [ids: 'C388145', description: 'wrong customRevision'],
     ]
 
     static def testCaseHelper
@@ -55,11 +62,11 @@ class RunPlanTestSuite extends PluginTestHelper{
     ]
 
     static def expectedLogs = [
-            default:     ["Request URI: http://bamboo-server:8085/rest/api/latest/result/PLANRUNKEY?expand=results.result.artifacts%2Cresults.result.labels",
+            default:     ["Request URI: http://bamboo-server:8085/rest/api/latest/result/PLANRUNKEY?expand=artifacts%2Clabels",
                             "http://bamboo-server:8085/rest/api/latest/queue/PROJECTKEY-PLANKEY"],
-            customRevision: ["Request URI: http://bamboo-server:8085/rest/api/latest/result/PLANRUNKEY?expand=results.result.artifacts%2Cresults.result.labels",
+            customRevision: ["Request URI: http://bamboo-server:8085/rest/api/latest/result/PLANRUNKEY?expand=artifacts%2Clabels",
                           "http://bamboo-server:8085/rest/api/latest/queue/PROJECTKEY-PLANKEY?customRevision=CUSTOMREVISION&executeAllStages=true"],
-            vars: ["Request URI: http://bamboo-server:8085/rest/api/latest/result/PLANRUNKEY?expand=results.result.artifacts%2Cresults.result.labels"],
+            vars: ["Request URI: http://bamboo-server:8085/rest/api/latest/result/PLANRUNKEY?expand=artifacts%2Clabels"],
             defaultError: "Possible exception in logs; check job",
             wrongState: "There is no BuildState called 'wrong'",
             notFound: "Plan \\'PROJECTKEY-PLANKEY\\' was not found",
@@ -81,7 +88,7 @@ class RunPlanTestSuite extends PluginTestHelper{
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: 'RunPlan', params: runPlanParams]
 
         bambooClient = new BambooClient('http', commanderAddress,  '8085', '', BAMBOO_USERNAME, BAMBOO_PASSWORD)
-        bambooClient.createPlanForRun('PROJECT', 'QARUNPLAN', 'QA project for runs1', ['jar', 'xml'])
+        bambooClient.createPlanForRun('PROJECT', 'QARUNPLAN', randomize('QA'), ['jar', 'xml'])
 
     }
 
@@ -503,13 +510,13 @@ class RunPlanTestSuite extends PluginTestHelper{
         where:
         caseId     | configName   | projectKey     | planKey      | additionalBuildVariables | waitForBuild | waitTimeout | customRevision | resultFormat    | resultPropertySheet  | expectedOutcome | expectedSummary    | expectedLog
         TC.C388145 | ''           | 'PROJECT'      | 'QARUNPLAN'  | ''                       | '1'          | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | null               | expectedLogs.defaultError
-        TC.C388145 | CONFIG_NAME  | ''             | 'QARUNPLAN'  | ''                       | '1'          | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | null               | expectedLogs.defaultError
-        TC.C388145 | CONFIG_NAME  | 'PROJECT'      | ''           | ''                       | '1'          | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | null               | expectedLogs.defaultError
-        TC.C388145 | CONFIG_NAME  | 'PROJECT'      | 'QARUNPLAN'  | ''                       | ''           | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | null               | expectedLogs.defaultError
-        TC.C388145 | 'wrong'      | 'PROJECT'      | 'QARUNPLAN'  | ''                       | '1'          | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | null               | expectedLogs.defaultError
-        TC.C388145 | CONFIG_NAME  | 'wrong'        | 'QARUNPLAN'  | ''                       | '1'          | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | expectedSummaries.notFound   | expectedLogs.notFound
-        TC.C388145 | CONFIG_NAME  | 'PROJECT'      | 'wrong'      | ''                       | '1'          | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | expectedSummaries.notFound   | expectedLogs.notFound
-        TC.C388145 | CONFIG_NAME  | 'PROJECT'      | 'QARUNPLAN'  | ''                       | '1'          | '300'       | 'wrong'             | 'json'          | '/myJob/runResult'   | 'warning'  | expectedSummaries.notStarted   | expectedSummaries.notStarted
+        TC.C388146 | CONFIG_NAME  | ''             | 'QARUNPLAN'  | ''                       | '1'          | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | null               | expectedLogs.defaultError
+        TC.C388147 | CONFIG_NAME  | 'PROJECT'      | ''           | ''                       | '1'          | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | null               | expectedLogs.defaultError
+        TC.C388148 | CONFIG_NAME  | 'PROJECT'      | 'QARUNPLAN'  | ''                       | ''           | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | null               | expectedLogs.defaultError
+        TC.C388149 | 'wrong'      | 'PROJECT'      | 'QARUNPLAN'  | ''                       | '1'          | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | null               | expectedLogs.defaultError
+        TC.C388150 | CONFIG_NAME  | 'wrong'        | 'QARUNPLAN'  | ''                       | '1'          | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | expectedSummaries.notFound   | expectedLogs.notFound
+        TC.C388151 | CONFIG_NAME  | 'PROJECT'      | 'wrong'      | ''                       | '1'          | '300'       | ''             | 'json'          | '/myJob/runResult'   | 'error'         | expectedSummaries.notFound   | expectedLogs.notFound
+        TC.C388152 | CONFIG_NAME  | 'PROJECT'      | 'QARUNPLAN'  | ''                       | '1'          | '300'       | 'wrong'             | 'json'          | '/myJob/runResult'   | 'warning'  | expectedSummaries.notStarted   | expectedSummaries.notStarted
     }
 
     def assertRecursively(def map, def map2){
