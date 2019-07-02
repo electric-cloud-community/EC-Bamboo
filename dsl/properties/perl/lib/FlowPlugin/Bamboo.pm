@@ -314,7 +314,7 @@ sub createRelease {
     $params->{resultPropertySheet} ||= '/myJob/release';
 
     if (!$params->{releaseName} && !$params->{requestReleaseName}) {
-        bailOut("Either 'Version Name' or 'Request Version Name?' should be specified.")
+        bailOut("Either 'Release Name' or 'Request Release Name?' should be specified.")
     }
 
     # Stripping plan key from the build result key [PROJECT-PLAN]-22
