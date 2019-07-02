@@ -47,35 +47,65 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
     ]
 
     static def TC = [
-            C388153: [ids: 'C388153', description: 'Enable disabled plan'],
+            C388170: [ids: 'C388170', description: 'Trigger deployment - json format'],
+            C388171: [ids: 'C388171', description: 'Trigger deployment - property sheet format'],
+            C388172: [ids: 'C388172', description: 'Trigger deployment: long time of deployment'],
+            C388173: [ids: 'C388173', description: 'Trigger deployment: Wait For Deployment - false'],
+            C388174: [ids: 'C388174', description: 'Trigger deployment: Wait Timeout, Deployment is not finished in time'],
+            C388175: [ids: 'C388175', description: 'Trigger deployment, don`t save result'],
+            C388176: [ids: 'C388176', description: 'Trigger deployment, bamboo deployment is completed with errors'],
+            C388177: [ids: 'C388177', description: 'empty required parameter: config'],
+            C388178: [ids: 'C388178', description: 'empty required parameter: project Name'],
+            C388179: [ids: 'C388179', description: 'empty required parameter: environment Name'],
+            C388180: [ids: 'C388180', description: 'empty required parameter: version Name'],
+            C388181: [ids: 'C388181', description: 'wrong value for parameter: config'],
+            C388182: [ids: 'C388182', description: 'wrong value for parameter: project Name'],
+            C388183: [ids: 'C388183', description: 'wrong value for parameter: environment Name'],
+            C388184: [ids: 'C388184', description: 'wrong value for parameter: version Name'],
+            C388186: [ids: 'C388186', description: 'wrong value for parameter: result format'],
     ]
 
     static def testCaseHelper
     static def bambooClient
-    static def bambooDeployFromProject = 'Deployment Project'
+    static def deployProjects = [
+            default: 'Deployment Project',
+            long: 'Long Deployment project',
+            error: 'Failing deployment project',
+            wrong: 'wrong',
+    ]
+
+    static def deployEnv = [
+            default: 'Stage',
+            long: 'Production',
+            error: 'Production2',
+            wrong: 'wrong',
+    ]
+
+    static def versionNames = [
+            wrong: 'wrong'
+    ]
+
     static def bambooProject = 'PROJECT'
     static def bambooDeployFromPlan = 'PLAN'
     static def successfulPlanRunKey
-    static def versionName
+
 
     static def expectedSummaries = [
             default:     "Finished with Success. Deployment result key: 'KEY'",
-            error: "Build was not finished successfully",
+            error: "Deployment was not finished successfully.",
             noWait: "Deployment was successfully added to a queue.",
-            wrongPoject: "Can't find project by key: wrong",
-            notFound: "Plan PROJECTKEY-PLANKEY not found.",
-            wrongState: "There is no BuildState called 'wrong'",
-            zeroRun: "No results found for plan",
-            notStarted: "Build was not started.",
+            timeout: "Exceeded the wait timeout while waiting for the deployment to finish.",
+            wrongProject: "Can't find deployment project 'wrong'.",
+            wrongEnv: "Can't find environment 'wrong'.",
+            wrongVersion: "Can't find version 'wrong'.",
+            wrongFormat: "Deployment is finished. Requesting result.",
     ]
 
     static def expectedLogs = [
             default:     ['Request URI: http://bamboo-server:8085/rest/api/latest/deploy/result/KEY',
                           'http://bamboo-server:8085/rest/api/latest/queue/deployment?'],
-            defaultError: ["Possible exception in logs; check job"],
-            wrongState: ["There is no BuildState called 'wrong'"],
-            notFound: ["Plan PROJECTKEY-PLANKEY not found"],
-            zeroRun: ["No results found for plan"],
+            defaultError: "Possible exception in logs; check job",
+            wrongFormat: "Wrong Result Property Format provided. Has to be one of 'none', 'propertySheet', 'json'",
     ]
 
     def doSetupSpec() {
@@ -86,21 +116,91 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: 'CreateRelease', params: createReleaseParams]
 
         bambooClient = new BambooClient('http', commanderAddress,  '8085', '', BAMBOO_USERNAME, BAMBOO_PASSWORD)
-//        successfulPlanRunKey = runPlan(bambooProject, bambooDeployFromPlan)
-//        versionName = createRelease(bambooDeployFromProject, successfulPlanRunKey)
-        versionName = 'release_80c96cb5-d07a-4945-bbdf-080b5297f616'
+        successfulPlanRunKey = runPlan(bambooProject, bambooDeployFromPlan)
+        versionNames.default = createRelease(deployProjects.default, successfulPlanRunKey)
+        versionNames.long = createRelease(deployProjects.long, successfulPlanRunKey)
+        versionNames.error = createRelease(deployProjects.error, successfulPlanRunKey)
     }
 
     def doCleanupSpec() {
         testCaseHelper.createTestCases()
         deleteConfiguration(PLUGIN_NAME, CONFIG_NAME)
-//        conditionallyDeleteProject(projectName)
+        conditionallyDeleteProject(projectName)
     }
+
+    @Sanity
+    @Unroll
+    def 'TriggerDeployment: Sanity #caseId.ids #caseId.description'() {
+
+        given: "Tests parameters for procedure"
+        def runParams = [
+                config: configName,
+                deploymentEnvironmentName: envName,
+                deploymentProjectName: deploymentProjectName,
+                deploymentVersionName: deploymentVersionName,
+                resultFormat: resultFormat,
+                resultPropertySheet: resultPropertySheet,
+                waitForDeployment: waitForDeployment,
+                waitTimeout: waitTimeout,
+        ]
+
+        when: "Run procedure TriggerDeployment"
+
+
+        def result = runProcedure(projectName, procedureName, runParams)
+        def jobSummary = getStepSummary(result.jobId, procedureName)
+
+        def outputParameters = getJobOutputParameters(result.jobId, 1)
+        def jobProperties = getJobProperties(result.jobId)
+
+        def deploymentInfo = bambooClient.getDeployment(outputParameters['deploymentResultKey'])
+        deploymentInfo.agentId = deploymentInfo.agent.id
+        deploymentInfo.agentName = deploymentInfo.agent.name
+        deploymentInfo.key = deploymentInfo.key.key
+        ['deploymentVersion', 'startedDate', 'queuedDate', 'executedDate', 'finishedDate', 'reasonSummary', 'agent', 'operations'].each{
+            deploymentInfo.remove(it)
+        }
+
+        def propertyName = resultPropertySheet.split("/")[2]
+
+        then: "Verify results"
+        assert result.outcome == expectedOutcome
+
+        assert jobSummary == expectedSummary.replace('KEY', deploymentInfo.key)
+
+        for (def log in expectedLog) {
+            assert result.logs.contains(log
+                    .replace("KEY", outputParameters['deploymentResultKey']))
+        }
+
+        assert outputParameters['deploymentResultKey']
+
+        assert outputParameters['deploymentResultUrl'] == "http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}"
+
+        assert jobProperties['report-urls']['View Deployment Report'] == "http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}"
+
+        if (resultFormat == 'json') {
+            assert deploymentInfo == new JsonSlurper().parseText(jobProperties[propertyName])
+        }
+
+        if (resultFormat == 'propertySheet') {
+            assertRecursively(deploymentInfo, jobProperties[propertyName])
+        }
+
+        where:
+        caseId     | configName   | envName           | deploymentProjectName      | deploymentVersionName | resultFormat    | resultPropertySheet       | waitForDeployment | waitTimeout | expectedOutcome | expectedSummary             | expectedLog
+        TC.C388170 | CONFIG_NAME  | deployEnv.default | deployProjects.default     | versionNames.default  | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'success'       | expectedSummaries.default   | expectedLogs.default
+        TC.C388176 | CONFIG_NAME  | deployEnv.error   | deployProjects.error       | versionNames.error    | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'warning'       | expectedSummaries.error     | expectedLogs.default
+    }
+
 
     @NewFeature(pluginVersion = "1.5.0")
     @Unroll
     def 'TriggerDeployment: Positive #caseId.ids #caseId.description'() {
         testCaseHelper.createNewTestCase(caseId.ids, caseId.description)
+        testCaseHelper.testCasePrecondition("create release ${versionNames.default} in deploy project: ${deployProjects.default}")
+        testCaseHelper.testCasePrecondition("create release ${versionNames.long} in deploy project: ${deployProjects.long}")
+        testCaseHelper.testCasePrecondition("create release ${versionNames.error} in deploy project: ${deployProjects.error}")
 
         given: "Tests parameters for procedure"
         def runParams = [
@@ -153,6 +253,9 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
         testCaseHelper.addExpectedResult("OutputParameter deploymentResultUrl: http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}")
         assert outputParameters['deploymentResultUrl'] == "http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}"
 
+        testCaseHelper.addExpectedResult("Job property /report-urls/View Deployment Report : http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}")
+        assert jobProperties['report-urls']['View Deployment Report'] == "http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}"
+
         if (resultFormat == 'json') {
             testCaseHelper.addExpectedResult("Job property  ${jobProperties[propertyName]}: $deploymentInfo")
             assert deploymentInfo == new JsonSlurper().parseText(jobProperties[propertyName])
@@ -164,9 +267,79 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
         }
 
         where:
-        caseId     | configName   | envName   | deploymentProjectName | deploymentVersionName | resultFormat    | resultPropertySheet       | waitForDeployment | waitTimeout | expectedOutcome | expectedSummary             | expectedLog
-        TC.C388153 | CONFIG_NAME  | 'Stage 1' | 'Deployment Project'  | versionName           | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'success'       | expectedSummaries.default   | expectedLogs.default
-        TC.C388153 | CONFIG_NAME  | 'Stage 1' | 'Deployment Project'  | versionName           | 'propertySheet' | '/myJob/deploymentResult' | '1'               | '300'       | 'success'       | expectedSummaries.default   | expectedLogs.default
+        caseId     | configName   | envName           | deploymentProjectName      | deploymentVersionName | resultFormat    | resultPropertySheet       | waitForDeployment | waitTimeout | expectedOutcome | expectedSummary             | expectedLog
+        TC.C388170 | CONFIG_NAME  | deployEnv.default | deployProjects.default     | versionNames.default  | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'success'       | expectedSummaries.default   | expectedLogs.default
+        TC.C388171 | CONFIG_NAME  | deployEnv.default | deployProjects.default     | versionNames.default  | 'propertySheet' | '/myJob/deploymentResult' | '1'               | '300'       | 'success'       | expectedSummaries.default   | expectedLogs.default
+        TC.C388172 | CONFIG_NAME  | deployEnv.long    | deployProjects.long        | versionNames.long     | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'success'       | expectedSummaries.default   | expectedLogs.default
+        TC.C388173 | CONFIG_NAME  | deployEnv.default | deployProjects.default     | versionNames.default  | 'json'          | '/myJob/deploymentResult' | '0'               | '300'       | 'success'       | expectedSummaries.noWait    | expectedLogs.default
+        TC.C388175 | CONFIG_NAME  | deployEnv.default | deployProjects.default     | versionNames.default  | 'none'          | '/myJob/deploymentResult' | '1'               | '300'       | 'success'       | expectedSummaries.default   | expectedLogs.default
+        TC.C388176 | CONFIG_NAME  | deployEnv.error   | deployProjects.error       | versionNames.error    | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'warning'       | expectedSummaries.error     | expectedLogs.default
+    }
+
+    @NewFeature(pluginVersion = "1.5.0")
+    @Unroll
+    def 'TriggerDeployment: Negative #caseId.ids #caseId.description'() {
+        testCaseHelper.createNewTestCase(caseId.ids, caseId.description)
+
+        given: "Tests parameters for procedure"
+        def runParams = [
+                config: configName,
+                deploymentEnvironmentName: envName,
+                deploymentProjectName: deploymentProjectName,
+                deploymentVersionName: deploymentVersionName,
+                resultFormat: resultFormat,
+                resultPropertySheet: resultPropertySheet,
+                waitForDeployment: waitForDeployment,
+                waitTimeout: waitTimeout,
+        ]
+
+        when: "Run procedure TriggerDeployment"
+
+        testCaseHelper.addStepContent("Run procedure $procedureName with parameters:", runParams)
+
+        def result = runProcedure(projectName, procedureName, runParams)
+        def jobSummary = getStepSummary(result.jobId, procedureName)
+
+        def outputParameters = getJobOutputParameters(result.jobId, 1)
+        def jobProperties = getJobProperties(result.jobId)
+
+        def propertyName = resultPropertySheet.split("/")[2]
+
+        then: "Verify results"
+        testCaseHelper.addExpectedResult("Job status: $expectedOutcome")
+        assert result.outcome == expectedOutcome
+
+        if (expectedSummary) {
+            testCaseHelper.addExpectedResult("Job Summary: ${expectedSummary}")
+            assert jobSummary == expectedSummary
+        }
+
+        if (expectedLog) {
+            testCaseHelper.addExpectedResult("Job logs contains: $expectedLog")
+            assert result.logs.contains(expectedLog)
+        }
+
+//        if (caseId == TC.C388174) {
+//            // TODO http://jira.electric-cloud.com/browse/ECBAMBOO-45
+//            testCaseHelper.addExpectedResult("OutputParameter deploymentResultKey: ${outputParameters['deploymentResultKey']}")
+//            assert outputParameters['deploymentResultKey']
+//
+//            testCaseHelper.addExpectedResult("OutputParameter deploymentResultUrl: http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}")
+//            assert outputParameters['deploymentResultUrl'] == "http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}"
+//        }
+
+        where:
+        caseId     | configName   | envName           | deploymentProjectName      | deploymentVersionName | resultFormat    | resultPropertySheet       | waitForDeployment | waitTimeout | expectedOutcome | expectedSummary                 | expectedLog
+        TC.C388174 | CONFIG_NAME  | deployEnv.long    | deployProjects.long        | versionNames.long     | 'json'          | '/myJob/deploymentResult' | '1'               | '15'        | 'error'         | expectedSummaries.timeout       | expectedSummaries.timeout
+        TC.C388177 | ''           | deployEnv.default | deployProjects.default     | versionNames.default  | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'error'         | null                            | expectedLogs.defaultError
+        TC.C388178 | CONFIG_NAME  | deployEnv.default | ''                         | versionNames.default  | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'error'         | null                            | expectedLogs.defaultError
+        TC.C388179 | CONFIG_NAME  | ''                | deployProjects.default     | versionNames.default  | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'error'         | null                            | expectedLogs.defaultError
+        TC.C388180 | CONFIG_NAME  | deployEnv.default | deployProjects.default     | ''                    | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'error'         | null                            | expectedLogs.defaultError
+        TC.C388181 | 'wrong'      | deployEnv.default | deployProjects.default     | versionNames.default  | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'error'         | null                            | expectedLogs.defaultError
+        TC.C388182 | CONFIG_NAME  | deployEnv.default | deployProjects.wrong       | versionNames.default  | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'error'         | expectedSummaries.wrongProject  | expectedSummaries.wrongProject
+        TC.C388183 | CONFIG_NAME  | deployEnv.wrong   | deployProjects.default     | versionNames.default  | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'error'         | expectedSummaries.wrongEnv      | expectedSummaries.wrongEnv
+        TC.C388184 | CONFIG_NAME  | deployEnv.default | deployProjects.default     | versionNames.wrong    | 'json'          | '/myJob/deploymentResult' | '1'               | '300'       | 'error'         | expectedSummaries.wrongVersion  | expectedSummaries.wrongVersion
+        TC.C388186 | CONFIG_NAME  | deployEnv.default | deployProjects.default     | versionNames.default  | 'wrong'         | '/myJob/deploymentResult' | '1'               | '300'       | 'error'         | expectedSummaries.wrongFormat   | null
 
     }
 
