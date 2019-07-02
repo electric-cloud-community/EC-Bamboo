@@ -451,9 +451,6 @@ class RunPlanTestSuite extends PluginTestHelper{
         testCaseHelper.addExpectedResult("Job Summary: ${expectedSummary.replace('PLANRUNKEY', lastPlanRunName)}")
         assert jobSummary == expectedSummary.replace('PLANRUNKEY', lastPlanRunName)
 
-        testCaseHelper.addExpectedResult("Procedure should trigger plan run, new plan run should appear")
-        assert lastPlanRunName != lastPlanRunNameBeforeProcedureStarted
-
         testCaseHelper.addExpectedResult("Job output parameter 'buildResultKey': $lastPlanRunName")
         assert outputParameters.buildResultKey == lastPlanRunName
 
