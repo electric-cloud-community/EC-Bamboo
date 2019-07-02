@@ -29,22 +29,22 @@
   </formElement>
   <formElement>
     <type>checkbox</type>
-    <property>requestVersionName</property>
+    <property>requestReleaseName</property>
     <required>0</required>
-    <documentation>Request name for the next version from the deployment project.</documentation>
-    <label>Request Version Name?:</label>
+    <documentation>Request name for the next release from the deployment project.</documentation>
+    <label>Request Release Name?:</label>
     <checkedValue>1</checkedValue>
     <initiallyChecked>false</initiallyChecked>
     <uncheckedValue>0</uncheckedValue>
   </formElement>
   <formElement>
     <type>entry</type>
-    <property>versionName</property>
+    <property>releaseName</property>
     <required>0</required>
-    <documentation>Name for new version to create. e.g. 'release-22'.</documentation>
-    <label>Version Name:</label>
-    <condition>${requestVersionName} == 0</condition>
-    <dependsOn>requestVersionName</dependsOn>
+    <documentation>Name for new release (version) to create. e.g. 'release-22'.</documentation>
+    <label>Release Name:</label>
+    <condition>${requestReleaseName} == 0</condition>
+    <dependsOn>requestReleaseName</dependsOn>
   </formElement>
   <formElement>
     <type>select</type>
@@ -70,9 +70,9 @@
     <type>entry</type>
     <property>resultPropertySheet</property>
     <required>0</required>
-    <documentation>Result property sheet to save created version properties.</documentation>
+    <documentation>Result property sheet to save created release properties.</documentation>
     <label>Result Property Sheet:</label>
-    <value>/myJob/version</value>
+    <value>/myJob/release</value>
     <condition>${resultFormat} != 'none'</condition>
     <dependsOn>resultFormat</dependsOn>
   </formElement>

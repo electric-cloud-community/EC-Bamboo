@@ -29,10 +29,10 @@
   </formElement>
   <formElement>
     <type>entry</type>
-    <property>deploymentVersionName</property>
+    <property>deploymentReleaseName</property>
     <required>1</required>
-    <documentation>Name of the version to be deployed.</documentation>
-    <label>Version Name:</label>
+    <documentation>Name of the release to be deployed.</documentation>
+    <label>Release Name:</label>
   </formElement>
   <formElement>
     <type>checkbox</type>

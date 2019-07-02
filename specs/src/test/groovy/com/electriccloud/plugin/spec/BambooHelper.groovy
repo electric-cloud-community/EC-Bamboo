@@ -72,8 +72,8 @@ class BambooHelper extends PluginTestHelper {
                 config               : CONFIG_NAME,
                 deploymentProjectName: deploymentProjectName,
                 planBuildKey         : buildResultKey,
-                requestVersionName   : '',
-                versionName          : version,
+                requestReleaseName   : '',
+                releaseName          : version,
                 resultFormat         : 'propertySheet',
                 resultPropertySheet  : '/myJob/result'
         ]

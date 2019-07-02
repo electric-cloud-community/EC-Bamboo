@@ -311,10 +311,10 @@ sub createRelease {
     $self->init($params);
 
     $params->{resultFormat} ||= 'json';
-    $params->{resultPropertySheet} ||= '/myJob/version';
+    $params->{resultPropertySheet} ||= '/myJob/release';
 
-    if (!$params->{versionName} && !$params->{requestVersionName}) {
-        bailOut("Either 'Version Name' or 'Request Version Name?' should be specified.")
+    if (!$params->{releaseName} && !$params->{requestReleaseName}) {
+        bailOut("Either 'Release Name' or 'Request Release Name?' should be specified.")
     }
 
     # Stripping plan key from the build result key [PROJECT-PLAN]-22
@@ -340,24 +340,22 @@ sub createRelease {
     my $deploymentProjectId = $deploymentProject->{id};
     logDebug("Deployment project id: $deploymentProjectId");
 
-    if (!$params->{versionName} && $params->{requestVersionName}) {
-        logInfo("Requesting next version name for $deploymentProject->{name}");
+    if (!$params->{releaseName} && $params->{requestReleaseName}) {
+        logInfo("Requesting next release name for $deploymentProject->{name}");
         my $nextVersionRequest = $self->client->get("/deploy/projectVersioning/$deploymentProjectId/nextVersion", {
             # Can't see any difference with/without this but as we have it, let's specify
             resultKey => $params->{planBuildKey}
         });
         return unless defined $nextVersionRequest;
-        $params->{versionName} = $nextVersionRequest->{nextVersionName};
+        $params->{releaseName} = $nextVersionRequest->{nextVersionName};
     }
 
-    logInfo("Next version name is '$params->{versionName}'");
-
-    logInfo("Creating version");
+    logInfo("Creating release '$params->{releaseName}'");
     my $createVersionResponse = $self->client->post("/deploy/project/$deploymentProjectId/version", undef,
         # Content
         {
             planResultKey => $params->{planBuildKey},
-            name          => $params->{versionName}
+            name          => $params->{releaseName}
         },
         {
             errorHook => {
@@ -367,13 +365,13 @@ sub createRelease {
     );
     return unless defined $createVersionResponse;
 
-    logInfo("Created version: $params->{versionName}");
+    logInfo("Created release: $params->{releaseName}");
     my $shortInfo = _versionToShortInfo($createVersionResponse);
 
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $shortInfo);
-    $stepResult->setOutputParameter('version', $params->{versionName});
+    $stepResult->setOutputParameter('release', $params->{releaseName});
 
-    my $summary = "Created version: $params->{versionName}";
+    my $summary = "Created release: $params->{releaseName}";
     $stepResult->setJobStepOutcome('success');
     $stepResult->setJobStepSummary($summary);
     $stepResult->setJobSummary($summary);
@@ -553,9 +551,9 @@ sub triggerDeployment {
 
     # Get version id from the deployment project
     my $allVersions = $self->client->get("/deploy/project/$project->{id}/versions");
-    my ($version) = grep {$_->{name} eq $params->{deploymentVersionName}} @{$allVersions->{versions}};
+    my ($version) = grep {$_->{name} eq $params->{deploymentReleaseName}} @{$allVersions->{versions}};
     if (!defined $version) {
-        return $self->setStepResultFields($stepResult, 'error', "Can't find version '$params->{deploymentVersionName}'.");
+        return $self->setStepResultFields($stepResult, 'error', "Can't find release '$params->{deploymentReleaseName}'.");
     }
     logTrace("Version", $version);
 
