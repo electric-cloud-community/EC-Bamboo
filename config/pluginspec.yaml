@@ -307,9 +307,9 @@ procedures:
         documentation: Name of the environment for the deployment.
         type: entry
         required: true
-      - name: deploymentVersionName
-        label: Version Name
-        documentation: Name of the version to be deployed.
+      - name: deploymentReleaseName
+        label: Release Name
+        documentation: Name of the release (version) to be deployed.
         type: entry
         required: true
       - name: waitForDeployment
@@ -401,7 +401,7 @@ procedures:
     parameters:
       - name: deploymentProjectName
         label: Deployment Project Name
-        documentation: Name of the deployment project where version will be created.
+        documentation: Name of the deployment project where release will be created.
         type: entry
         required: true
       - name: planBuildKey
@@ -409,21 +409,21 @@ procedures:
         documentation: Identifier of the Plan Build result. e.g. 'PROJECT-PLAN-22'
         type: entry
         required: true
-      - name: requestVersionName
-        label: Request Version Name?
-        documentation: Request name for the next version from the deployment project.
+      - name: requestReleaseName
+        label: Request Release Name?
+        documentation: Request name for the next release (version) from the deployment project.
         type: checkbox
         initiallyChecked: false
         checkedValue: 1
         uncheckedValue: 0
         required: false
-      - name: versionName
-        label: Version Name
-        documentation: Name for new version to create. e.g. 'release-22'.
+      - name: releaseName
+        label: Release Name
+        documentation: Name for new release (version) to create. e.g. 'release-22'.
         type: entry
         required: false
-        dependsOn: requestVersionName
-        condition: ${requestVersionName} == 0
+        dependsOn: requestReleaseName
+        condition: ${requestReleaseName} == 0
       - name: resultFormat
         label: Result Format
         documentation: Format to save the results.
@@ -439,14 +439,14 @@ procedures:
             value: 'none'
       - name: resultPropertySheet
         label: Result Property Sheet
-        documentation: Result property sheet to save created version properties.
-        value: /myJob/version
+        documentation: Result property sheet to save created release properties.
+        value: /myJob/release
         type: entry
         required: false
         dependsOn: resultFormat
         condition: ${resultFormat} != 'none'
     outputParameters: {
-      version: 'Name of the created version.'
+      release: 'Name of the created release.'
     }
   - name: CollectReportingData
     description: This procedure collects reporting data for the DevOpsInsight Dashboards. It collects build results with optional tests run details.

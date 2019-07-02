@@ -12,8 +12,8 @@ class CreateReleaseSuite extends BambooHelper {
             config               : '',
             deploymentProjectName: '',
             planBuildKey         : '',
-            requestVersionName   : '',
-            versionName          : '',
+            requestReleaseName   : '',
+            releaseName          : '',
             resultFormat         : '',
             resultPropertySheet  : ''
     ]
@@ -32,7 +32,7 @@ class CreateReleaseSuite extends BambooHelper {
             ]
     ]
 
-    static String defaultResultPropertyPath = 'version'
+    static String defaultResultPropertyPath = 'release'
 
     @Shared
     static def buildRunSuccessful
@@ -43,7 +43,7 @@ class CreateReleaseSuite extends BambooHelper {
     String config = CONFIG_NAME
 
     @Shared
-    String deploymentProjectName, planBuildKey, requestVersionName, versionName, resultFormat, resultPropertySheet
+    String deploymentProjectName, planBuildKey, requestReleaseName, releaseName, resultFormat, resultPropertySheet
 
     def doSetupSpec() {
         createConfiguration(CONFIG_NAME)
@@ -88,8 +88,8 @@ class CreateReleaseSuite extends BambooHelper {
                 config               : config,
                 deploymentProjectName: deploymentProjectName,
                 planBuildKey         : planBuildKey,
-                requestVersionName   : requestVersionName,
-                versionName          : versionName,
+                requestReleaseName   : requestReleaseName,
+                releaseName          : releaseName,
                 resultFormat         : resultFormat,
                 resultPropertySheet  : resultPropertySheet
         ]
@@ -105,20 +105,20 @@ class CreateReleaseSuite extends BambooHelper {
         if (resultFormat == 'propertySheet') {
             def properties = getJobProperties(result.jobId)
             def versionProperties = properties[resultPropertyPath]
-            if (versionName) {
-                assert versionProperties['name'] == versionName
+            if (releaseName) {
+                assert versionProperties['name'] == releaseName
             }
         }
 
         def outputParameters = getJobOutputParameters(result.jobId, 1)
-        assert outputParameters['version']
+        assert outputParameters['release']
 
-        if (versionName) {
-            assert outputParameters['version'] == versionName
+        if (releaseName) {
+            assert outputParameters['release'] == releaseName
         }
 
         where:
-        caseId       | deploymentProject | requestVersionName | versionName           | resultPropertyPath
+        caseId       | deploymentProject | requestReleaseName | releaseName           | resultPropertyPath
         'CHANGEME_1' | 'valid'           | 1                  | ''                    | ''
         'CHANGEME_2' | 'valid'           | 0                  | randomize("version-") | 'result'
     }
@@ -135,7 +135,7 @@ class CreateReleaseSuite extends BambooHelper {
             planBuildKey = "PROJECT-PLAN-0"
         }
 
-        if (versionName == 'existing') {
+        if (releaseName == 'existing') {
             if (!existingVersionName) {
                 def newVersion = createRelease(
                         deploymentProjects['valid']['name'],
@@ -143,15 +143,15 @@ class CreateReleaseSuite extends BambooHelper {
                 )
                 existingVersionName = newVersion['name']
             }
-            versionName = existingVersionName
+            releaseName = existingVersionName
         }
 
         def procedureParams = [
                 config               : config,
                 deploymentProjectName: deploymentProjectName,
                 planBuildKey         : planBuildKey,
-                requestVersionName   : '0',
-                versionName          : versionName,
+                requestReleaseName   : '0',
+                releaseName          : releaseName,
                 resultFormat         : 'none',
                 resultPropertySheet  : ''
         ]
@@ -167,7 +167,7 @@ class CreateReleaseSuite extends BambooHelper {
         }
 
         where:
-        caseId       | deploymentProject | planBuild    | versionName | expectedOutcome | expectedSummary
+        caseId       | deploymentProject | planBuild    | releaseName | expectedOutcome | expectedSummary
         'CHANGEME_3' | 'unexisting'      | 'valid'      | 'valid'     | 'error'         | "Can't find deployment project with name"
         'CHANGEME_4' | 'valid'           | 'unexisting' | 'valid'     | 'warning'       | 'Unable to find result number'
         'CHANGEME_5' | 'valid'           | 'valid'      | 'existing'  | 'warning'       | 'This release version is already in use'

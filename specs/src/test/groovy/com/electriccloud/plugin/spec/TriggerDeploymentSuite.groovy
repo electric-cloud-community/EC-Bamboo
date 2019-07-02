@@ -16,7 +16,7 @@ class TriggerDeploymentSuite extends BambooHelper {
             config                   : '',
             deploymentProjectName    : '',
             deploymentEnvironmentName: '',
-            deploymentVersionName    : '',
+            deploymentReleaseName    : '',
             waitForDeployment        : '',
             waitTimeout              : '',
             resultFormat             : '',
@@ -58,7 +58,7 @@ class TriggerDeploymentSuite extends BambooHelper {
     @Shared
     String deploymentEnvironmentName
     @Shared
-    String deploymentVersionName
+    String deploymentReleaseName
     @Shared
     String waitForDeployment
     @Shared
@@ -95,7 +95,7 @@ class TriggerDeploymentSuite extends BambooHelper {
         given:
         deploymentProjectName = bambooDeploymentProjects['valid']
         deploymentEnvironmentName = bambooEnvironments['valid']
-        deploymentVersionName = getVersionNameForDeploymentProject(deploymentProjectName)
+        deploymentReleaseName = getVersionNameForDeploymentProject(deploymentProjectName)
 
         resultPropertySheet = ''
         if (resultPropertyPath) {
@@ -108,7 +108,7 @@ class TriggerDeploymentSuite extends BambooHelper {
                 config                   : CONFIG_NAME,
                 deploymentProjectName    : deploymentProjectName,
                 deploymentEnvironmentName: deploymentEnvironmentName,
-                deploymentVersionName    : deploymentVersionName,
+                deploymentReleaseName    : deploymentReleaseName,
                 waitForDeployment        : waitForDeployment,
                 waitTimeout              : waitTimeout,
                 resultFormat             : resultFormat,
@@ -130,7 +130,7 @@ class TriggerDeploymentSuite extends BambooHelper {
             def properties = getJobProperties(result.jobId)
             def resultProperties = properties[resultPropertyPath]
             assert resultProperties['lifeCycleState'] == 'FINISHED'
-            assert resultProperties['deploymentVersionName'] == deploymentVersionName
+            assert resultProperties['deploymentVersionName'] == deploymentReleaseName
         }
 
         def outputParameters = getJobOutputParameters(result.jobId, 1)
@@ -150,7 +150,6 @@ class TriggerDeploymentSuite extends BambooHelper {
     }
 
     @Unroll
-    @IgnoreRest
     def "#caseId. TriggerDeployment - Negative"() {
         given:
         resultFormat == 'none'
@@ -166,9 +165,9 @@ class TriggerDeploymentSuite extends BambooHelper {
         }
 
         if (versionCase == 'unexisting' || projectCase == 'unexisting') {
-            deploymentVersionName = randomize("unexisting")
+            deploymentReleaseName = randomize("unexisting")
         } else {
-            deploymentVersionName = getVersionNameForDeploymentProject(deploymentProjectName)
+            deploymentReleaseName = getVersionNameForDeploymentProject(deploymentProjectName)
         }
 
         def resultFormat = 'none'
@@ -176,7 +175,7 @@ class TriggerDeploymentSuite extends BambooHelper {
                 config                   : CONFIG_NAME,
                 deploymentProjectName    : deploymentProjectName,
                 deploymentEnvironmentName: deploymentEnvironmentName,
-                deploymentVersionName    : deploymentVersionName,
+                deploymentReleaseName    : deploymentReleaseName,
                 waitForDeployment        : waitForDeployment,
                 waitTimeout              : waitTimeout,
                 resultFormat             : resultFormat,
@@ -200,7 +199,7 @@ class TriggerDeploymentSuite extends BambooHelper {
         // Wrong environment
         'CHANGEME_5' | 'valid'      | 'anotherProject' | 'valid'      | 0           | 'error'         | "Can't find environment "
         // Unexisting version
-        'CHANGEME_6' | 'valid'      | 'valid'          | 'unexisting' | 0           | 'error'         | "Can't find version "
+        'CHANGEME_6' | 'valid'      | 'valid'          | 'unexisting' | 0           | 'error'         | "Can't find release "
         // Unexisting project
         'CHANGEME_7' | 'unexisting' | 'valid'          | 'valid'      | 0           | 'error'         | "Can't find deployment project "
     }
@@ -209,7 +208,7 @@ class TriggerDeploymentSuite extends BambooHelper {
      * Returns cached or new version name for the deployment project
      *
      * @param deploymentProjectName
-     * @return String - versionName
+     * @return String - releaseName
      */
     String getVersionNameForDeploymentProject(String deploymentProjectName) {
         if (existingVersions[deploymentProjectName] == null) {

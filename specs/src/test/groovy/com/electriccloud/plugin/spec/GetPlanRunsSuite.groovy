@@ -143,8 +143,8 @@ class GetPlanRunsSuite extends BambooHelper {
 
         where:
         caseId       | projectKey                   | planKey                   | buildState   | expectedOutcome | expectedSummary
-        'CHANGEME_2' | bambooProjects['valid']      | bambooPlans['unexisting'] | 'All'        | 'warning'       | "Plan '$projectKey-$planKey' was not found"
-        'CHANGEME_2' | bambooProjects['unexisting'] | bambooPlans['valid']      | 'All'        | 'warning'       | "Plan '$projectKey-$planKey' was not found"
+        'CHANGEME_2' | bambooProjects['valid']      | bambooPlans['unexisting'] | 'All'        | 'error'         | "Plan '$projectKey-$planKey' was not found"
+        'CHANGEME_2' | bambooProjects['unexisting'] | bambooPlans['valid']      | 'All'        | 'error'         | "Plan '$projectKey-$planKey' was not found"
         'CHANGEME_2' | bambooProjects['valid']      | bambooPlans['failing']    | 'Successful' | 'warning'       | "No results found for plan"
     }
 
