@@ -145,6 +145,36 @@ class RunPlanTestSuite extends PluginTestHelper{
          "comments", "labels", "jiraIssues", "variables", "stages", "changes", "metadata", "planResultKey", "state", "number", "prettyBuildStartedTime", "buildDurationDescription"].each {
             planRunInfo.remove(it)
         }
+        if (expectedOutcome == 'warning'){
+            planRunInfo.remove('totalTestsCount')
+        }
+        def artifacts = planRunInfo.artifacts
+        if (resultFormat == 'json') {
+            planRunInfo.artifacts = []
+            for (def j=0; j<artifacts.artifact.size(); j++) {
+                planRunInfo.artifacts[j] = [:]
+                planRunInfo.artifacts[j].shared = artifacts.artifact[j].shared
+                planRunInfo.artifacts[j].size = artifacts.artifact[j].size
+                planRunInfo.artifacts[j].producerJobKey = artifacts.artifact[j].producerJobKey
+                planRunInfo.artifacts[j].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
+                planRunInfo.artifacts[j].name = artifacts.artifact[j].name
+                planRunInfo.artifacts[j].link = artifacts.artifact[j].link.href
+            }
+        }
+        if (resultFormat == 'propertySheet') {
+            planRunInfo.artifacts = [:]
+            for (def j=0; j<artifacts.artifact.size(); j++) {
+                planRunInfo.artifacts["$j"] = [:]
+                planRunInfo.artifacts["$j"].shared = artifacts.artifact[j].shared
+                planRunInfo.artifacts["$j"].size = artifacts.artifact[j].size
+                planRunInfo.artifacts["$j"].producerJobKey = artifacts.artifact[j].producerJobKey
+                planRunInfo.artifacts["$j"].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
+                planRunInfo.artifacts["$j"].name = artifacts.artifact[j].name
+                planRunInfo.artifacts["$j"].link = artifacts.artifact[j].link.href
+            }
+            planRunInfo.artifacts.count = artifacts.artifact.size().toString()
+        }
+
         def bambooRunVars = bambooClient.getPlanRunVars(planRunInfo.key).variables.variable
 
         then: "Verify results"
@@ -184,8 +214,7 @@ class RunPlanTestSuite extends PluginTestHelper{
             else {
                 assert new JsonSlurper().parseText(jobProperties[propertyName])['buildReason'] =~ "Manual run by"
             }
-//            testCaseHelper.addExpectedResult("Job property  ${jobProperties[propertyName]}: $planRunInfo")
-//            assert new JsonSlurper().parseText(jobProperties[propertyName]) == planRunInfo
+            assert new JsonSlurper().parseText(jobProperties[propertyName]) == planRunInfo
         }
 
         if (resultFormat == 'propertySheet'){
@@ -195,8 +224,7 @@ class RunPlanTestSuite extends PluginTestHelper{
             else {
                 assert jobProperties[propertyName]['buildReason'] =~ "Manual run by"
             }
-//            testCaseHelper.addExpectedResult("Job property  ${jobProperties[propertyName]}:")
-//            assertRecursively(planRunInfo, jobProperties[propertyName] )
+            assertRecursively(planRunInfo, jobProperties[propertyName] )
         }
 
 
@@ -255,6 +283,36 @@ class RunPlanTestSuite extends PluginTestHelper{
          "comments", "labels", "jiraIssues", "variables", "stages", "changes", "metadata", "planResultKey", "state", "number", "prettyBuildStartedTime", "buildDurationDescription"].each {
             planRunInfo.remove(it)
         }
+        if (expectedOutcome == 'warning'){
+            planRunInfo.remove('totalTestsCount')
+        }
+        def artifacts = planRunInfo.artifacts
+        if (resultFormat == 'json') {
+            planRunInfo.artifacts = []
+            for (def j=0; j<artifacts.artifact.size(); j++) {
+                planRunInfo.artifacts[j] = [:]
+                planRunInfo.artifacts[j].shared = artifacts.artifact[j].shared
+                planRunInfo.artifacts[j].size = artifacts.artifact[j].size
+                planRunInfo.artifacts[j].producerJobKey = artifacts.artifact[j].producerJobKey
+                planRunInfo.artifacts[j].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
+                planRunInfo.artifacts[j].name = artifacts.artifact[j].name
+                planRunInfo.artifacts[j].link = artifacts.artifact[j].link.href
+            }
+        }
+        if (resultFormat == 'propertySheet') {
+            planRunInfo.artifacts = [:]
+            for (def j=0; j<artifacts.artifact.size(); j++) {
+                planRunInfo.artifacts["$j"] = [:]
+                planRunInfo.artifacts["$j"].shared = artifacts.artifact[j].shared
+                planRunInfo.artifacts["$j"].size = artifacts.artifact[j].size
+                planRunInfo.artifacts["$j"].producerJobKey = artifacts.artifact[j].producerJobKey
+                planRunInfo.artifacts["$j"].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
+                planRunInfo.artifacts["$j"].name = artifacts.artifact[j].name
+                planRunInfo.artifacts["$j"].link = artifacts.artifact[j].link.href
+            }
+            planRunInfo.artifacts.count = artifacts.artifact.size().toString()
+        }
+
         def bambooRunVars = bambooClient.getPlanRunVars(planRunInfo.key).variables.variable
 
         then: "Verify results"
@@ -304,8 +362,8 @@ class RunPlanTestSuite extends PluginTestHelper{
                 testCaseHelper.addExpectedResult("Job property: $propertyName /'buildReason' should contain text: Manual run by ...")
                 assert new JsonSlurper().parseText(jobProperties[propertyName])['buildReason'] =~ "Manual run by"
             }
-//            testCaseHelper.addExpectedResult("Job property  ${jobProperties[propertyName]}: $planRunInfo")
-//            assert new JsonSlurper().parseText(jobProperties[propertyName]) == planRunInfo
+            testCaseHelper.addExpectedResult("Job property  ${jobProperties[propertyName]}: $planRunInfo")
+            assert new JsonSlurper().parseText(jobProperties[propertyName]) == planRunInfo
         }
 
         if (resultFormat == 'propertySheet'){
@@ -317,8 +375,8 @@ class RunPlanTestSuite extends PluginTestHelper{
                 testCaseHelper.addExpectedResult("Job property: $propertyName /'buildReason' should contain text: Manual run by ...")
                 assert jobProperties[propertyName]['buildReason'] =~ "Manual run by"
             }
-//            testCaseHelper.addExpectedResult("Job property  ${jobProperties[propertyName]}:")
-//            assertRecursively(planRunInfo, jobProperties[propertyName] )
+            testCaseHelper.addExpectedResult("Job property  ${jobProperties[propertyName]}:")
+            assertRecursively(planRunInfo, jobProperties[propertyName] )
         }
 
 
