@@ -97,7 +97,7 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
             timeout: "Exceeded the wait timeout while waiting for the deployment to finish.",
             wrongProject: "Can't find deployment project 'wrong'.",
             wrongEnv: "Can't find environment 'wrong'.",
-            wrongVersion: "Can't find version 'wrong'.",
+            wrongVersion: "Can't find release 'wrong'.",
             wrongFormat: "Deployment is finished. Requesting result.",
     ]
 
