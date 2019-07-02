@@ -6,6 +6,7 @@ import com.electriccloud.plugin.spec.TestCaseHelper
 import com.electriccloud.plugins.annotations.NewFeature
 import com.electriccloud.plugins.annotations.Sanity
 import groovy.json.JsonSlurper
+import spock.lang.IgnoreRest
 import spock.lang.Unroll
 
 class RunPlanTestSuite extends PluginTestHelper{
@@ -61,11 +62,11 @@ class RunPlanTestSuite extends PluginTestHelper{
     ]
 
     static def expectedLogs = [
-            default:     ["Request URI: http://bamboo-server:8085/rest/api/latest/result/PLANRUNKEY?expand=results.result.artifacts%2Cresults.result.labels",
+            default:     ["Request URI: http://bamboo-server:8085/rest/api/latest/result/PLANRUNKEY?expand=artifacts%2Clabels",
                             "http://bamboo-server:8085/rest/api/latest/queue/PROJECTKEY-PLANKEY"],
-            customRevision: ["Request URI: http://bamboo-server:8085/rest/api/latest/result/PLANRUNKEY?expand=results.result.artifacts%2Cresults.result.labels",
+            customRevision: ["Request URI: http://bamboo-server:8085/rest/api/latest/result/PLANRUNKEY?expand=artifacts%2Clabels",
                           "http://bamboo-server:8085/rest/api/latest/queue/PROJECTKEY-PLANKEY?customRevision=CUSTOMREVISION&executeAllStages=true"],
-            vars: ["Request URI: http://bamboo-server:8085/rest/api/latest/result/PLANRUNKEY?expand=results.result.artifacts%2Cresults.result.labels"],
+            vars: ["Request URI: http://bamboo-server:8085/rest/api/latest/result/PLANRUNKEY?expand=artifacts%2Clabels"],
             defaultError: "Possible exception in logs; check job",
             wrongState: "There is no BuildState called 'wrong'",
             notFound: "Plan \\'PROJECTKEY-PLANKEY\\' was not found",
