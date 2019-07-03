@@ -85,6 +85,19 @@ class BambooClient {
         }
     }
 
+    def getDeploymentProjectsForPlan(def project, def plan){
+        def query = [planKey: "$project-$plan"]
+        def projectResults = doHttpRequest(GET, "/rest/api/latest/deploy/project/forPlan", query)
+        def projectIds = projectResults.collect{ it.id}
+        def projectsInfo = []
+        projectIds.each { id ->
+            def projectInfo = doHttpRequest(GET, "/rest/api/latest/deploy/project/$id")
+            projectsInfo += projectInfo
+        }
+        return projectsInfo
+
+    }
+
     def getDeployment(def id){
         def result = doHttpRequest(GET, "/rest/api/latest/deploy/result/$id")
         return result
