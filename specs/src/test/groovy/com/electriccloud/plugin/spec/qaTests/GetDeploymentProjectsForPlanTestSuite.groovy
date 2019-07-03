@@ -27,6 +27,14 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
             C388188: [ids: 'C388188', description: 'GetDeploymentProjectsForPlan propertySheet format'],
             C388189: [ids: 'C388189', description: 'GetDeploymentProjectsForPlan don`t save result'],
             C388190: [ids: 'C388190', description: 'GetDeploymentProjectsForPlan empty plan'],
+
+            C388191: [ids: 'C388191', description: 'empty config'],
+            C388192: [ids: 'C388192', description: 'empty project'],
+            C388193: [ids: 'C388193', description: 'empty plan'],
+            C388194: [ids: 'C388194', description: 'wrong config'],
+            C388195: [ids: 'C388195', description: 'wrong project'],
+            C388196: [ids: 'C388196', description: 'wrong plan'],
+            C388197: [ids: 'C388197', description: 'wrong format'],
     ]
 
     static def testCaseHelper
@@ -35,13 +43,7 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
     static def expectedSummaries = [
             default:     "Deployment projects info saved to property(ies).",
             empty: "No deployment projects found for plan: PROJECT-FAIL",
-            error: "Deployment was not finished successfully.",
-            noWait: "Deployment was successfully added to a queue.",
-            timeout: "Exceeded the wait timeout while waiting for the deployment to finish.",
-            wrongProject: "Can't find deployment project 'wrong'.",
-            wrongEnv: "Can't find environment 'wrong'.",
-            wrongVersion: "Can't find version 'wrong'.",
-            wrongFormat: "Deployment is finished. Requesting result.",
+            error: "No deployment projects found for plan: PROJECTKEY-PLANKEY",
     ]
 
     static def expectedLogs = [
@@ -162,7 +164,6 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
         TC.C388190 | CONFIG_NAME  | 'PROJECT'         | 'FAIL'  | 'json'           | '/myJob/deploymentProjectKeys'  | 'warning'       | expectedSummaries.empty     | expectedLogs.default
     }
 
-
     @NewFeature(pluginVersion = "1.5.0")
     @Unroll
     def 'GetDeploymentProjectsForPlan: Positive #caseId.ids #caseId.description'() {
@@ -275,6 +276,57 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
         TC.C388188 | CONFIG_NAME  | 'PROJECT'         | 'PLAN'  | 'propertySheet'  | '/myJob/deploymentProjectKeys'  | 'success'       | expectedSummaries.default   | expectedLogs.default
         TC.C388189 | CONFIG_NAME  | 'PROJECT'         | 'PLAN'  | 'none'           | '/myJob/deploymentProjectKeys'  | 'success'       | expectedSummaries.default   | expectedLogs.default
         TC.C388190 | CONFIG_NAME  | 'PROJECT'         | 'FAIL'  | 'json'           | '/myJob/deploymentProjectKeys'  | 'warning'       | expectedSummaries.empty     | expectedLogs.default
+    }
+
+    @NewFeature(pluginVersion = "1.5.0")
+    @Unroll
+    def 'GetDeploymentProjectsForPlan: Negative #caseId.ids #caseId.description'() {
+        testCaseHelper.createNewTestCase(caseId.ids, caseId.description)
+
+        given: "Tests parameters for procedure"
+        def runParams = [
+                config: configName,
+                planKey: planKey,
+                projectKey: projectKey,
+                resultFormat: resultFormat,
+                resultPropertySheet: resultPropertySheet,
+        ]
+
+        when: "Run procedure TriggerDeployment"
+
+        testCaseHelper.addStepContent("Run procedure $procedureName with parameters:", runParams)
+
+        def result = runProcedure(projectName, procedureName, runParams)
+        def jobSummary = getStepSummary(result.jobId, procedureName)
+
+        def outputParameters = getJobOutputParameters(result.jobId, 1)
+        def jobProperties = getJobProperties(result.jobId)
+
+        then: "Verify results"
+        testCaseHelper.addExpectedResult("Job status: $expectedOutcome")
+        assert result.outcome == expectedOutcome
+
+        if (expectedSummary) {
+            testCaseHelper.addExpectedResult("Job Summary: $expectedSummary")
+            assert jobSummary == expectedSummary
+                    .replace('PROJECTKEY', projectKey)
+                    .replace('PLANKEY', planKey)
+        }
+
+        testCaseHelper.addExpectedResult("Job logs contains: $expectedLog")
+        assert result.logs.contains(expectedLog
+                .replace('PROJECTKEY', projectKey)
+                .replace('PLANKEY', planKey))
+        where:
+        caseId     | configName   | projectKey        | planKey |  resultFormat    | resultPropertySheet             | expectedOutcome | expectedSummary             | expectedLog
+        TC.C388191 | ''           | 'PROJECT'         | 'PLAN'  | 'json'           | '/myJob/deploymentProjectKeys'  | 'error'         | null                        | expectedLogs.defaultError
+        TC.C388192 | CONFIG_NAME  | ''                | 'PLAN'  | 'json'           | '/myJob/deploymentProjectKeys'  | 'error'         | null                        | expectedLogs.defaultError
+        TC.C388193 | CONFIG_NAME  | 'PROJECT'         | ''      | 'json'           | '/myJob/deploymentProjectKeys'  | 'error'         | null                        | expectedLogs.defaultError
+        TC.C388194 | 'wrong'      | 'PROJECT'         | 'PLAN'  | 'json'           | '/myJob/deploymentProjectKeys'  | 'error'         | null                        | expectedLogs.defaultError
+        TC.C388195 | CONFIG_NAME  | 'WRONG'           | 'PLAN'  | 'json'           | '/myJob/deploymentProjectKeys'  | 'warning'       | expectedSummaries.error     | expectedSummaries.error
+        TC.C388196 | CONFIG_NAME  | 'PROJECT'         | 'WRONG' | 'json'           | '/myJob/deploymentProjectKeys'  | 'warning'       | expectedSummaries.error     | expectedSummaries.error
+        TC.C388197 | CONFIG_NAME  | 'PROJECT'         | 'PLAN'  | 'wrong'          | '/myJob/deploymentProjectKeys'  | 'error'         | null                        | ''
+
     }
 
     def assertRecursively(def map, def map2){
