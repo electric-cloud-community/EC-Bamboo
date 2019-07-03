@@ -88,15 +88,36 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
         def propertyName = resultPropertySheet.split("/")[2]
 
         def projectsInfo = bambooClient.getDeploymentProjectsForPlan(projectKey, planKey)
-        for (def i=0; i<projectsInfo.size(); i++) {
-            projectsInfo[i].environmentNames = projectsInfo[i].environments[0].name
-            projectsInfo[i].environments[0].key = projectsInfo[i].environments[0].key.key
-            projectsInfo[i].environments[0].remove('operations')
-            projectsInfo[i].planKey = projectsInfo[i].planKey.key
-            projectsInfo[i].key = projectsInfo[i].key.key
-            projectsInfo[i].remove('operations')
-            projectsInfo[i].remove('oid')
+
+        if (resultFormat == 'json') {
+            for (def i = 0; i < projectsInfo.size(); i++) {
+                projectsInfo[i].environmentNames = projectsInfo[i].environments[0].name
+                projectsInfo[i].environments[0].key = projectsInfo[i].environments[0].key.key
+                projectsInfo[i].environments[0].remove('operations')
+                projectsInfo[i].planKey = projectsInfo[i].planKey.key
+                projectsInfo[i].key = projectsInfo[i].key.key
+                projectsInfo[i].remove('operations')
+                projectsInfo[i].remove('oid')
+            }
         }
+        if (resultFormat == 'propertySheet') {
+            for (def i = 0; i < projectsInfo.size(); i++) {
+                projectsInfo[i].environmentNames = projectsInfo[i].environments[0].name
+                projectsInfo[i].environments[0].key = projectsInfo[i].environments[0].key.key
+                projectsInfo[i].environments[0].remove('operations')
+                projectsInfo[i].planKey = projectsInfo[i].planKey.key
+                projectsInfo[i].key = projectsInfo[i].key.key
+                projectsInfo[i].remove('operations')
+                projectsInfo[i].remove('oid')
+            }
+            def tmpProjectsInfo = projectsInfo
+            projectsInfo = [:]
+            tmpProjectsInfo.each{
+                projectsInfo[it.id.toString()] = it
+            }
+        }
+        println '***'
+        println projectsInfo
 
         then: "Verify results"
         testCaseHelper.addExpectedResult("Job status: $expectedOutcome")
@@ -105,15 +126,30 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
         testCaseHelper.addExpectedResult("Job Summary: $expectedSummary")
         assert jobSummary == expectedSummary
 
-        if (resultPropertySheet == 'json') {
+        if (resultFormat == 'json') {
             testCaseHelper.addExpectedResult("Job property propertyName : $expectedOutcome")
             assert new JsonSlurper().parseText(jobProperties[propertyName]) == projectsInfo
         }
 
+        if (resultFormat == 'propertySheet') {
+            assertRecursively(projectsInfo, jobProperties[propertyName])
+        }
         where:
         caseId     | configName   | projectKey        | planKey |  resultFormat    | resultPropertySheet             | expectedOutcome | expectedSummary             | expectedLog
-        TC.C388170 | CONFIG_NAME  | 'PROJECT'         | 'PLAN'  | 'json'           | '/myJob/deploymentProjectKeys'  | 'success'       | expectedSummaries.default   | expectedLogs.default
-//        TC.C388170 | CONFIG_NAME  | 'PROJECT'         | 'PLAN'  | 'propertySheet'  | '/myJob/deploymentProjectKeys ' | 'success'       | expectedSummaries.default   | expectedLogs.default
+//        TC.C388170 | CONFIG_NAME  | 'PROJECT'         | 'PLAN'  | 'json'           | '/myJob/deploymentProjectKeys'  | 'success'       | expectedSummaries.default   | expectedLogs.default
+        TC.C388170 | CONFIG_NAME  | 'PROJECT'         | 'PLAN'  | 'propertySheet'  | '/myJob/deploymentProjectKeys ' | 'success'       | expectedSummaries.default   | expectedLogs.default
+    }
+
+    def assertRecursively(def map, def map2){
+        for (def entry in map) {
+            if (entry.value instanceof Map){
+                assertRecursively(entry.value, map2[entry.key])
+            }
+            else{
+                testCaseHelper.addExpectedResult("--Job property $entry.key: $entry.value")
+                assert entry.value.toString() == map2[entry.key]
+            }
+        }
     }
 
 }
