@@ -18,7 +18,7 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
             config: "",
             deploymentEnvironmentName: "",
             deploymentProjectName: "",
-            deploymentVersionName: "",
+            deploymentReleaseName: "",
             resultFormat: "",
             resultPropertySheet: "",
             waitForDeployment: "",
@@ -40,10 +40,10 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
             config: "",
             deploymentProjectName: "",
             planBuildKey: "",
-            requestVersionName: "",
+            requestReleaseName: "",
             resultFormat: "",
             resultPropertySheet: "",
-            versionName: "",
+            releaseName: "",
     ]
 
     static def TC = [
@@ -97,7 +97,7 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
             timeout: "Exceeded the wait timeout while waiting for the deployment to finish.",
             wrongProject: "Can't find deployment project 'wrong'.",
             wrongEnv: "Can't find environment 'wrong'.",
-            wrongVersion: "Can't find version 'wrong'.",
+            wrongVersion: "Can't find release 'wrong'.",
             wrongFormat: "Deployment is finished. Requesting result.",
     ]
 
@@ -137,7 +137,7 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
                 config: configName,
                 deploymentEnvironmentName: envName,
                 deploymentProjectName: deploymentProjectName,
-                deploymentVersionName: deploymentVersionName,
+                deploymentReleaseName: deploymentVersionName,
                 resultFormat: resultFormat,
                 resultPropertySheet: resultPropertySheet,
                 waitForDeployment: waitForDeployment,
@@ -207,7 +207,7 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
                 config: configName,
                 deploymentEnvironmentName: envName,
                 deploymentProjectName: deploymentProjectName,
-                deploymentVersionName: deploymentVersionName,
+                deploymentReleaseName: deploymentVersionName,
                 resultFormat: resultFormat,
                 resultPropertySheet: resultPropertySheet,
                 waitForDeployment: waitForDeployment,
@@ -286,7 +286,7 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
                 config: configName,
                 deploymentEnvironmentName: envName,
                 deploymentProjectName: deploymentProjectName,
-                deploymentVersionName: deploymentVersionName,
+                deploymentReleaseName: deploymentVersionName,
                 resultFormat: resultFormat,
                 resultPropertySheet: resultPropertySheet,
                 waitForDeployment: waitForDeployment,
@@ -364,10 +364,10 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
                 config: PluginTestHelper.CONFIG_NAME,
                 deploymentProjectName: deploymentProjetct,
                 planBuildKey: planBuildKey,
-                requestVersionName: '0',
+                requestReleaseName: '0',
                 resultFormat: "json",
                 resultPropertySheet: "/myJob/version",
-                versionName: versionName,
+                releaseName: versionName,
         ]
         runProcedure(projectName, 'CreateRelease', runParams)
         return versionName
