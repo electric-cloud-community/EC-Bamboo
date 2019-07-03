@@ -143,7 +143,7 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
                     planRunsInfo[i].artifacts["$j"].producerJobKey = artifacts.artifact[j].producerJobKey
                     planRunsInfo[i].artifacts["$j"].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
                     planRunsInfo[i].artifacts["$j"].name = artifacts.artifact[j].name
-                    planRunsInfo[i].artifacts["$j"].link = artifacts.artifact[j].link
+                    planRunsInfo[i].artifacts["$j"].link = artifacts.artifact[j].link.href
                 }
                 planRunsInfo[i].artifacts.count = artifacts.artifact.size().toString()
             }
@@ -156,7 +156,7 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
                     planRunsInfo[i].artifacts[j].producerJobKey = artifacts.artifact[j].producerJobKey
                     planRunsInfo[i].artifacts[j].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
                     planRunsInfo[i].artifacts[j].name = artifacts.artifact[j].name
-                    planRunsInfo[i].artifacts[j].link = artifacts.artifact[j].link
+                    planRunsInfo[i].artifacts[j].link = artifacts.artifact[j].link.href
                 }
             }
             planRunsInfo[i].totalTestsCount = planRunsInfo[i].successfulTestCount + planRunsInfo[i].failedTestCount + planRunsInfo[i].quarantinedTestCount + planRunsInfo[i].skippedTestCount
@@ -290,7 +290,7 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
                     planRunsInfo[i].artifacts["$j"].producerJobKey = artifacts.artifact[j].producerJobKey
                     planRunsInfo[i].artifacts["$j"].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
                     planRunsInfo[i].artifacts["$j"].name = artifacts.artifact[j].name
-                    planRunsInfo[i].artifacts["$j"].link = artifacts.artifact[j].link
+                    planRunsInfo[i].artifacts["$j"].link = artifacts.artifact[j].link.href
                 }
                 planRunsInfo[i].artifacts.count = artifacts.artifact.size().toString()
             }
@@ -303,7 +303,7 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
                     planRunsInfo[i].artifacts[j].producerJobKey = artifacts.artifact[j].producerJobKey
                     planRunsInfo[i].artifacts[j].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
                     planRunsInfo[i].artifacts[j].name = artifacts.artifact[j].name
-                    planRunsInfo[i].artifacts[j].link = artifacts.artifact[j].link
+                    planRunsInfo[i].artifacts[j].link = artifacts.artifact[j].link.href
                 }
             }
             planRunsInfo[i].totalTestsCount = planRunsInfo[i].successfulTestCount + planRunsInfo[i].failedTestCount + planRunsInfo[i].quarantinedTestCount + planRunsInfo[i].skippedTestCount
