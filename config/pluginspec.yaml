@@ -411,7 +411,7 @@ procedures:
         required: true
       - name: requestReleaseName
         label: Request Release Name?
-        documentation: Request name for the next release (version) from the deployment project.
+        documentation: Procedure will request name for the next release (version) from the Bamboo deployment project.
         type: checkbox
         initiallyChecked: false
         checkedValue: 1
