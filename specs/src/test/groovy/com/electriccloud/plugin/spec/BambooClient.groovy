@@ -85,6 +85,25 @@ class BambooClient {
         }
     }
 
+    def getReleaseInfo(def projectDeployId, def releaseName){
+        def result
+        def request = doHttpRequest(GET, "/rest/api/latest/deploy/project/$projectDeployId/versions")
+        if (releaseName) {
+            if (releaseName == 'LAST'){
+                return request.versions[0]
+            }
+            request.versions.each {
+                if (it.name == releaseName) {
+                    result = it
+                }
+            }
+            return result
+        }
+        else {
+            return request.versions[0]
+        }
+    }
+
     def getDeploymentProjectsForPlan(def project, def plan){
         def query = [planKey: "$project-$plan"]
         def projectResults = doHttpRequest(GET, "/rest/api/latest/deploy/project/forPlan", query)
