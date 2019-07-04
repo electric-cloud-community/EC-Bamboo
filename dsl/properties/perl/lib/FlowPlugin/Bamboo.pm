@@ -340,7 +340,11 @@ sub createRelease {
     my $deploymentProjectId = $deploymentProject->{id};
     logDebug("Deployment project id: $deploymentProjectId");
 
-    if (!$params->{releaseName} && $params->{requestReleaseName}) {
+    if ($params->{requestReleaseName}) {
+        if ($params->{releaseName} ne ''){
+            logWarning("The value specified for the 'Release Name' will be ignored.");
+        }
+
         logInfo("Requesting next release name for $deploymentProject->{name}");
         my $nextVersionRequest = $self->client->get("/deploy/projectVersioning/$deploymentProjectId/nextVersion", {
             # Can't see any difference with/without this but as we have it, let's specify
@@ -351,6 +355,8 @@ sub createRelease {
     }
 
     logInfo("Creating release '$params->{releaseName}'");
+    $stepResult->setOutputParameter('release', $params->{releaseName});
+
     my $createVersionResponse = $self->client->post("/deploy/project/$deploymentProjectId/version", undef,
         # Content
         {
@@ -369,7 +375,6 @@ sub createRelease {
     my $shortInfo = _versionToShortInfo($createVersionResponse);
 
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $shortInfo);
-    $stepResult->setOutputParameter('release', $params->{releaseName});
 
     my $summary = "Created release: $params->{releaseName}";
     $stepResult->setJobStepOutcome('success');
@@ -567,6 +572,13 @@ sub triggerDeployment {
     my $deploymentResultId = $triggerDeploymentResponse->{deploymentResultId};
     logInfo("Deployment Result Key: $deploymentResultId");
 
+    my $bambooResultURL = $params->{endpoint}
+        . '/deploy/viewDeploymentResult.action?deploymentResultId=' . $deploymentResultId;
+
+    $stepResult->setReportUrl("View Deployment Report", $bambooResultURL);
+    $stepResult->setOutputParameter('deploymentResultKey', $deploymentResultId);
+    $stepResult->setOutputParameter('deploymentResultUrl', $bambooResultURL);
+
     if ($params->{waitForDeployment}) {
         $stepResult->setJobStepSummary("Waiting for the deployment to finish.");
         $stepResult->applyAndFlush();
@@ -602,13 +614,6 @@ sub triggerDeployment {
 
     logInfo("Saving result properties");
     $self->saveResultProperties($stepResult, $params->{resultFormat}, $params->{resultPropertySheet}, $shortInfo);
-
-    my $bambooResultURL = $params->{endpoint}
-        . '/deploy/viewDeploymentResult.action?deploymentResultId=' . $deploymentResultId;
-
-    $stepResult->setReportUrl("View Deployment Report", $bambooResultURL);
-    $stepResult->setOutputParameter('deploymentResultKey', $deploymentResultId);
-    $stepResult->setOutputParameter('deploymentResultUrl', $bambooResultURL);
 
     if (!$params->{waitForDeployment}) {
         return $self->setStepResultFields($stepResult, 'success', "Deployment was successfully added to a queue.");
