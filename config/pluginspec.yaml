@@ -419,7 +419,7 @@ procedures:
         required: false
       - name: releaseName
         label: Release Name
-        documentation: Name for new release (version) to create. e.g. 'release-22'.
+        documentation: Name for new release (version) to create. e.g. 'release-22'. If the "Request Release Name?" is checked, this value will be ignored.
         type: entry
         required: false
         dependsOn: requestReleaseName
