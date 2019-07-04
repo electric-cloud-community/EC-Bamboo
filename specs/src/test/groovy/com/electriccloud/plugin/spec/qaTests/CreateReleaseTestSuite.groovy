@@ -47,7 +47,7 @@ class CreateReleaseTestSuite extends PluginTestHelper{
             C388206: [ids: 'C388206', description: 'wrong config'],
             C388207: [ids: 'C388207', description: 'wrong deploymentProjectName'],
             C388208: [ids: 'C388208', description: 'wrong Format of planBuildKey'],
-            C388211: [ids: 'C388208', description: 'wrong planBuildKey'],
+            C388211: [ids: 'C388211', description: 'wrong planBuildKey'],
             C388209: [ids: 'C388209', description: 'wrong format'],
             C388210: [ids: 'C388210', description: 'releaseName already exists'],
     ]
