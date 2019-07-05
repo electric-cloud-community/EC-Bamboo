@@ -301,9 +301,14 @@ class CreateReleaseTestSuite extends PluginTestHelper{
         testCaseHelper.addExpectedResult("Job logs contains: $expectedLog")
         assert result.logs.contains(expectedLog)
 
-
-        testCaseHelper.addExpectedResult("OutputParameter release: $releaseName")
-        assert !outputParameters['release']
+        if (caseId == TC.C388210){
+            testCaseHelper.addExpectedResult("OutputParameter release: $releaseName")
+            assert outputParameters['release'] == releaseName
+        }
+        else {
+            testCaseHelper.addExpectedResult("OutputParameter release: $releaseName")
+            assert !outputParameters['release']
+        }
 
         testCaseHelper.addExpectedResult("Job property  $propertyName shouldn't exist")
         assert !jobProperties[propertyName]
