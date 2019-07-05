@@ -320,7 +320,6 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
         }
 
         if (caseId == TC.C388174) {
-            // TODO http://jira.electric-cloud.com/browse/ECBAMBOO-45
             testCaseHelper.addExpectedResult("OutputParameter deploymentResultKey: ${outputParameters['deploymentResultKey']}")
             assert outputParameters['deploymentResultKey']
 
