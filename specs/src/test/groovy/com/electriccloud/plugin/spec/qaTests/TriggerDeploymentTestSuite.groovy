@@ -319,14 +319,13 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
             assert result.logs.contains(expectedLog)
         }
 
-//        if (caseId == TC.C388174) {
-//            // TODO http://jira.electric-cloud.com/browse/ECBAMBOO-45
-//            testCaseHelper.addExpectedResult("OutputParameter deploymentResultKey: ${outputParameters['deploymentResultKey']}")
-//            assert outputParameters['deploymentResultKey']
-//
-//            testCaseHelper.addExpectedResult("OutputParameter deploymentResultUrl: http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}")
-//            assert outputParameters['deploymentResultUrl'] == "http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}"
-//        }
+        if (caseId == TC.C388174) {
+            testCaseHelper.addExpectedResult("OutputParameter deploymentResultKey: ${outputParameters['deploymentResultKey']}")
+            assert outputParameters['deploymentResultKey']
+
+            testCaseHelper.addExpectedResult("OutputParameter deploymentResultUrl: http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}")
+            assert outputParameters['deploymentResultUrl'] == "http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}"
+        }
 
         where:
         caseId     | configName   | envName           | deploymentProjectName      | deploymentVersionName | resultFormat    | resultPropertySheet       | waitForDeployment | waitTimeout | expectedOutcome | expectedSummary                 | expectedLog
