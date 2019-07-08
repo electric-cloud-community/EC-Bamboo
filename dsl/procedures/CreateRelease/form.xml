@@ -17,7 +17,7 @@
     <type>entry</type>
     <property>deploymentProjectName</property>
     <required>1</required>
-    <documentation>Name of the deployment project where version will be created.</documentation>
+    <documentation>Name of the deployment project where release will be created.</documentation>
     <label>Deployment Project Name:</label>
   </formElement>
   <formElement>
@@ -31,7 +31,7 @@
     <type>checkbox</type>
     <property>requestReleaseName</property>
     <required>0</required>
-    <documentation>Request name for the next release from the deployment project.</documentation>
+    <documentation>Procedure will request name for the next release (version) from the Bamboo deployment project.</documentation>
     <label>Request Release Name?:</label>
     <checkedValue>1</checkedValue>
     <initiallyChecked>false</initiallyChecked>
@@ -41,7 +41,7 @@
     <type>entry</type>
     <property>releaseName</property>
     <required>0</required>
-    <documentation>Name for new release (version) to create. e.g. 'release-22'.</documentation>
+    <documentation>Name for new release (version) to create. e.g. 'release-22'. If the "Request Release Name?" is checked, this value will be ignored.</documentation>
     <label>Release Name:</label>
     <condition>${requestReleaseName} == 0</condition>
     <dependsOn>requestReleaseName</dependsOn>

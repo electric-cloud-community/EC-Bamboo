@@ -81,14 +81,14 @@ Method should be named "transform", and should return payload object. In this ex
     <type>entry</type>
     <property>metadataPropertyPath</property>
     <required>0</required>
-    <documentation>Property sheet where run metadata will be stored. If omitted, /mySchedule/EC-Bamboo-%JobName%-build will be used for schedule context. For all other contexts root is /myProject.</documentation>
+    <documentation>Property sheet where run metadata will be stored. If omitted, /mySchedule/EC-Bamboo-%planKey%-build will be used for schedule context. For all other contexts root is /myProject.</documentation>
     <label>Metadata Property Path:</label>
   </formElement>
   <formElement>
     <type>entry</type>
     <property>baseDrilldownUrl</property>
     <required>0</required>
-    <documentation>Base URL for the Bamboo. If empty it will be set to %url_from_configuration%/job/%Job name%.</documentation>
+    <documentation>Base URL for the Bamboo. If empty it will be set to %url_from_configuration%/browse/%projectKey%[-%planKey%].</documentation>
     <label>Base URL for drill-down:</label>
   </formElement>
   <formElement>
