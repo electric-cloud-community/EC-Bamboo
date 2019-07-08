@@ -40,7 +40,7 @@ class E2ESuite extends BambooHelper {
     @E2E
     def "runPipeline"() {
         when:
-        def resp = runPipeline(projectName, pipelineName)
+        def resp = runPipeline(projectName, pipelineName, [], 300)
 
         def pipelineStatus = getPipelineRuntimeDetails(resp['flowRuntime']['flowRuntimeId'])
         then:
