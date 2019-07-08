@@ -31,7 +31,7 @@
     <type>entry</type>
     <property>deploymentReleaseName</property>
     <required>1</required>
-    <documentation>Name of the release to be deployed.</documentation>
+    <documentation>Name of the release (version) to be deployed.</documentation>
     <label>Release Name:</label>
   </formElement>
   <formElement>

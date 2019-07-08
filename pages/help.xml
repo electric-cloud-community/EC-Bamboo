@@ -122,21 +122,21 @@
             <tr>
                 
                     <td >Description</td>
-                    <td>Description for the configuration</td>
+                    <td>Description for the configuration.</td>
                 
             </tr>
             
             <tr>
                 
                     <td class="required">Bamboo Server URL</td>
-                    <td>Atlassian Bamboo server URL.</td>
+                    <td>Atlassian Bamboo server URL. e.g. 'http://bamboo-server.example.com:8085'</td>
                 
             </tr>
             
             <tr>
                 
                     <td class="required">Credential</td>
-                    <td>Provide the credentials ElectricFlow uses to communicate with the Bamboo server.</td>
+                    <td>Provide the credentials CloudBees Flow uses to communicate with the Bamboo server.</td>
                 
             </tr>
             
@@ -157,7 +157,7 @@
             <tr>
                 
                     <td >Proxy Authorization</td>
-                    <td>Provide the credentials ElectricFlow uses to authenticate proxy requests.</td>
+                    <td>Provide the credentials CloudBees Flow uses to authenticate proxy requests.</td>
                 
             </tr>
             

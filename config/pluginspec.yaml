@@ -26,7 +26,7 @@ configuration:
       type: entry
       required: true
     - name: basic_credential
-      documentation: Provide the credentials ElectricFlow uses to communicate with the Bamboo server.
+      documentation: Provide the credentials CloudBees uses to communicate with the Bamboo server.
       label: Credential
       type: credential
       userNameLabel: Username
@@ -52,7 +52,7 @@ configuration:
       required: false
     - name: proxy_credential
       label: Proxy Authorization
-      documentation: Provide the credentials ElectricFlow uses to authenticate proxy requests.
+      documentation: Provide the credentials CloudBees uses to authenticate proxy requests.
       type: credential
       userNameLabel: Proxy Username
       passwordLabel: Proxy Password
@@ -507,12 +507,12 @@ procedures:
         required: false
       - name: metadataPropertyPath
         label: Metadata Property Path
-        documentation: Property sheet where run metadata will be stored. If omitted, /mySchedule/EC-Bamboo-%JobName%-build will be used for schedule context. For all other contexts root is /myProject.
+        documentation: Property sheet where run metadata will be stored. If omitted, /mySchedule/EC-Bamboo-%planKey%-build will be used for schedule context. For all other contexts root is /myProject.
         type: entry
         required: false
       - name: baseDrilldownUrl
         label: Base URL for drill-down
-        documentation: Base URL for the Bamboo. If empty it will be set to %url_from_configuration%/job/%Job name%.
+        documentation: Base URL for the Bamboo. If empty it will be set to %url_from_configuration%/browse/%projectKey%[-%planKey%].
         type: entry
         required: false
       - name: previewMode
@@ -558,6 +558,6 @@ procedures:
         required: false
       - name: frequency
         label: Polling Frequency
-        documentation: Polling frequency (in minutes) for retrieving defects from Bamboo.
+        documentation: Polling frequency (in minutes) for retrieving builds from Bamboo.
         type: entry
         value: 30
