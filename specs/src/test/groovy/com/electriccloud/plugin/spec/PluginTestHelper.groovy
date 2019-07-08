@@ -303,7 +303,7 @@ class PluginTestHelper extends PluginSpockTestSupport {
 
 
 
-    def runPipeline(projectName, pipelineName, stagesToRun = []){
+    def runPipeline(projectName, pipelineName, stagesToRun = [], int timeout = 300){
         def stagesDsl = ''
         if (stagesToRun.size() > 0){
             stagesDsl = ", stagesToRun: '" + stagesToRun.join(',') + "'"
@@ -318,9 +318,9 @@ class PluginTestHelper extends PluginSpockTestSupport {
                         $stagesDsl
                     )
             """
-        waitUntil {
+        waitUntil( {
             pipelineCompleted(resp)
-        }
+        }, timeout, 0)
 
         // Display pipeline stages and tasks logs
         stagesToRun.each { stage ->
