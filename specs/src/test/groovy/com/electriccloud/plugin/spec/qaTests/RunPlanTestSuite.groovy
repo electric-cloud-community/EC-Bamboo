@@ -87,7 +87,7 @@ class RunPlanTestSuite extends PluginTestHelper{
         createConfiguration(CONFIG_NAME)
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: 'RunPlan', params: runPlanParams]
 
-        bambooClient = new BambooClient('http', commanderAddress,  '8085', '', BAMBOO_USERNAME, BAMBOO_PASSWORD)
+        bambooClient = initBambooClient()
         bambooClient.createPlanForRun('PROJECT', 'QARUNPLAN', randomize('QA'), ['jar', 'xml'])
 
     }

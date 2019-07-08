@@ -115,7 +115,7 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: 'RunPlan', params: runPlanParams]
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: 'CreateRelease', params: createReleaseParams]
 
-        bambooClient = new BambooClient('http', commanderAddress,  '8085', '', BAMBOO_USERNAME, BAMBOO_PASSWORD)
+        bambooClient = initBambooClient()
         successfulPlanRunKey = runPlan(bambooProject, bambooDeployFromPlan)
         versionNames.default = createRelease(deployProjects.default, successfulPlanRunKey)
         versionNames.long = createRelease(deployProjects.long, successfulPlanRunKey)

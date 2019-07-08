@@ -84,7 +84,7 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: procedureName, params: getPlanRunsParams]
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: 'RunPlan', params: runPlanParams]
 
-        bambooClient = new BambooClient('http', commanderAddress,  '8085', '', BAMBOO_USERNAME, BAMBOO_PASSWORD)
+        bambooClient = initBambooClient()
         bambooClient.createPlan('PROJECT', 'QARUN0', 'Plan without runs', 1)
         bambooClient.createPlanForRun('PROJECT', 'QARUN1', 'QA project for runs1', ['jar', 'xml'])
         bambooClient.createPlanForRun('PROJECT', 'QARUN2', 'QA project for runs2')

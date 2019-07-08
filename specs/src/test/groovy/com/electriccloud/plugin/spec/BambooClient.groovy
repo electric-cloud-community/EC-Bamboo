@@ -32,12 +32,7 @@ import static groovyx.net.http.Method.DELETE
 @BambooSpec
 class BambooClient {
 
-    static def commanderAddress = PluginTestHelper.commanderAddress
-
-    def protocol
-    def host
-    def port
-    def urlPath
+    def endpoint
     def userName
     def password
 
@@ -52,13 +47,12 @@ class BambooClient {
             endpoint += "/$urlPath"
         }
 
-        this.protocol = protocol
-        this.host     = host
-        this.port     = port
-        this.urlPath  = urlPath
+        this.endpoint = endpoint
+
         this.userName = userName
         this.password = password
-        this.http = new HTTPBuilder(endpoint)
+
+        this.http = new HTTPBuilder(new URI(endpoint))
         this.http.ignoreSSLIssues()
     }
 
@@ -187,7 +181,7 @@ class BambooClient {
     }
 
     def createPlan(def projectKey, def planKey, def planName = 'Test QA plan', def countOfStages=0){
-        def bambooServer = new BambooServer("http://$commanderAddress:8085")
+        def bambooServer = new BambooServer(this.endpoint)
         Stage[] stagesArray = []
 
         def task1 = new ScriptTask()
@@ -213,7 +207,7 @@ class BambooClient {
     }
 
     def createPlanForRun(def projectKey, def planKey, def planName, def listArtifact = ['jar'] ){
-        def bambooServer = new BambooServer("http://$commanderAddress:8085")
+        def bambooServer = new BambooServer(this.endpoint)
         def taskClean1 = new CleanWorkingDirectoryTask()
                 .description("Clean")
                 .enabled(true)

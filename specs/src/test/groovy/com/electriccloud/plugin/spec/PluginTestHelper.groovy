@@ -342,5 +342,18 @@ class PluginTestHelper extends PluginSpockTestSupport {
         return resp
     }
 
+    def initBambooClient(){
+        def regexMatch = (BAMBOO_URL =~ /(?:(https?):\/\/)([0-9a-zA-Z-.]+):(\d+)(.*)/)
+        def matchGroups = regexMatch[0]
+
+        def scheme = matchGroups[1] ?: 'http'
+        def host = matchGroups[2]
+        def port = matchGroups[3] ?: '8085'
+        def urlPath = matchGroups[4] ?: ''
+
+        assert host
+
+        return new BambooClient(scheme, host, port, urlPath, BAMBOO_USERNAME, BAMBOO_PASSWORD)
+    }
 
 }

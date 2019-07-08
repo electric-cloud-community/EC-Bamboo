@@ -60,7 +60,7 @@ class DisablePlanTestsSuite extends PluginTestHelper{
         createConfiguration(CONFIG_NAME)
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: 'DisablePlan', params: runPlanParams]
 
-        bambooClient = new BambooClient('http', commanderAddress,  '8085', '', BAMBOO_USERNAME, BAMBOO_PASSWORD)
+        bambooClient = initBambooClient()
         bambooClient.createPlan('PROJECT', 'QADISABLEPLAN', 'Disabled plan')
 
     }
