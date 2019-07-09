@@ -23,14 +23,14 @@
     <type>entry</type>
     <property>endpoint</property>
     <required>1</required>
-    <documentation>Atlassian Bamboo server URL.</documentation>
+    <documentation>Atlassian Bamboo server URL e.g. 'http://bamboo-server.example.com:8085'.</documentation>
     <label>Bamboo Server URL:</label>
   </formElement>
   <formElement>
     <type>credential</type>
     <property>basic_credential</property>
     <required>1</required>
-    <documentation>Provide the credentials ElectricFlow uses to communicate with the Bamboo server.</documentation>
+    <documentation>Provide the credentials CloudBees uses to communicate with the Bamboo server.</documentation>
     <label>Credential:</label>
     <attachedAsParameterToStep>createConfiguration</attachedAsParameterToStep>
     <passwordLabel>Password</passwordLabel>
@@ -67,7 +67,7 @@
     <type>credential</type>
     <property>proxy_credential</property>
     <required>0</required>
-    <documentation>Provide the credentials ElectricFlow uses to authenticate proxy requests.</documentation>
+    <documentation>Provide the credentials CloudBees uses to authenticate proxy requests.</documentation>
     <label>Proxy Authorization:</label>
     <attachedAsParameterToStep>createConfiguration</attachedAsParameterToStep>
     <passwordLabel>Proxy Password</passwordLabel>
