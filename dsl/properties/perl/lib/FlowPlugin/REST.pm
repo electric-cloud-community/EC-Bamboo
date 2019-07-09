@@ -25,6 +25,12 @@ sub new {
 
     my FlowPDF::Config $config = $context->getConfigValues();
 
+    #@type FlowPDF::Credential
+    my $credential = $config->getRequiredParameter('basic_credential');
+    if (!$credential->getUserName() || !$credential->getSecretValue()){
+        bailOut("Username and Password are mandatory in the credential.");
+    }
+
     my $debugLog = $params->{debug}
         ? $params->{debug}
         : ($config->isParameterExists('debugLevel'))
