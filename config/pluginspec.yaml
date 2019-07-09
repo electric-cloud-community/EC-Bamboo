@@ -22,7 +22,7 @@ configuration:
       required: false
     - name: endpoint
       label: Bamboo Server URL
-      documentation: Atlassian Bamboo server URL.
+      documentation: Atlassian Bamboo server URL e.g. 'http://bamboo-server.example.com:8085'.
       type: entry
       required: true
     - name: basic_credential
