@@ -4,6 +4,7 @@ use warnings FATAL => 'all';
 
 use base qw/FlowPDF::Component::EF::Reporting/;
 use FlowPDF::Log;
+use FlowPDF::Helpers qw/bailOut/;
 use Data::Dumper;
 
 
@@ -140,6 +141,10 @@ sub initialGetRecords {
     my $records = $pluginObject->getBuildRuns($params->{projectKey}, $params->{planKey}, {
         maxResults => ($limit || 10)
     });
+
+    if (!@{$records}) {
+        bailOut("No records for given project and plan key. Please try again when will have builds.");
+    }
 
     return $records;
 }

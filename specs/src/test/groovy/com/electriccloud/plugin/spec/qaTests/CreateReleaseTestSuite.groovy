@@ -83,7 +83,7 @@ class CreateReleaseTestSuite extends PluginTestHelper{
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: procedureName, params: runParams]
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: 'RunPlan', params: runPlanParams]
 
-        bambooClient = new BambooClient('http', commanderAddress,  '8085', '', BAMBOO_USERNAME, BAMBOO_PASSWORD)
+        bambooClient = initBambooClient()
         successfulPlanRunKey = runPlan(bambooProject, bambooDeployFromPlan)
     }
 

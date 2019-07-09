@@ -51,7 +51,7 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
 
     def doSetupSpec() {
         testCaseHelper = new TestCaseHelper(procedureName)
-        bambooClient = new BambooClient('http', commanderAddress,  '8085', '', BAMBOO_USERNAME, BAMBOO_PASSWORD)
+        bambooClient = initBambooClient()
         createConfiguration(PluginTestHelper.CONFIG_NAME)
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: procedureName, params: getAllPlansParams]
 

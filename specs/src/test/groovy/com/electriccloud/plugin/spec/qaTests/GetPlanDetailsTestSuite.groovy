@@ -56,7 +56,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
 
     def doSetupSpec() {
         testCaseHelper = new TestCaseHelper(procedureName)
-        bambooClient = new BambooClient('http', commanderAddress,  '8085', '', BAMBOO_USERNAME, BAMBOO_PASSWORD)
+        bambooClient = initBambooClient()
         bambooClient.createPlan('PROJECT', 'QA0', 'Plan without stages', 0)
         bambooClient.createPlan('PROJECT', 'QA2', 'Plan with some (2) stages', 2)
         createConfiguration(PluginTestHelper.CONFIG_NAME)

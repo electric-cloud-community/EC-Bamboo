@@ -11,11 +11,11 @@ class PluginTestHelper extends PluginSpockTestSupport {
     static String BAMBOO_URL = getURL()
     static String BAMBOO_USERNAME = getUsername()
     static String BAMBOO_PASSWORD = getPassword()
-
     static String CONFIG_NAME = 'specConfig'
-//    static def commanderAddress = System.getProperty("COMMANDER_SERVER")
-    static def commanderAddress = '0.0.0.0'
 
+    // 0.0.0.0 is required for the BambooClient to connect to the docker container
+    // because the container hostname does not work for it
+    static String commanderAddress = System.getenv('COMMANDER_SERVER') ?: '0.0.0.0'
 
     def createConfiguration(String configName = CONFIG_NAME, Map props = [:]) {
         String username = BAMBOO_USERNAME
@@ -342,5 +342,16 @@ class PluginTestHelper extends PluginSpockTestSupport {
         return resp
     }
 
+    def initBambooClient(){
+        URI bambooURI = new URI(BAMBOO_URL)
+
+        def host = commanderAddress// bambooURI.getHost()
+
+        def scheme = bambooURI.getScheme() ?: 'http'
+        def port = bambooURI.getPort()
+        def urlPath = bambooURI.getPath()
+
+        return new BambooClient(scheme, host, port, urlPath, BAMBOO_USERNAME, BAMBOO_PASSWORD)
+    }
 
 }
