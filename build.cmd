@@ -1,4 +1,4 @@
-java -jar ..\PluginWizardHelp\build\libs\plugin-wizard-help-1.20-SNAPSHOT.jar -rd "Jul 04, 2019" --out pages\help.xml --pluginFolder .
+java -jar ..\PluginWizardHelp\build\libs\plugin-wizard-help-1.20-SNAPSHOT.jar -rd "Jul 09, 2019" --out pages\help.xml --pluginFolder .
 
 ectool login admin changeme
 

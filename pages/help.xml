@@ -14,7 +14,7 @@
     <h1>@PLUGIN_KEY@</h1>
     <p>Plugin version @PLUGIN_VERSION@</p>
     
-    <p>Revised on Jul 04, 2019</p>
+    <p>Revised on Jul 09, 2019</p>
     
     <hr style="margin-left: -10px; margin-top: 10px; height: 1px; width: 100%; color: #5981BD;" noshade="noshade"/>
     <h1>Contents</h1>
@@ -122,21 +122,21 @@
             <tr>
                 
                     <td >Description</td>
-                    <td>Description for the configuration.</td>
+                    <td>Description for the configuration</td>
                 
             </tr>
             
             <tr>
                 
                     <td class="required">Bamboo Server URL</td>
-                    <td>Atlassian Bamboo server URL. e.g. 'http://bamboo-server.example.com:8085'</td>
+                    <td>Atlassian Bamboo server URL e.g. 'http://bamboo-server.example.com:8085'.</td>
                 
             </tr>
             
             <tr>
                 
                     <td class="required">Credential</td>
-                    <td>Provide the credentials CloudBees Flow uses to communicate with the Bamboo server.</td>
+                    <td>Provide the credentials CloudBees uses to communicate with the Bamboo server.</td>
                 
             </tr>
             
@@ -157,7 +157,7 @@
             <tr>
                 
                     <td >Proxy Authorization</td>
-                    <td>Provide the credentials CloudBees Flow uses to authenticate proxy requests.</td>
+                    <td>Provide the credentials CloudBees uses to authenticate proxy requests.</td>
                 
             </tr>
             
@@ -758,7 +758,7 @@
         <h2>CreateRelease</h2>
         
         
-        <p>This procedure creates new release from the build plan result.</p>
+        <p>This procedure creates new release (version) from the build plan result.</p>
         
         
         <h3>CreateRelease Parameters</h3>
@@ -781,7 +781,7 @@
             <tr>
                 
                 <td class="required">Deployment Project Name</td>
-                <td>Name of the deployment project where version will be created.</td>
+                <td>Name of the deployment project where release will be created.</td>
                 
             </tr>
             
@@ -795,14 +795,14 @@
             <tr>
                 
                 <td >Request Release Name?</td>
-                <td>Request name for the next release from the deployment project.</td>
+                <td>Procedure will request name for the next release (version) from the Bamboo deployment project.</td>
                 
             </tr>
             
             <tr>
                 
                 <td >Release Name</td>
-                <td>Name for new release (version) to create. e.g. 'release-22'.</td>
+                <td>Name for new release (version) to create. e.g. 'release-22'. If the "Request Release Name?" is checked, this value will be ignored.</td>
                 
             </tr>
             
@@ -896,7 +896,7 @@
             <tr>
                 
                 <td class="required">Release Name</td>
-                <td>Name of the release to be deployed.</td>
+                <td>Name of the release (version) to be deployed.</td>
                 
             </tr>
             
@@ -1051,14 +1051,14 @@ Method should be named &quot;transform&quot;, and should return payload object. 
             <tr>
                 
                 <td >Metadata Property Path</td>
-                <td>Property sheet where run metadata will be stored. If omitted, /mySchedule/EC-Bamboo-%JobName%-build will be used for schedule context. For all other contexts root is /myProject.</td>
+                <td>Property sheet where run metadata will be stored. If omitted, /mySchedule/EC-Bamboo-%planKey%-build will be used for schedule context. For all other contexts root is /myProject.</td>
                 
             </tr>
             
             <tr>
                 
                 <td >Base URL for drill-down</td>
-                <td>Base URL for the Bamboo. If empty it will be set to %url_from_configuration%/job/%Job name%.</td>
+                <td>Base URL for the Bamboo. If empty it will be set to %url_from_configuration%/browse/%projectKey%[-%planKey%].</td>
                 
             </tr>
             
