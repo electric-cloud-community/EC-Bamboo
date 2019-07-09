@@ -17,7 +17,7 @@ configuration:
       required: true
     - name: desc
       label: Description
-      documentation: Description for the configuration
+      documentation: Description for the configuration.
       type: entry
       required: false
     - name: endpoint
