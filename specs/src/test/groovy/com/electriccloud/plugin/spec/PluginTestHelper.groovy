@@ -347,13 +347,13 @@ class PluginTestHelper extends PluginSpockTestSupport {
         def matchGroups = regexMatch[0]
 
         def scheme = matchGroups[1] ?: 'http'
-        def host = matchGroups[2]
+        def host = commanderAddress ?: matchGroups[2]
         def port = matchGroups[3] ?: '8085'
         def urlPath = matchGroups[4] ?: ''
 
         assert host
 
-        return new BambooClient(scheme, host, port, urlPath, BAMBOO_USERNAME, BAMBOO_PASSWORD)
+        return new BambooClient(scheme, commanderAddress, port, urlPath, BAMBOO_USERNAME, BAMBOO_PASSWORD)
     }
 
 }
