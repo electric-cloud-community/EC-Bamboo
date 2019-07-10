@@ -122,7 +122,7 @@
             <tr>
                 
                     <td >Description</td>
-                    <td>Description for the configuration</td>
+                    <td>Description for the configuration.</td>
                 
             </tr>
             
@@ -598,7 +598,7 @@
             
             <tr>
                 
-                <td >Max Results</td>
+                <td >Results Limit</td>
                 <td>Limit the count of retrieved plan results by this value. Set to '0' to retrieve all results.</td>
                 
             </tr>

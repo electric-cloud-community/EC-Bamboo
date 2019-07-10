@@ -31,7 +31,7 @@
     <type>entry</type>
     <property>maxResults</property>
     <documentation>Limit the count of retrieved plan results by this value. Set to '0' to retrieve all results.</documentation>
-    <label>Max Results:</label>
+    <label>Results Limit:</label>
     <value>25</value>
   </formElement>
   <formElement>
