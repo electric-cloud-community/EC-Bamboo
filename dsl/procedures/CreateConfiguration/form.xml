@@ -16,7 +16,7 @@
     <type>entry</type>
     <property>desc</property>
     <required>0</required>
-    <documentation>Description for the configuration</documentation>
+    <documentation>Description for the configuration.</documentation>
     <label>Description:</label>
   </formElement>
   <formElement>

@@ -141,7 +141,7 @@ procedures:
         type: entry
         required: true
       - name : maxResults
-        label: Max Results
+        label: Results Limit
         documentation: Limit the count of retrieved plan results by this value. Set to '0' to retrieve all results.
         value: 25
         type: entry
