@@ -22,6 +22,11 @@ proceduresGrouping:
        - GetDeploymentProjectsForPlan
        - CreateRelease
        - TriggerDeployment
+   - name: Analytics
+     description: This procedure helps in performing analytics using the DevOps Insight Server.
+     procedures:
+       - CollectReportingData
+
 excludeProcedures:
   - ValidateCRDParams
 

@@ -142,10 +142,6 @@ sub initialGetRecords {
         maxResults => ($limit || 10)
     });
 
-    if (!@{$records}) {
-        bailOut("No records for given project and plan key. Please try again when will have builds.");
-    }
-
     return $records;
 }
 
