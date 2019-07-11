@@ -1,5 +1,5 @@
 1.5.1:
-  -
+  - Enhanced CollectReportingData procedure to gracefully handle the scenario where in no builds exist on the Bamboo Server on the first run.
 1.5.0:
   - Result Format and Result Property Sheet parameters were added for existing procedures, where appropriate to capture information returned by Bamboo.
   - |

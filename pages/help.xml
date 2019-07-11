@@ -1114,7 +1114,7 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
     <h3>@PLUGIN_KEY@ 1.5.1</h3>
     <ul>
         
-        <li>null</li>
+        <li>Enhanced CollectReportingData procedure to gracefully handle the scenario where in no builds exist on the Bamboo Server on the first run.</li>
         
     </ul>
     
