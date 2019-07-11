@@ -1,8 +1,8 @@
 package com.electriccloud.plugin.spec.qaTests
 
-import com.electriccloud.plugin.spec.BambooClient
+
 import com.electriccloud.plugin.spec.PluginTestHelper
-import com.electriccloud.plugin.spec.TestCaseHelper
+import com.electriccloud.plugin.spec.utils.TestCaseHelper
 import com.electriccloud.plugins.annotations.NewFeature
 import com.electriccloud.plugins.annotations.Sanity
 import spock.lang.*
@@ -89,28 +89,20 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         // procedure doesn't use all fields from response
         // and save only part of them:
         plansInfo.each {
-            it.remove('expand')
-            it.remove('project')
-            it.remove('shortKey')
-            it.url = it.link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
-            if (!it.description) {
-                it.description = null
-            }
-            it.remove('link')
-            it.remove('isFavourite')
-            it.remove('isActive')
-            it.remove('actions')
-            it.stagesSize = it.stages.size
-            it.remove('stages')
-            it.remove('branches')
-            it.remove('planKey')
+            it.url = it.link.href.replace(commanderAddress, 'bamboo-server')
             it.planDescription = it.description
-            it.remove('description')
+            it.stagesSize = it.stages.size
             if (resultFormat == 'propertySheet') {
                 it.averageBuildTimeInSeconds = Math.round(it.averageBuildTimeInSeconds).toString()
                 if (!it.planDescription){
                     it.remove('planDescription')
                 }
+                it.each { k, v ->
+                    it[k] = v.toString()
+                }
+            }
+            ['expand', 'project', 'shortKey', 'link', 'isFavourite', 'isActive', 'actions', 'stages', 'branches', 'planKey', 'description'].each{ field ->
+                it.remove(field)
             }
         }
 
@@ -135,14 +127,12 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
             plansInfo.each{
                 mapPlansInfo[it['key']] = it
             }
-            mapPlansInfo.each{ k, v ->
-                mapPlansInfo[k].each {k1, v1 ->
-                    assert mapPlansInfo[k][k1].toString() == jobProperties[propertyName][k][k1]
-                }
-            }
+            mapPlansInfo['keys'] = plansKey.join(',')
+
+            assert mapPlansInfo == jobProperties[propertyName]
+
             assert jobProperties[propertyName]['keys'].split(',') == plansKey
         }
-
 
         assert result.logs.contains("Found project: '$projectKey'")
         plansKey.each {
@@ -184,28 +174,20 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         // procedure doesn't use all fields from response
         // and save only part of them:
         plansInfo.each {
-            it.remove('expand')
-            it.remove('project')
-            it.remove('shortKey')
-            it.url = it.link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
-            if (!it.description) {
-                it.description = null
-            }
-            it.remove('link')
-            it.remove('isFavourite')
-            it.remove('isActive')
-            it.remove('actions')
-            it.stagesSize = it.stages.size
-            it.remove('stages')
-            it.remove('branches')
-            it.remove('planKey')
+            it.url = it.link.href.replace(commanderAddress, 'bamboo-server')
             it.planDescription = it.description
-            it.remove('description')
+            it.stagesSize = it.stages.size
             if (resultFormat == 'propertySheet') {
                 it.averageBuildTimeInSeconds = Math.round(it.averageBuildTimeInSeconds).toString()
                 if (!it.planDescription){
                     it.remove('planDescription')
                 }
+                it.each { k, v ->
+                    it[k] = v.toString()
+                }
+            }
+            ['expand', 'project', 'shortKey', 'link', 'isFavourite', 'isActive', 'actions', 'stages', 'branches', 'planKey', 'description'].each{ field ->
+                it.remove(field)
             }
         }
 
@@ -234,12 +216,10 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
             plansInfo.each{
                 mapPlansInfo[it['key']] = it
             }
-            mapPlansInfo.each{ k, v ->
-                testCaseHelper.addExpectedResult("Job property $propertyName - $k: ${mapPlansInfo[k]}")
-                mapPlansInfo[k].each {k1, v1 ->
-                    assert mapPlansInfo[k][k1].toString() == jobProperties[propertyName][k][k1]
-                }
-            }
+            mapPlansInfo['keys'] = plansKey.join(',')
+
+            assert mapPlansInfo == jobProperties[propertyName]
+
             testCaseHelper.addExpectedResult("Job property $propertyName - keys: ${jobProperties[propertyName]['keys']}")
             assert jobProperties[propertyName]['keys'].split(',') == plansKey
         }
@@ -296,6 +276,5 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
         TC.C388098 | 'wrong'                      | 'PROJECT'  | 'propertySheet' | '/myJob/plans'      | null                          | expectedLogs.defaultError
         TC.C388099 | PluginTestHelper.CONFIG_NAME | 'wrong'    | 'propertySheet' | '/myJob/plans'      | expectedSummaries.wrongPoject | expectedLogs.wrongPoject
         TC.C388100 | PluginTestHelper.CONFIG_NAME | 'PROJECT'  | 'wrong'         | '/myJob/plans'      | null                          | ''
-
     }
 }
