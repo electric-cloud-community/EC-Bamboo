@@ -1,3 +1,3 @@
 <p>This plugin integrates CloudBees Flow with Atlassian Bamboo.</p>
-<p>Atlassian Bamboo is a continuous integration (CI) and deployment (CD) server that can be used to automate the release management for a software application, creating a continuous delivery pipeline.</p>
-<p>For more information about Atlassian Bamboo go to <a href="https://www.atlassian.com/software/bamboo" target="_blank">Bamboo home page</a>. For better Atlassian Bamboo understanding go to  <a href="https://confluence.atlassian.com/bamboo/understanding-the-bamboo-ci-server-289277285.html" target="_blank">Atlassian Documentation</a></p>
+<p><a href="https://www.atlassian.com/software/bamboo" target="_blank">Atlassian Bamboo</a> is a continuous integration (CI) and deployment (CD) server that can be used to automate the release management for a software application, creating a continuous delivery pipeline.</p>
+<p>The documentation <a href="https://www.atlassian.com/software/bamboo" target="_blank">here</a> provides more details on its functionality.</p>

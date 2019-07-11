@@ -14,7 +14,7 @@
     <h1>@PLUGIN_KEY@</h1>
     <p>Plugin version @PLUGIN_VERSION@</p>
     
-    <p>Revised on Jul 09, 2019</p>
+    <p>Revised on Jul 11, 2019</p>
     
     <hr style="margin-left: -10px; margin-top: 10px; height: 1px; width: 100%; color: #5981BD;" noshade="noshade"/>
     <h1>Contents</h1>
@@ -34,7 +34,7 @@
 
     
     <li><a href="#procedures">Plugin Procedures</a></li>
-    <li>Build Plans management<br/><i>These procedures help in managing a Build process.</i></li><ul><li><a href="#RunPlan">RunPlan</a></li><li><a href="#EnablePlan">EnablePlan</a></li><li><a href="#DisablePlan">DisablePlan</a></li><li><a href="#GetAllPlans">GetAllPlans</a></li><li><a href="#GetPlanDetails">GetPlanDetails</a></li><li><a href="#GetPlanRuns">GetPlanRuns</a></li></ul><li>Deployment Plans management<br/><i>These procedures help in managing a Deployment process.</i></li><ul><li><a href="#GetDeploymentProjectsForPlan">GetDeploymentProjectsForPlan</a></li><li><a href="#CreateRelease">CreateRelease</a></li><li><a href="#TriggerDeployment">TriggerDeployment</a></li></ul><li>Other</li><ul><li><a href="#CollectReportingData">CollectReportingData</a></li></ul>
+    <li>Build Plans management<br/><i>These procedures help in managing a Build process.</i></li><ul><li><a href="#RunPlan">RunPlan</a></li><li><a href="#EnablePlan">EnablePlan</a></li><li><a href="#DisablePlan">DisablePlan</a></li><li><a href="#GetAllPlans">GetAllPlans</a></li><li><a href="#GetPlanDetails">GetPlanDetails</a></li><li><a href="#GetPlanRuns">GetPlanRuns</a></li></ul><li>Deployment Plans management<br/><i>These procedures help in managing a Deployment process.</i></li><ul><li><a href="#GetDeploymentProjectsForPlan">GetDeploymentProjectsForPlan</a></li><li><a href="#CreateRelease">CreateRelease</a></li><li><a href="#TriggerDeployment">TriggerDeployment</a></li></ul><li>Analytics<br/><i>This procedure helps in performing analytics using the DevOps Insight Server.</i></li><ul><li><a href="#CollectReportingData">CollectReportingData</a></li></ul>
 
     
     
@@ -49,24 +49,13 @@
     
     <h1>Overview</h1>
     <p><p>This plugin integrates CloudBees Flow with Atlassian Bamboo.</p>
-<p>Atlassian Bamboo is a continuous integration (CI) and deployment (CD) server that can be used to automate the release management for a software application, creating a continuous delivery pipeline.</p>
-<p>For more information about Atlassian Bamboo go to <a href="https://www.atlassian.com/software/bamboo" target="_blank">Bamboo home page</a>. For better Atlassian Bamboo understanding go to  <a href="https://confluence.atlassian.com/bamboo/understanding-the-bamboo-ci-server-289277285.html" target="_blank">Atlassian Documentation</a></p>
+<p><a href="https://www.atlassian.com/software/bamboo" target="_blank">Atlassian Bamboo</a> is a continuous integration (CI) and deployment (CD) server that can be used to automate the release management for a software application, creating a continuous delivery pipeline.</p>
+<p>The documentation <a href="https://www.atlassian.com/software/bamboo" target="_blank">here</a> provides more details on its functionality.</p>
 </p>
     <div id="SupportedVersions">
 <h1>Supported Versions</h1>
-<p>This plugin was developed and tested against following Bamboo Server versions:</p>
-<ul>
-<li>Atlassian Bamboo 6.8.1</li>
-</ul>
-<p>According to the Atlassian Bamboo changelog, the following changes define the minimal compatible versions:</p>
-<ul>
-<li>
-<a href="https://developer.atlassian.com/server/bamboo/bamboo-api-changes-for-5-11/" target="_blank">Bamboo 5.11</a>
-: Versions prior to this are not compatible with the TriggerDeployment procedure.</li>
-<li>
-<a href="https://developer.atlassian.com/server/bamboo/bamboo-api-changes-for-bamboo-3-0/" target="_blank">Bamboo 3.0</a>
-: Changes in the process of receiving Plan Build results make versions, prior to this, incompatible with RunPlan, GetPlanRuns and CollectReportingData procedures.</li>
-</ul>
+<p>This plugin was developed and tested against the Bamboo Server 6.8.1 version.</p>
+<p>As the plugin uses Rest API, versions newer than 5.11, should be compatible.</p>
 
 </div>
     
@@ -1122,12 +1111,19 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
 
     <h1 id="releaseNotes">Release Notes</h1>
     
+    <h3>@PLUGIN_KEY@ 1.5.1</h3>
+    <ul>
+        
+        <li>null</li>
+        
+    </ul>
+    
     <h3>@PLUGIN_KEY@ 1.5.0</h3>
     <ul>
         
-        <li>Added Result Format and Result Property Sheet parameters for all the procedures which returns information from Bamboo.</li>
+        <li>Result Format and Result Property Sheet parameters were added for existing procedures, where appropriate to capture information returned by Bamboo.</li>
         
-        <li><p>New procedures for the deployment process automation:</p>
+        <li><p>Following new procedures were added for deployment process automation:</p>
 <ul>
   <li>GetDeploymentProjectsForPlan</li>
   <li>CreateRelease</li>
@@ -1135,16 +1131,17 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
 </ul>
 </li>
         
-        <li><p>Introduced enhancements for the RunPlan procedure:</p>
+        <li><p>RunPlan procedure was enhanced to support the following:</p>
 <ul>
-  <li>Posibility to run a build against custom VCS revision (branch).</li>
-  <li>Supplying the additional run variables for the build.</li>
-  <li>Showing live progress as the Plan Build runs.</li>
-  <li>Posibility to omit waiting for the Plan Run to finish.</li>
+  <li>Run a build against custom VCS revision (branch).</li>
+  <li>Parametrized builds.</li>
+  <li>Show Build progress in Summary as the Build is running.</li>
+  <li>Ability to Queue a plan without waiting for it to complete.</li>
+  <li>Ability to wait for a build based on a configurable timeout.</li>
 </ul>
 </li>
         
-        <li><p>Following procedures now produce output parameters:</p>
+        <li><p>Output parameters were added to these procedures:</p>
 <ul>
   <li>GetAllPlans</li>
   <li>GetPlanDetails</li>
@@ -1153,11 +1150,9 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
 </ul>
 </li>
         
-        <li>New procedure CollectReportingData for the DevOps Insight Server integration was added.</li>
+        <li>New procedure CollectReportingData was added to support Analytics using the DevOps Insight Server</li>
         
-        <li>Proxy support was added.</li>
-        
-        <li>Cleanup was performed.</li>
+        <li>Http Proxy support was added for Plugin Configuration.</li>
         
     </ul>
     
