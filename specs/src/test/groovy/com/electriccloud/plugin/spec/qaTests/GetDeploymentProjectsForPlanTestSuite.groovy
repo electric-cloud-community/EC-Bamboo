@@ -1,8 +1,8 @@
 package com.electriccloud.plugin.spec.qaTests
 
-import com.electriccloud.plugin.spec.BambooClient
+
 import com.electriccloud.plugin.spec.PluginTestHelper
-import com.electriccloud.plugin.spec.TestCaseHelper
+import com.electriccloud.plugin.spec.utils.TestCaseHelper
 import com.electriccloud.plugins.annotations.NewFeature
 import com.electriccloud.plugins.annotations.Sanity
 import groovy.json.JsonSlurper
@@ -86,42 +86,7 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
         def outputParameters = getJobOutputParameters(result.jobId, 1)
         def jobProperties = getJobProperties(result.jobId)
 
-        def projectsInfo = bambooClient.getDeploymentProjectsForPlan(projectKey, planKey)
-
-        if (resultFormat == 'json') {
-            for (def i = 0; i < projectsInfo.size(); i++) {
-                projectsInfo[i].environmentNames = projectsInfo[i].environments[0].name
-                projectsInfo[i].environments[0].key = projectsInfo[i].environments[0].key.key
-                projectsInfo[i].environments[0].remove('operations')
-                projectsInfo[i].planKey = projectsInfo[i].planKey.key
-                projectsInfo[i].key = projectsInfo[i].key.key
-                projectsInfo[i].remove('operations')
-                projectsInfo[i].remove('oid')
-            }
-        }
-        if (resultFormat == 'propertySheet') {
-            for (def i = 0; i < projectsInfo.size(); i++) {
-                projectsInfo[i].environmentNames = projectsInfo[i].environments[0].name
-                projectsInfo[i].environments[0].key = projectsInfo[i].environments[0].key.key
-                projectsInfo[i].environments[0].remove('operations')
-                projectsInfo[i].planKey = projectsInfo[i].planKey.key
-                projectsInfo[i].key = projectsInfo[i].key.key
-                projectsInfo[i].remove('operations')
-                projectsInfo[i].remove('oid')
-            }
-            def tmpProjectsInfo = projectsInfo
-            projectsInfo = [:]
-            tmpProjectsInfo.each{
-                projectsInfo[it.id.toString()] = it
-                def envs = it.environments
-                projectsInfo[it.id.toString()].environments = [:]
-                for (def env in envs){
-                    projectsInfo[it.id.toString()].environments[env.key.toString()] = env
-                }
-                projectsInfo[it.id.toString()].environments.keys = projectsInfo[it.id.toString()].environments.collect { k,v -> k} .join(',')
-            }
-            projectsInfo.keys = projectsInfo.collect {k, v -> k}.join(',')
-        }
+        def projectsInfo = getDeploymentProjectsForPlan(projectKey, planKey, resultFormat)
 
         def propertyName = resultPropertySheet.split("/")[2]
         then: "Verify results"
@@ -139,7 +104,7 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
             if (resultFormat == 'propertySheet') {
                 assert outputParameters.deploymentProjectKeys == projectsInfo.keys.replace(',', ', ')
 
-                assertRecursively(projectsInfo, jobProperties[propertyName])
+                assert jobProperties[propertyName] == projectsInfo
             }
 
             if (resultFormat == 'none') {
@@ -188,42 +153,7 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
         def outputParameters = getJobOutputParameters(result.jobId, 1)
         def jobProperties = getJobProperties(result.jobId)
 
-        def projectsInfo = bambooClient.getDeploymentProjectsForPlan(projectKey, planKey)
-
-        if (resultFormat == 'json') {
-            for (def i = 0; i < projectsInfo.size(); i++) {
-                projectsInfo[i].environmentNames = projectsInfo[i].environments[0].name
-                projectsInfo[i].environments[0].key = projectsInfo[i].environments[0].key.key
-                projectsInfo[i].environments[0].remove('operations')
-                projectsInfo[i].planKey = projectsInfo[i].planKey.key
-                projectsInfo[i].key = projectsInfo[i].key.key
-                projectsInfo[i].remove('operations')
-                projectsInfo[i].remove('oid')
-            }
-        }
-        if (resultFormat == 'propertySheet') {
-            for (def i = 0; i < projectsInfo.size(); i++) {
-                projectsInfo[i].environmentNames = projectsInfo[i].environments[0].name
-                projectsInfo[i].environments[0].key = projectsInfo[i].environments[0].key.key
-                projectsInfo[i].environments[0].remove('operations')
-                projectsInfo[i].planKey = projectsInfo[i].planKey.key
-                projectsInfo[i].key = projectsInfo[i].key.key
-                projectsInfo[i].remove('operations')
-                projectsInfo[i].remove('oid')
-            }
-            def tmpProjectsInfo = projectsInfo
-            projectsInfo = [:]
-            tmpProjectsInfo.each{
-                projectsInfo[it.id.toString()] = it
-                def envs = it.environments
-                projectsInfo[it.id.toString()].environments = [:]
-                for (def env in envs){
-                    projectsInfo[it.id.toString()].environments[env.key.toString()] = env
-                }
-                projectsInfo[it.id.toString()].environments.keys = projectsInfo[it.id.toString()].environments.collect { k,v -> k} .join(',')
-            }
-            projectsInfo.keys = projectsInfo.collect {k, v -> k}.join(',')
-        }
+        def projectsInfo = getDeploymentProjectsForPlan(projectKey, planKey, resultFormat)
 
         def propertyName = resultPropertySheet.split("/")[2]
         then: "Verify results"
@@ -246,7 +176,7 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
                 testCaseHelper.addExpectedResult("OutputParameter deploymentProjectKeys: ${projectsInfo.keys}")
                 assert outputParameters.deploymentProjectKeys == projectsInfo.keys.replace(',', ', ')
 
-                assertRecursively(projectsInfo, jobProperties[propertyName])
+                assert jobProperties[propertyName] == projectsInfo
             }
 
             if (resultFormat == 'none') {
@@ -329,16 +259,54 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
 
     }
 
-    def assertRecursively(def map, def map2){
+    def getDeploymentProjectsForPlan(def projectKey, def planKey, def resultFormat){
+        def projectsInfo = bambooClient.getDeploymentProjectsForPlan(projectKey, planKey)
+        if (resultFormat == 'json') {
+            for (def i = 0; i < projectsInfo.size(); i++) {
+                projectsInfo[i].environmentNames = projectsInfo[i].environments[0].name
+                projectsInfo[i].environments[0].key = projectsInfo[i].environments[0].key.key
+                projectsInfo[i].environments[0].remove('operations')
+                projectsInfo[i].planKey = projectsInfo[i].planKey.key
+                projectsInfo[i].key = projectsInfo[i].key.key
+                projectsInfo[i].remove('operations')
+                projectsInfo[i].remove('oid')
+            }
+        }
+        if (resultFormat == 'propertySheet') {
+            for (def i = 0; i < projectsInfo.size(); i++) {
+                projectsInfo[i].environmentNames = projectsInfo[i].environments[0].name
+                projectsInfo[i].environments[0].key = projectsInfo[i].environments[0].key.key
+                projectsInfo[i].environments[0].remove('operations')
+                projectsInfo[i].planKey = projectsInfo[i].planKey.key
+                projectsInfo[i].key = projectsInfo[i].key.key
+                projectsInfo[i].remove('operations')
+                projectsInfo[i].remove('oid')
+            }
+            def tmpProjectsInfo = projectsInfo
+            projectsInfo = [:]
+            tmpProjectsInfo.each{
+                projectsInfo[it.id.toString()] = it
+                def envs = it.environments
+                projectsInfo[it.id.toString()].environments = [:]
+                for (def env in envs){
+                    projectsInfo[it.id.toString()].environments[env.key.toString()] = env
+                }
+                projectsInfo[it.id.toString()].environments.keys = projectsInfo[it.id.toString()].environments.collect { k,v -> k} .join(',')
+            }
+            projectsInfo.keys = projectsInfo.collect {k, v -> k}.join(',')
+            convertMapValueToString(projectsInfo)
+
+        }
+        return projectsInfo
+    }
+
+    def convertMapValueToString(def map){
         for (def entry in map) {
             if (entry.value instanceof Map){
-                testCaseHelper.addExpectedResult("-Job property $entry.key:")
-                assertRecursively(entry.value, map2[entry.key])
-                testCaseHelper.addExpectedResult("----")
+                convertMapValueToString(entry.value)
             }
-            else{
-                testCaseHelper.addExpectedResult("--Job property $entry.key: $entry.value")
-                assert entry.value.toString() == map2[entry.key]
+            else {
+                entry.value = entry.value.toString()
             }
         }
     }
