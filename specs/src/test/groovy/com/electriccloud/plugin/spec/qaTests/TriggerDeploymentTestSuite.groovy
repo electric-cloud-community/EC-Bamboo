@@ -1,8 +1,8 @@
 package com.electriccloud.plugin.spec.qaTests
 
-import com.electriccloud.plugin.spec.BambooClient
+
 import com.electriccloud.plugin.spec.PluginTestHelper
-import com.electriccloud.plugin.spec.TestCaseHelper
+import com.electriccloud.plugin.spec.utils.TestCaseHelper
 import com.electriccloud.plugins.annotations.NewFeature
 import com.electriccloud.plugins.annotations.Sanity
 import groovy.json.JsonSlurper
@@ -153,14 +153,7 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
         def outputParameters = getJobOutputParameters(result.jobId, 1)
         def jobProperties = getJobProperties(result.jobId)
 
-        def deploymentInfo = bambooClient.getDeployment(outputParameters['deploymentResultKey'])
-        deploymentInfo.agentId = deploymentInfo.agent.id
-        deploymentInfo.agentName = deploymentInfo.agent.name
-        deploymentInfo.key = deploymentInfo.key.key
-        ['deploymentVersion', 'startedDate', 'queuedDate', 'executedDate', 'finishedDate', 'reasonSummary', 'agent', 'operations'].each{
-            deploymentInfo.remove(it)
-        }
-
+        def deploymentInfo = getDeployment(outputParameters['deploymentResultKey'], resultFormat)
         def propertyName = resultPropertySheet.split("/")[2]
 
         then: "Verify results"
@@ -184,7 +177,7 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
         }
 
         if (resultFormat == 'propertySheet') {
-            assertRecursively(deploymentInfo, jobProperties[propertyName])
+            assert deploymentInfo == jobProperties[propertyName]
         }
 
         where:
@@ -224,14 +217,7 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
         def outputParameters = getJobOutputParameters(result.jobId, 1)
         def jobProperties = getJobProperties(result.jobId)
 
-        def deploymentInfo = bambooClient.getDeployment(outputParameters['deploymentResultKey'])
-        deploymentInfo.agentId = deploymentInfo.agent.id
-        deploymentInfo.agentName = deploymentInfo.agent.name
-        deploymentInfo.key = deploymentInfo.key.key
-        ['deploymentVersion', 'startedDate', 'queuedDate', 'executedDate', 'finishedDate', 'reasonSummary', 'agent', 'operations'].each{
-            deploymentInfo.remove(it)
-        }
-
+        def deploymentInfo = getDeployment(outputParameters['deploymentResultKey'], resultFormat)
         def propertyName = resultPropertySheet.split("/")[2]
 
         then: "Verify results"
@@ -257,13 +243,13 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
         assert jobProperties['report-urls']['View Deployment Report'] == "http://bamboo-server:8085/deploy/viewDeploymentResult.action?deploymentResultId=${outputParameters['deploymentResultKey']}"
 
         if (resultFormat == 'json') {
-            testCaseHelper.addExpectedResult("Job property  ${jobProperties[propertyName]}: $deploymentInfo")
+            testCaseHelper.addExpectedResult("Job property  $propertyName: $deploymentInfo")
             assert deploymentInfo == new JsonSlurper().parseText(jobProperties[propertyName])
         }
 
         if (resultFormat == 'propertySheet') {
-            testCaseHelper.addExpectedResult("Job property  ${jobProperties[propertyName]}: $deploymentInfo")
-            assertRecursively(deploymentInfo, jobProperties[propertyName])
+            testCaseHelper.addExpectedResult("Job property  $propertyName: $deploymentInfo")
+            assert deploymentInfo == jobProperties[propertyName]
         }
 
         where:
@@ -301,9 +287,6 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
         def jobSummary = getStepSummary(result.jobId, procedureName)
 
         def outputParameters = getJobOutputParameters(result.jobId, 1)
-        def jobProperties = getJobProperties(result.jobId)
-
-        def propertyName = resultPropertySheet.split("/")[2]
 
         then: "Verify results"
         testCaseHelper.addExpectedResult("Job status: $expectedOutcome")
@@ -342,6 +325,32 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
 
     }
 
+    def getDeployment(def deploymentResultKey, def resultFormat){
+        def deploymentInfo = bambooClient.getDeployment(deploymentResultKey)
+        deploymentInfo.agentId = deploymentInfo.agent.id
+        deploymentInfo.agentName = deploymentInfo.agent.name
+        deploymentInfo.key = deploymentInfo.key.key
+        ['deploymentVersion', 'startedDate', 'queuedDate', 'executedDate', 'finishedDate', 'reasonSummary', 'agent', 'operations'].each{
+            deploymentInfo.remove(it)
+        }
+        if (resultFormat == 'propertySheet'){
+            convertMapValueToString(deploymentInfo)
+        }
+
+        return deploymentInfo
+    }
+
+    def convertMapValueToString(def map){
+        for (def entry in map) {
+            if (entry.value instanceof Map){
+                convertMapValueToString(entry.value)
+            }
+            else {
+                entry.value = entry.value.toString()
+            }
+        }
+    }
+
     def runPlan(def projectKey, def planKey, def additionalBuildVariables = ''){
         def runParams = [
                 config             : PluginTestHelper.CONFIG_NAME,
@@ -370,18 +379,6 @@ class TriggerDeploymentTestSuite  extends PluginTestHelper{
         ]
         runProcedure(projectName, 'CreateRelease', runParams)
         return versionName
-    }
-
-    def assertRecursively(def map, def map2){
-        for (def entry in map) {
-            if (entry.value instanceof Map){
-                assertRecursively(entry.value, map2[entry.key])
-            }
-            else{
-                testCaseHelper.addExpectedResult("--Job property $entry.key: $entry.value")
-                assert entry.value.toString() == map2[entry.key]
-            }
-        }
     }
 
 }
