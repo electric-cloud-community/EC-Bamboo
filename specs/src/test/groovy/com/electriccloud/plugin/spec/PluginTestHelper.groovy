@@ -1,5 +1,6 @@
 package com.electriccloud.plugin.spec
 
+import com.electriccloud.plugin.spec.utils.BambooClient
 import com.electriccloud.spec.PluginSpockTestSupport
 
 class PluginTestHelper extends PluginSpockTestSupport {
