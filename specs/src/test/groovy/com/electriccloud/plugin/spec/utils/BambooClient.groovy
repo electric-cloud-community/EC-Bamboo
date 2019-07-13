@@ -1,4 +1,4 @@
-package com.electriccloud.plugin.spec
+package com.electriccloud.plugin.spec.utils
 
 import com.atlassian.bamboo.specs.api.BambooSpec
 import com.atlassian.bamboo.specs.api.builders.Variable
