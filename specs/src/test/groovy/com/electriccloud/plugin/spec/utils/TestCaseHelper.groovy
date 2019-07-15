@@ -1,4 +1,4 @@
-package com.electriccloud.plugin.spec
+package com.electriccloud.plugin.spec.utils
 import groovy.xml.*
 
 class TestCaseHelper {

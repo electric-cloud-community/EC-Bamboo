@@ -1,8 +1,8 @@
 package com.electriccloud.plugin.spec.qaTests
 
-import com.electriccloud.plugin.spec.BambooClient
+
 import com.electriccloud.plugin.spec.PluginTestHelper
-import com.electriccloud.plugin.spec.TestCaseHelper
+import com.electriccloud.plugin.spec.utils.TestCaseHelper
 import com.electriccloud.plugins.annotations.NewFeature
 import com.electriccloud.plugins.annotations.Sanity
 import spock.lang.*
@@ -92,65 +92,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         def outputParameters = getJobOutputParameters(result.jobId, 1)
         def jobProperties = getJobProperties(result.jobId)
 
-        // procedure doesn't use all fields from response
-        // and save only part of them:
-        // <-------------------->
-        def plansInfo = bambooClient.getPlanDetails(projectKey, planKey)
-        plansInfo.remove('expand')
-        plansInfo.remove('project')
-        plansInfo.remove('shortKey')
-        plansInfo.url = plansInfo.link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
-        if (!plansInfo.description) {
-            plansInfo.description = null
-        }
-        plansInfo.remove('link')
-        plansInfo.remove('isFavourite')
-        plansInfo.remove('isActive')
-        plansInfo.remove('actions')
-        plansInfo.planDescription = plansInfo.description
-        plansInfo.remove('description')
-        plansInfo.averageBuildTimeInSeconds = Math.round(plansInfo.averageBuildTimeInSeconds)
-        plansInfo.stagesSize = plansInfo.stages.size
-        if (!plansInfo.planDescription && resultFormat == 'propertySheet'){
-            plansInfo.remove('planDescription')
-        }
-
-        if (plansInfo.stages.size) {
-            plansInfo.stageNames = plansInfo.stages.stage.collect { it.name }
-
-            if (resultFormat == 'propertySheet') {
-                plansInfo.stageNames = plansInfo.stageNames.collect{ "'$it'"}.join(', ')
-                def tmpStages = plansInfo.stages.stage
-                def stageNumber = 0
-                plansInfo.stages = [:]
-                for (def stage in tmpStages) {
-                    plansInfo.stages[stageNumber.toString()] = [:]
-                    if (stage.description) {
-                        plansInfo.stages[stageNumber.toString()].stageDescription  = stage.description
-                    }
-                    plansInfo.stages[stageNumber.toString()].name = stage.name
-
-                    stageNumber++
-                }
-                plansInfo.stages.count = plansInfo.stagesSize
-            }
-
-            if (resultFormat == 'json') {
-                plansInfo.stageNames = plansInfo.stageNames.collect { "'$it'"}.join(', ')
-                plansInfo.stages = plansInfo.stages.stage.collect {
-                    [name: it.name, stageDescription: it.description]
-                }
-            }
-        }
-        if (plansInfo.stages.size == 0){
-            plansInfo.remove('stages')
-            plansInfo.remove('size')
-        }
-
-        plansInfo.remove('branches')
-        plansInfo.remove('planKey')
-        plansInfo.remove('variableContext')
-        // <-------------------->
+        def plansInfo = getPlanDetails(projectKey, planKey, resultFormat)
 
         def propertyName = resultPropertySheet.split("/")[2]
 
@@ -167,7 +109,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         }
 
         if (resultFormat == 'propertySheet') {
-            assertRecursively(plansInfo, jobProperties[propertyName])
+            assert plansInfo == jobProperties[propertyName]
         }
 
         for (log in expectedLog) {
@@ -209,67 +151,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         def outputParameters = getJobOutputParameters(result.jobId, 1)
         def jobProperties = getJobProperties(result.jobId)
 
-        // procedure doesn't use all fields from response
-        // and save only part of them:
-        // <-------------------->
-        def plansInfo = bambooClient.getPlanDetails(projectKey, planKey)
-        plansInfo.remove('expand')
-        plansInfo.remove('project')
-        plansInfo.remove('shortKey')
-        plansInfo.url = plansInfo.link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
-        if (!plansInfo.description) {
-            plansInfo.description = null
-        }
-        plansInfo.remove('link')
-        plansInfo.remove('isFavourite')
-        plansInfo.remove('isActive')
-        plansInfo.remove('actions')
-        plansInfo.planDescription = plansInfo.description
-        plansInfo.remove('description')
-        plansInfo.averageBuildTimeInSeconds = Math.round(plansInfo.averageBuildTimeInSeconds)
-        plansInfo.stagesSize = plansInfo.stages.size
-        if (!plansInfo.planDescription && resultFormat == 'propertySheet'){
-            plansInfo.remove('planDescription')
-        }
-
-        if (plansInfo.stages.size) {
-            plansInfo.stageNames = plansInfo.stages.stage.collect { it.name }
-
-            if (resultFormat == 'propertySheet') {
-                plansInfo.stageNames = plansInfo.stageNames.collect{ "'$it'"}.join(', ')
-                def tmpStages = plansInfo.stages.stage
-                def stageNumber = 0
-                plansInfo.stages = [:]
-                for (def stage in tmpStages) {
-                    plansInfo.stages[stageNumber.toString()] = [:]
-                    if (stage.description) {
-                        plansInfo.stages[stageNumber.toString()].stageDescription = stage.description
-                    }
-                    plansInfo.stages[stageNumber.toString()].name = stage.name
-
-                    stageNumber++
-                }
-                plansInfo.stages.count = plansInfo.stagesSize
-            }
-
-            if (resultFormat == 'json') {
-                plansInfo.stageNames = plansInfo.stageNames.collect { "'$it'"}.join(', ')
-                plansInfo.stages = plansInfo.stages.stage.collect {
-//                    it.description ? [name: it.name, stageDescription: it.description] : [name: it.name]
-                    [name: it.name, stageDescription: it.description]
-
-                }
-            }
-        }
-        if (plansInfo.stages.size == 0){
-            plansInfo.remove('stages')
-            plansInfo.remove('size')
-        }
-
-        plansInfo.remove('branches')
-        plansInfo.remove('planKey')
-        plansInfo.remove('variableContext')
-        // <-------------------->
+        def plansInfo = getPlanDetails(projectKey, planKey, resultFormat)
 
         def propertyName = resultPropertySheet.split("/")[2]
 
@@ -289,7 +171,7 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
         }
 
         if (resultFormat == 'propertySheet') {
-            assertRecursively(plansInfo, jobProperties[propertyName])
+            assert plansInfo == jobProperties[propertyName]
         }
 
         for (log in expectedLog) {
@@ -360,14 +242,81 @@ class GetPlanDetailsTestSuite extends PluginTestHelper{
 
     }
 
-    def assertRecursively(def map, def map2){
+    def getPlanDetails(projectKey, planKey, resultFormat){
+        // procedure doesn't use all fields from response
+        // and save only part of them:
+        // <-------------------->
+        def plansInfo = bambooClient.getPlanDetails(projectKey, planKey)
+        plansInfo.remove('expand')
+        plansInfo.remove('project')
+        plansInfo.remove('shortKey')
+        plansInfo.url = plansInfo.link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
+        if (!plansInfo.description) {
+            plansInfo.description = null
+        }
+        plansInfo.remove('link')
+        plansInfo.remove('isFavourite')
+        plansInfo.remove('isActive')
+        plansInfo.remove('actions')
+        plansInfo.planDescription = plansInfo.description
+        plansInfo.remove('description')
+        plansInfo.averageBuildTimeInSeconds = Math.round(plansInfo.averageBuildTimeInSeconds)
+        plansInfo.stagesSize = plansInfo.stages.size
+        if (!plansInfo.planDescription && resultFormat == 'propertySheet'){
+            plansInfo.remove('planDescription')
+        }
+
+        if (plansInfo.stages.size) {
+            plansInfo.stageNames = plansInfo.stages.stage.collect { it.name }
+
+            if (resultFormat == 'propertySheet') {
+                plansInfo.stageNames = plansInfo.stageNames.collect{ "'$it'"}.join(', ')
+                def tmpStages = plansInfo.stages.stage
+                def stageNumber = 0
+                plansInfo.stages = [:]
+                for (def stage in tmpStages) {
+                    plansInfo.stages[stageNumber.toString()] = [:]
+                    if (stage.description) {
+                        plansInfo.stages[stageNumber.toString()].stageDescription  = stage.description
+                    }
+                    plansInfo.stages[stageNumber.toString()].name = stage.name
+
+                    stageNumber++
+                }
+                plansInfo.stages.count = plansInfo.stagesSize
+            }
+
+            if (resultFormat == 'json') {
+                plansInfo.stageNames = plansInfo.stageNames.collect { "'$it'"}.join(', ')
+                plansInfo.stages = plansInfo.stages.stage.collect {
+                    [name: it.name, stageDescription: it.description]
+                }
+            }
+        }
+        if (plansInfo.stages.size == 0){
+            plansInfo.remove('stages')
+            plansInfo.remove('size')
+        }
+
+        plansInfo.remove('branches')
+        plansInfo.remove('planKey')
+        plansInfo.remove('variableContext')
+        // <-------------------->
+        if (resultFormat == 'propertySheet') {
+            convertMapValueToString(plansInfo)
+        }
+        return plansInfo
+    }
+
+
+
+    def convertMapValueToString(def map){
         for (def entry in map) {
             if (entry.value instanceof Map){
-                assertRecursively(entry.value, map2[entry.key])
+                convertMapValueToString(entry.value)
             }
-            else{
-                testCaseHelper.addExpectedResult("Job property $entry.key: $entry.value")
-                assert entry.value.toString() == map2[entry.key]
+            else {
+                entry.value = entry.value.toString()
             }
         }
     }

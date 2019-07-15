@@ -1,8 +1,8 @@
 package com.electriccloud.plugin.spec.qaTests
 
-import com.electriccloud.plugin.spec.BambooClient
+
 import com.electriccloud.plugin.spec.PluginTestHelper
-import com.electriccloud.plugin.spec.TestCaseHelper
+import com.electriccloud.plugin.spec.utils.TestCaseHelper
 import com.electriccloud.plugins.annotations.NewFeature
 import com.electriccloud.plugins.annotations.Sanity
 import groovy.json.JsonSlurper
@@ -339,18 +339,6 @@ class CreateReleaseTestSuite extends PluginTestHelper{
         ]
         def result = runProcedure(projectName, 'RunPlan', runParams)
         return getJobProperties(result.jobId)['result']['key']
-    }
-
-    def assertRecursively(def map, def map2){
-        for (def entry in map) {
-            if (entry.value instanceof Map){
-                assertRecursively(entry.value, map2[entry.key])
-            }
-            else{
-                testCaseHelper.addExpectedResult("--Job property $entry.key: $entry.value")
-                assert entry.value.toString() == map2[entry.key]
-            }
-        }
     }
 
 }

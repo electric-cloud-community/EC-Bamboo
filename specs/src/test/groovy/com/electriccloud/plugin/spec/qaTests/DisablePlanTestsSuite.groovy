@@ -1,8 +1,8 @@
 package com.electriccloud.plugin.spec.qaTests
 
-import com.electriccloud.plugin.spec.BambooClient
+
 import com.electriccloud.plugin.spec.PluginTestHelper
-import com.electriccloud.plugin.spec.TestCaseHelper
+import com.electriccloud.plugin.spec.utils.TestCaseHelper
 import com.electriccloud.plugins.annotations.NewFeature
 import com.electriccloud.plugins.annotations.Sanity
 import spock.lang.Unroll

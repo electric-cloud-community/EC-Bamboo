@@ -1,8 +1,8 @@
 package com.electriccloud.plugin.spec.qaTests
 
-import com.electriccloud.plugin.spec.BambooClient
+
 import com.electriccloud.plugin.spec.PluginTestHelper
-import com.electriccloud.plugin.spec.TestCaseHelper
+import com.electriccloud.plugin.spec.utils.TestCaseHelper
 import com.electriccloud.plugins.annotations.NewFeature
 import com.electriccloud.plugins.annotations.Sanity
 import spock.lang.*
@@ -131,66 +131,7 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
 
 
 
-        def planRunsInfo = bambooClient.getPlanRuns(projectKey, planKey, maxResults, buildState).results.result
-        for (def i=0; i<planRunsInfo.size(); i++) {
-            def artifacts = planRunsInfo[i].artifacts
-            if (resultFormat == 'propertySheet') {
-                planRunsInfo[i].artifacts = [:]
-                for (def j=0; j<artifacts.artifact.size(); j++) {
-                    planRunsInfo[i].artifacts["$j"] = [:]
-                    planRunsInfo[i].artifacts["$j"].shared = artifacts.artifact[j].shared
-                    planRunsInfo[i].artifacts["$j"].size = artifacts.artifact[j].size
-                    planRunsInfo[i].artifacts["$j"].producerJobKey = artifacts.artifact[j].producerJobKey
-                    planRunsInfo[i].artifacts["$j"].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
-                    planRunsInfo[i].artifacts["$j"].name = artifacts.artifact[j].name
-                    planRunsInfo[i].artifacts["$j"].link = artifacts.artifact[j].link.href
-                }
-                planRunsInfo[i].artifacts.count = artifacts.artifact.size().toString()
-            }
-            if (resultFormat == 'json') {
-                planRunsInfo[i].artifacts = []
-                for (def j=0; j<artifacts.artifact.size(); j++) {
-                    planRunsInfo[i].artifacts[j] = [:]
-                    planRunsInfo[i].artifacts[j].shared = artifacts.artifact[j].shared
-                    planRunsInfo[i].artifacts[j].size = artifacts.artifact[j].size
-                    planRunsInfo[i].artifacts[j].producerJobKey = artifacts.artifact[j].producerJobKey
-                    planRunsInfo[i].artifacts[j].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
-                    planRunsInfo[i].artifacts[j].name = artifacts.artifact[j].name
-                    planRunsInfo[i].artifacts[j].link = artifacts.artifact[j].link.href
-                }
-            }
-            planRunsInfo[i].totalTestsCount = planRunsInfo[i].successfulTestCount + planRunsInfo[i].failedTestCount + planRunsInfo[i].quarantinedTestCount + planRunsInfo[i].skippedTestCount
-            planRunsInfo[i].url = planRunsInfo[i].link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
-            planRunsInfo[i].planKey = planRunsInfo[i].plan.key
-
-            planRunsInfo[i].remove("expand")
-            planRunsInfo[i].remove("plan")
-            planRunsInfo[i].remove("link")
-            planRunsInfo[i].remove("buildResultKey")
-            planRunsInfo[i].remove("id")
-            planRunsInfo[i].remove("prettyBuildStartedTime")
-            planRunsInfo[i].remove("buildCompletedDate")
-            planRunsInfo[i].remove("prettyBuildCompletedTime")
-            planRunsInfo[i].remove("buildDurationDescription")
-            planRunsInfo[i].remove("buildRelativeTime")
-            planRunsInfo[i].remove("vcsRevisions")
-            planRunsInfo[i].remove("continuable")
-            planRunsInfo[i].remove("onceOff")
-            planRunsInfo[i].remove("restartable")
-            planRunsInfo[i].remove("notRunYet")
-            planRunsInfo[i].remove("reasonSummary")
-            planRunsInfo[i].remove("comments")
-            planRunsInfo[i].remove("labels")
-            planRunsInfo[i].remove("jiraIssues")
-            planRunsInfo[i].remove("variables")
-            planRunsInfo[i].remove("stages")
-            planRunsInfo[i].remove("planResultKey")
-            planRunsInfo[i].remove("state")
-            planRunsInfo[i].remove("number")
-            if (planRunsInfo[i].successful == false){
-                planRunsInfo[i].remove("totalTestsCount")
-            }
-        }
+        def planRunsInfo = getPlanRuns(projectKey, planKey, maxResults, buildState, resultFormat)
 
         def propertyName = resultPropertySheet.split("/")[2]
 
@@ -216,14 +157,14 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
 
         if (resultFormat == 'json') {
             assert new JsonSlurper().parseText(jobProperties[propertyName]) == planRunsInfo
+            assert outputParameters.resultKeys.split(', ') == planRunsInfo.collect{ it.key }
+            assert outputParameters.latestResultKey == planRunsInfo[0].key
         }
 
         if (resultFormat == 'propertySheet') {
-            for (def i=0; i<planRunsInfo.size(); i++) {
-                def currentKey = planRunsInfo[i].key
-                assertRecursively(planRunsInfo[i], jobProperties[propertyName][currentKey])
-            }
-            assert jobProperties[propertyName]['keys'].split(',') == planRunsInfo.collect{ it.key}
+            assert planRunsInfo == jobProperties[propertyName]
+            assert outputParameters.resultKeys == planRunsInfo['keys']
+            assert outputParameters.latestResultKey == planRunsInfo.keySet()[0]
 
         }
 
@@ -276,70 +217,10 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
         def outputParameters = getJobOutputParameters(result.jobId, 1)
         def jobProperties = getJobProperties(result.jobId)
 
-
-
-        def planRunsInfo = bambooClient.getPlanRuns(projectKey, planKey, maxResults, buildState).results.result
-        for (def i=0; i<planRunsInfo.size(); i++) {
-            def artifacts = planRunsInfo[i].artifacts
-            if (resultFormat == 'propertySheet') {
-                planRunsInfo[i].artifacts = [:]
-                for (def j=0; j<artifacts.artifact.size(); j++) {
-                    planRunsInfo[i].artifacts["$j"] = [:]
-                    planRunsInfo[i].artifacts["$j"].shared = artifacts.artifact[j].shared
-                    planRunsInfo[i].artifacts["$j"].size = artifacts.artifact[j].size
-                    planRunsInfo[i].artifacts["$j"].producerJobKey = artifacts.artifact[j].producerJobKey
-                    planRunsInfo[i].artifacts["$j"].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
-                    planRunsInfo[i].artifacts["$j"].name = artifacts.artifact[j].name
-                    planRunsInfo[i].artifacts["$j"].link = artifacts.artifact[j].link.href
-                }
-                planRunsInfo[i].artifacts.count = artifacts.artifact.size().toString()
-            }
-            if (resultFormat == 'json') {
-                planRunsInfo[i].artifacts = []
-                for (def j=0; j<artifacts.artifact.size(); j++) {
-                    planRunsInfo[i].artifacts[j] = [:]
-                    planRunsInfo[i].artifacts[j].shared = artifacts.artifact[j].shared
-                    planRunsInfo[i].artifacts[j].size = artifacts.artifact[j].size
-                    planRunsInfo[i].artifacts[j].producerJobKey = artifacts.artifact[j].producerJobKey
-                    planRunsInfo[i].artifacts[j].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
-                    planRunsInfo[i].artifacts[j].name = artifacts.artifact[j].name
-                    planRunsInfo[i].artifacts[j].link = artifacts.artifact[j].link.href
-                }
-            }
-            planRunsInfo[i].totalTestsCount = planRunsInfo[i].successfulTestCount + planRunsInfo[i].failedTestCount + planRunsInfo[i].quarantinedTestCount + planRunsInfo[i].skippedTestCount
-            planRunsInfo[i].url = planRunsInfo[i].link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
-            planRunsInfo[i].planKey = planRunsInfo[i].plan.key
-
-            planRunsInfo[i].remove("expand")
-            planRunsInfo[i].remove("plan")
-            planRunsInfo[i].remove("link")
-            planRunsInfo[i].remove("buildResultKey")
-            planRunsInfo[i].remove("id")
-            planRunsInfo[i].remove("prettyBuildStartedTime")
-            planRunsInfo[i].remove("buildCompletedDate")
-            planRunsInfo[i].remove("prettyBuildCompletedTime")
-            planRunsInfo[i].remove("buildDurationDescription")
-            planRunsInfo[i].remove("buildRelativeTime")
-            planRunsInfo[i].remove("vcsRevisions")
-            planRunsInfo[i].remove("continuable")
-            planRunsInfo[i].remove("onceOff")
-            planRunsInfo[i].remove("restartable")
-            planRunsInfo[i].remove("notRunYet")
-            planRunsInfo[i].remove("reasonSummary")
-            planRunsInfo[i].remove("comments")
-            planRunsInfo[i].remove("labels")
-            planRunsInfo[i].remove("jiraIssues")
-            planRunsInfo[i].remove("variables")
-            planRunsInfo[i].remove("stages")
-            planRunsInfo[i].remove("planResultKey")
-            planRunsInfo[i].remove("state")
-            planRunsInfo[i].remove("number")
-            if (planRunsInfo[i].successful == false){
-                planRunsInfo[i].remove("totalTestsCount")
-            }
-        }
+        def planRunsInfo = getPlanRuns(projectKey, planKey, maxResults, buildState, resultFormat)
 
         def propertyName = resultPropertySheet.split("/")[2]
+
 
         then: "Verify results"
         testCaseHelper.addExpectedResult("Job status: success")
@@ -350,47 +231,65 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
 
         if (maxResults != '25') {
             testCaseHelper.addExpectedResult("Count of received of plans should be $maxResults")
-            assert planRunsInfo.collect { it.key }.size().toString() == maxResults
+            if (resultFormat == 'json') {
+                assert planRunsInfo.collect { it.key }.size().toString() == maxResults
+            }
+            if (resultFormat == 'propertySheet') {
+                assert (planRunsInfo.keySet().size() - 1).toString() == maxResults
+            }
         }
 
-        planRunsInfo.each {
-            // because JSON contains boolean value
-            // but propertySheet contains string
-            if (buildState == 'Failed') {
-                testCaseHelper.addExpectedResult("Job should contains info only about plan runs with buildStatus false")
-                assert it.successful.toString() == 'false'
-            }
-            if (buildState == 'Successful'){
-                testCaseHelper.addExpectedResult("Job should contains info only about plan runs with buildStatus true")
-                assert it.successful.toString() == 'true'
-            }
-        }
 
         if (resultFormat == 'json') {
+            planRunsInfo.each {
+                // because JSON contains boolean value
+                // but propertySheet contains string
+                if (buildState == 'Failed') {
+                    testCaseHelper.addExpectedResult("Job should contains info only about plan runs with buildStatus false")
+                    assert it.successful.toString() == 'false'
+                }
+                if (buildState == 'Successful'){
+                    testCaseHelper.addExpectedResult("Job should contains info only about plan runs with buildStatus true")
+                    assert it.successful.toString() == 'true'
+                }
+            }
             testCaseHelper.addExpectedResult("Job property $propertyName: $planRunsInfo")
             assert new JsonSlurper().parseText(jobProperties[propertyName]) == planRunsInfo
+
+            testCaseHelper.addExpectedResult("Output parameter resultKeys: ${planRunsInfo.collect{it.key}}")
+            assert outputParameters.resultKeys.split(', ') == planRunsInfo.collect{ it.key }
+            testCaseHelper.addExpectedResult("Output parameter latestResultKey: ${planRunsInfo[0].key}")
+            assert outputParameters.latestResultKey == planRunsInfo[0].key
         }
 
         if (resultFormat == 'propertySheet') {
-            for (def i=0; i<planRunsInfo.size(); i++) {
-                def currentKey = planRunsInfo[i].key
-                testCaseHelper.addExpectedResult("Job property ${planRunsInfo[i]}")
-                assertRecursively(planRunsInfo[i], jobProperties[propertyName][currentKey])
+            planRunsInfo.each { k, v ->
+                if (k == 'keys') {
+                    return
+                }
+                // because JSON contains boolean value
+                // but propertySheet contains string
+                if (buildState == 'Failed') {
+                    testCaseHelper.addExpectedResult("Job should contains info only about plan runs with buildStatus false")
+                    assert planRunsInfo[k].successful.toString() == 'false'
+                }
+                if (buildState == 'Successful'){
+                    testCaseHelper.addExpectedResult("Job should contains info only about plan runs with buildStatus true")
+                    assert planRunsInfo[k].successful.toString() == 'true'
+                }
             }
-            testCaseHelper.addExpectedResult("Job property 'keys': ${planRunsInfo.collect{it.key}}")
-            assert jobProperties[propertyName]['keys'].split(',') == planRunsInfo.collect{ it.key}
+            assert planRunsInfo == jobProperties[propertyName]
 
+            testCaseHelper.addExpectedResult("Output parameter resultKeys: ${planRunsInfo['keys']}")
+            assert outputParameters.resultKeys == planRunsInfo['keys'].replace(',', ', ')
+
+            testCaseHelper.addExpectedResult("Output parameter latestResultKey: ${planRunsInfo.keySet()[0]}")
+            assert outputParameters.latestResultKey == planRunsInfo.keySet()[0]
         }
 
         if (resultFormat == 'none'){
             assert !jobProperties[propertyName]
         }
-
-        testCaseHelper.addExpectedResult("Output parameter resultKeys: ${planRunsInfo.collect{it.key}}")
-        assert outputParameters.resultKeys.split(', ') == planRunsInfo.collect{ it.key }
-        testCaseHelper.addExpectedResult("Output parameter latestResultKey: ${planRunsInfo[0].key}")
-        assert outputParameters.latestResultKey == planRunsInfo[0].key
-
 
         for (log in expectedLog) {
             testCaseHelper.addExpectedResult("Job logs: $log")
@@ -463,6 +362,71 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
 
     }
 
+    def getPlanRuns(projectKey, planKey, maxResults, buildState, resultFormat){
+        def planRunsInfo = bambooClient.getPlanRuns(projectKey, planKey, maxResults, buildState).results.result
+        for (def i=0; i<planRunsInfo.size(); i++) {
+            def artifacts = planRunsInfo[i].artifacts
+            if (resultFormat == 'propertySheet') {
+                planRunsInfo[i].artifacts = [:]
+                for (def j=0; j<artifacts.artifact.size(); j++) {
+                    planRunsInfo[i].artifacts["$j"] = [:]
+                    planRunsInfo[i].artifacts["$j"].shared = artifacts.artifact[j].shared
+                    planRunsInfo[i].artifacts["$j"].size = artifacts.artifact[j].size
+                    planRunsInfo[i].artifacts["$j"].producerJobKey = artifacts.artifact[j].producerJobKey
+                    planRunsInfo[i].artifacts["$j"].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
+                    planRunsInfo[i].artifacts["$j"].name = artifacts.artifact[j].name
+                    planRunsInfo[i].artifacts["$j"].link = artifacts.artifact[j].link.href
+                }
+                planRunsInfo[i].artifacts.count = artifacts.artifact.size().toString()
+            }
+            if (resultFormat == 'json') {
+                planRunsInfo[i].artifacts = []
+                for (def j=0; j<artifacts.artifact.size(); j++) {
+                    planRunsInfo[i].artifacts[j] = [:]
+                    planRunsInfo[i].artifacts[j].shared = artifacts.artifact[j].shared
+                    planRunsInfo[i].artifacts[j].size = artifacts.artifact[j].size
+                    planRunsInfo[i].artifacts[j].producerJobKey = artifacts.artifact[j].producerJobKey
+                    planRunsInfo[i].artifacts[j].prettySizeDescription = artifacts.artifact[j].prettySizeDescription
+                    planRunsInfo[i].artifacts[j].name = artifacts.artifact[j].name
+                    planRunsInfo[i].artifacts[j].link = artifacts.artifact[j].link.href
+                }
+            }
+            planRunsInfo[i].totalTestsCount = planRunsInfo[i].successfulTestCount + planRunsInfo[i].failedTestCount + planRunsInfo[i].quarantinedTestCount + planRunsInfo[i].skippedTestCount
+            planRunsInfo[i].url = planRunsInfo[i].link.href.replace(PluginTestHelper.commanderAddress, 'bamboo-server')
+            planRunsInfo[i].planKey = planRunsInfo[i].plan.key
+            ["expand", "plan", "link", "buildResultKey", "id", "prettyBuildStartedTime",
+             "buildCompletedDate", "prettyBuildCompletedTime", "buildDurationDescription", "buildRelativeTime",
+             "vcsRevisions", "continuable", "onceOff", "restartable", "notRunYet", "reasonSummary", "comments", "labels",
+             "jiraIssues", "variables", "stages", "planResultKey", "state", "number", ].each{
+                planRunsInfo[i].remove(it)
+            }
+            if (planRunsInfo[i].successful == false){
+                planRunsInfo[i].remove("totalTestsCount")
+            }
+        }
+        if (resultFormat == 'propertySheet'){
+            def tmpPlanRuns = planRunsInfo
+            planRunsInfo = [:]
+            for (def planRun in tmpPlanRuns){
+                planRunsInfo[planRun.key] = planRun
+            }
+            planRunsInfo['keys'] = tmpPlanRuns.collect{ it.key}.join(',')
+            convertMapValueToString(planRunsInfo)
+        }
+        return planRunsInfo
+    }
+
+    def convertMapValueToString(def map){
+        for (def entry in map) {
+            if (entry.value instanceof Map){
+                convertMapValueToString(entry.value)
+            }
+            else {
+                entry.value = entry.value.toString()
+            }
+        }
+    }
+
     def runPlan(def projectKey, def planKey, def countOfRun=1, def additionalBuildVariables = ''){
         def runParams = [
                 config             : PluginTestHelper.CONFIG_NAME,
@@ -476,18 +440,6 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
         ]
         for (def i=0; i<countOfRun; i++) {
             runProcedure(projectName, 'RunPlan', runParams)
-        }
-    }
-
-    def assertRecursively(def map, def map2){
-        for (def entry in map) {
-            if (entry.value instanceof Map){
-                assertRecursively(entry.value, map2[entry.key])
-            }
-            else{
-                testCaseHelper.addExpectedResult("----Job property $entry.key: $entry.value")
-                assert entry.value.toString() == map2[entry.key]
-            }
         }
     }
 
