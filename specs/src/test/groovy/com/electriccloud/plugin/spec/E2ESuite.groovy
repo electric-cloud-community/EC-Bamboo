@@ -15,6 +15,7 @@ class E2ESuite extends BambooHelper {
     static def bambooDeployEnvironment = 'Stage'
 
     def doSetupSpec() {
+		createDefaultProject()
         createConfiguration(config)
 
         importProject(projectName, "dsl/${pipelineFileName}", [

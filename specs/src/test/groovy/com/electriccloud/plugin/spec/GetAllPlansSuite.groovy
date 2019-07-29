@@ -27,6 +27,7 @@ class GetAllPlansSuite extends PluginTestHelper {
     String config, projectKey, resultFormat, resultPropertySheet
 
     def doSetupSpec() {
+		createDefaultProject()
         redirectLogs()
 
         createConfiguration(CONFIG_NAME)

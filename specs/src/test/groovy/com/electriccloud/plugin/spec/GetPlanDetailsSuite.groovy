@@ -43,6 +43,7 @@ class GetPlanDetailsSuite extends PluginTestHelper {
     String resultPropertyPath
 
     def doSetupSpec() {
+		createDefaultProject()
         createConfiguration(PluginTestHelper.CONFIG_NAME)
 
         // Import procedure project

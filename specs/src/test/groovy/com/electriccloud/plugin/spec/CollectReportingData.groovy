@@ -44,6 +44,7 @@ class CollectReportingData extends BambooHelper {
     static def successfulBuildRun
 
     def doSetupSpec() {
+		createDefaultProject()
         redirectLogs()
         createConfiguration(CONFIG_NAME)
         importProject(projectName, 'dsl/CollectReportingDataProject.dsl', [
