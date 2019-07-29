@@ -18,6 +18,20 @@ class PluginTestHelper extends PluginSpockTestSupport {
     // because the container hostname does not work for it
     static String commanderAddress = System.getenv('COMMANDER_SERVER') ?: '0.0.0.0'
 
+    def createDefaultProject(){
+        def bambooClient = initBambooClient()
+        def projectExist = true
+        try {
+            bambooClient.getPlans('PROJECT')
+        }
+        catch (Exception e){
+            projectExist = false
+        }
+        if (!projectExist) {
+            bambooClient.createDefaultPlan()
+        }
+    }
+
     def createConfiguration(String configName = CONFIG_NAME, Map props = [:]) {
         String username = BAMBOO_USERNAME
         String password = BAMBOO_PASSWORD
