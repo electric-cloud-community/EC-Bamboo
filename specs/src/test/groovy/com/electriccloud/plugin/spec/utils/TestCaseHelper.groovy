@@ -80,5 +80,41 @@ class TestCaseHelper {
         this.testCases[-1].expected += expectedResult + '\n\n'
     }
 
+    def addExpectedPropertySheetRecursively(def expectedResult, def propertySheet){
+        this.testCases[-1].expected += expectedResult + '\n'
+        createTable2(propertySheet)
+    }
+
+    def createTable(def map, def level=0){
+        for (def entry in map) {
+            if (entry.value instanceof Map){
+                def raw = ''
+                raw += '| ' * level
+                this.testCases[-1].expected += "|| $raw ${entry.key} | \n"
+                createTable(entry.value, level+1)
+            }
+            else {
+                def raw = ''
+                raw += '| ' * level
+                this.testCases[-1].expected += "|| $raw ${entry.key} | ${entry.value} \n"
+            }
+        }
+    }
+
+    def createTable2(def map, def level=0){
+        for (def entry in map) {
+            if (entry.value instanceof Map){
+                def raw = ''
+                raw += '>' * level
+                this.testCases[-1].expected += "$raw> - ${entry.key} : \n\n"
+                createTable2(entry.value, level+1)
+            }
+            else {
+                def raw = ''
+                raw += '>' * level
+                this.testCases[-1].expected += "$raw> - ${entry.key} : ${entry.value} \n\n"
+            }
+        }
+    }
 
 }
