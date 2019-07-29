@@ -266,10 +266,12 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
                 projectsInfo[i].environmentNames = projectsInfo[i].environments[0].name
                 projectsInfo[i].environments[0].key = projectsInfo[i].environments[0].key.key
                 projectsInfo[i].environments[0].remove('operations')
+                projectsInfo[i].environments[0].remove('description')
                 projectsInfo[i].planKey = projectsInfo[i].planKey.key
                 projectsInfo[i].key = projectsInfo[i].key.key
                 projectsInfo[i].remove('operations')
                 projectsInfo[i].remove('oid')
+                projectsInfo[i].remove('description')
             }
         }
         if (resultFormat == 'propertySheet') {
@@ -277,10 +279,12 @@ class GetDeploymentProjectsForPlanTestSuite extends PluginTestHelper{
                 projectsInfo[i].environmentNames = projectsInfo[i].environments[0].name
                 projectsInfo[i].environments[0].key = projectsInfo[i].environments[0].key.key
                 projectsInfo[i].environments[0].remove('operations')
+                projectsInfo[i].environments[0].remove('description')
                 projectsInfo[i].planKey = projectsInfo[i].planKey.key
                 projectsInfo[i].key = projectsInfo[i].key.key
                 projectsInfo[i].remove('operations')
                 projectsInfo[i].remove('oid')
+                projectsInfo[i].remove('description')
             }
             def tmpProjectsInfo = projectsInfo
             projectsInfo = [:]
