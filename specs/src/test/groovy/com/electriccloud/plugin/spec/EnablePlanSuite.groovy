@@ -35,6 +35,7 @@ class EnablePlanSuite extends BambooHelper {
     String projectKey, planKey
 
     def doSetupSpec() {
+		createDefaultProject()
         createConfiguration(CONFIG_NAME)
 
         // Import procedure project

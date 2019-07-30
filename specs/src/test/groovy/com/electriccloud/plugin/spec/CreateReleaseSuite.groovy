@@ -46,6 +46,7 @@ class CreateReleaseSuite extends BambooHelper {
     String deploymentProjectName, planBuildKey, requestReleaseName, releaseName, resultFormat, resultPropertySheet
 
     def doSetupSpec() {
+		createDefaultProject()
         createConfiguration(CONFIG_NAME)
 
         // Import procedure project

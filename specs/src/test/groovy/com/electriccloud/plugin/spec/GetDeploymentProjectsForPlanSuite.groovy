@@ -51,6 +51,7 @@ class GetDeploymentProjectsForPlanSuite extends PluginTestHelper {
     String resultPropertyPath, projectCase, planCase
 
     def doSetupSpec() {
+		createDefaultProject()
         createConfiguration(CONFIG_NAME)
 
         // Import procedure project

@@ -71,6 +71,7 @@ class RunPlanSuite extends PluginTestHelper {
     String resultPropertySheet
 
     def doSetupSpec() {
+		createDefaultProject()
         redirectLogs()
 
         createConfiguration(CONFIG_NAME)

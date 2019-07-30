@@ -69,6 +69,7 @@ class TriggerDeploymentSuite extends BambooHelper {
     String resultPropertySheet
 
     def doSetupSpec() {
+		createDefaultProject()
         redirectLogs()
 
         createConfiguration(CONFIG_NAME)

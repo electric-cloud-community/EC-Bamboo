@@ -86,6 +86,7 @@ class ConfigurationSuite extends BambooHelper {
     ]
 
     def doSetupSpec() {
+		createDefaultProject()
         redirectLogs()
     }
 

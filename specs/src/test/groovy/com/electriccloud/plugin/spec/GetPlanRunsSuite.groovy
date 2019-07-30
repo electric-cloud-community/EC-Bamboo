@@ -47,6 +47,7 @@ class GetPlanRunsSuite extends BambooHelper {
     String resultPropertyPath
 
     def doSetupSpec() {
+		createDefaultProject()
         createConfiguration(CONFIG_NAME)
 
         // Import procedure project

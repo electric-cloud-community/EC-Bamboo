@@ -50,6 +50,7 @@ class GetAllPlansTestsSuite extends PluginTestHelper {
 
 
     def doSetupSpec() {
+		createDefaultProject()
         testCaseHelper = new TestCaseHelper(procedureName)
         bambooClient = initBambooClient()
         createConfiguration(PluginTestHelper.CONFIG_NAME)

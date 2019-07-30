@@ -78,6 +78,7 @@ class CreateReleaseTestSuite extends PluginTestHelper{
     ]
 
     def doSetupSpec() {
+		createDefaultProject()
         testCaseHelper = new TestCaseHelper(procedureName)
         createConfiguration(CONFIG_NAME)
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: procedureName, params: runParams]

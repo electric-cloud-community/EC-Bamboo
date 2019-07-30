@@ -79,6 +79,7 @@ class GetPlanRunsTestsSuite extends PluginTestHelper{
     ]
 
     def doSetupSpec() {
+		createDefaultProject()
         testCaseHelper = new TestCaseHelper(procedureName)
         createConfiguration(PluginTestHelper.CONFIG_NAME)
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: procedureName, params: getPlanRunsParams]

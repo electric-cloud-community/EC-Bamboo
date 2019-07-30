@@ -82,6 +82,7 @@ class RunPlanTestSuite extends PluginTestHelper{
     static def commitHash = '3b04da7ddc5a2e8e61020f1886f3e4e5a07b7688'
 
     def doSetupSpec() {
+		createDefaultProject()
         testCaseHelper = new TestCaseHelper(procedureName)
         createConfiguration(CONFIG_NAME)
         dslFile "dsl/procedure.dsl", [projectName: projectName, resName: 'local', procedureName: 'RunPlan', params: runPlanParams]
