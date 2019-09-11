@@ -13,6 +13,8 @@ import com.electriccloud.domain.DevOpsInsightDataSourceResult
 import com.electriccloud.errors.EcException
 import com.electriccloud.errors.ErrorCodes
 
+import com.electriccloud.bamboo.CollectReportingDataValidation
+
 def PLUGIN_NAME = 'EC-Bamboo'
 def CONFIG_LOCATION = 'ec_plugin_cfgs'
 def REQUIRED_PARAMETERS = ['config', 'projectKey']
