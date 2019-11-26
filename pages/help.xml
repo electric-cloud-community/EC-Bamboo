@@ -14,7 +14,7 @@
     <h1>@PLUGIN_KEY@</h1>
     <p>Plugin version @PLUGIN_VERSION@</p>
     
-    <p>Revised on Jul 11, 2019</p>
+    <p>Revised on Nov 26, 2019</p>
     
     <hr style="margin-left: -10px; margin-top: 10px; height: 1px; width: 100%; color: #5981BD;" noshade="noshade"/>
     <h1>Contents</h1>
@@ -1110,6 +1110,13 @@ You can follow the CloudBees Flow user guide to add the datasource.</p>
     
 
     <h1 id="releaseNotes">Release Notes</h1>
+    
+    <h3>@PLUGIN_KEY@ 1.5.2</h3>
+    <ul>
+        
+        <li>Enhanced CollectReportingData procedure to gracefully handle datetime in a non UTC timezone.</li>
+        
+    </ul>
     
     <h3>@PLUGIN_KEY@ 1.5.1</h3>
     <ul>
