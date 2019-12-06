@@ -12,6 +12,7 @@ use FlowPDF::Constants qw/AUTH_SCHEME_VALUE_FOR_BASIC_AUTH/;
 
 use JSON qw/decode_json/;
 use URI::Escape qw/uri_escape_utf8/;
+use DateTime::Format::ISO8601;
 
 # Service function that is being used to set some metadata for a plugin.
 sub pluginInfo {
@@ -802,6 +803,13 @@ sub compareISODateTimes {
     logDebug("Comparing: $date1 > $date2 = ", $date1 <=> $date2);
 
     return $date1 <=> $date2;
+}
+
+sub datetimeToUTC {
+    my ($self, $date) = @_;
+    my $dateObj = DateTime::Format::ISO8601::parse_datetime('YYYY-MM-DDThh:mm:ssZ', $date);
+    $dateObj->set_time_zone('UTC');
+    return $dateObj->strftime("%Y-%m-%dT%H:%M:%S.%3N") . "Z";
 }
 
 sub defaultErrorHandler {
