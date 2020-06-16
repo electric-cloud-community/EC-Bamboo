@@ -44,7 +44,7 @@ sub init {
     };
 
     # Show framework logs when debug level is set to "Trace"
-    if ($params->{debugLevel} >= FlowPDF::Log::TRACE) {
+    if ($params->{debugLevel} && $params->{debugLevel} >= FlowPDF::Log::TRACE) {
         FlowPDF::Log::FW::setLogLevel(FlowPDF::Log::TRACE);
     }
 
