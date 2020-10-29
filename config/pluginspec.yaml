@@ -1,10 +1,11 @@
 pluginInfo:
   pluginName: EC-Bamboo
-  description: CloudBees Flow Plugin for Atlassian Bamboo
+  description: CloudBees CD Plugin for Atlassian Bamboo
   version: 1.5.1
   author: CloudBees
   authorUrl: http://www.electric-cloud.com/support
   category: Build
+  repositoryUrl: https://github.com/electric-cloud-community/EC-Bamboo
 
 configuration:
   shell: ec-perl
