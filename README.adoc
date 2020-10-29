@@ -22,6 +22,7 @@ As the plugin uses Rest API, versions newer than 5.11, should be compatible.
 
 
 == Plugin configurations
+
 Plugin configurations are sets of parameters that apply
 across some or all of the plugin procedures. They
 reduce repetition of common values, create
@@ -32,9 +33,10 @@ parameters on procedures that use them.
 
 
 === Creating plugin configurations
+
 To create plugin configurations in CloudBees CD, do these steps:
 
-* Go to menu:Admistration[Plugins] to open the Plugin Manager.
+* Go to Adminstration -> Plugins to open the Plugin Manager.
 * Find the EC-Bamboo-1.5.1 row.
 * Click *Configure* to open the
      Configurations page.
@@ -43,6 +45,7 @@ To create plugin configurations in CloudBees CD, do these steps:
 
 
 === Configuration procedure parameters
+
 [cols=",",options="header",]
 |===
 |Parameter |Description
@@ -76,6 +79,7 @@ To create plugin configurations in CloudBees CD, do these steps:
 
 [[procedures]]
 == Plugin procedures
+
 
 
 
