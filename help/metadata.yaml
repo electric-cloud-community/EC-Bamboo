@@ -26,5 +26,5 @@ excludeProcedures:
 
 chapters:
   - name: 'Supported Versions'
-    file: supportedVersionsChapter.md
+    file: supportedVersionsChapter.adoc
     place: 'after overview'

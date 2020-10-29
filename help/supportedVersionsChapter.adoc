@@ -1,0 +1,5 @@
+== Supported Versions
+
+This plugin was developed and tested against the Bamboo Server 6.8.1 version.
+
+As the plugin uses Rest API, versions newer than 5.11, should be compatible.
