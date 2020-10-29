@@ -5,29 +5,29 @@
 1.5.0:
   - Result Format and Result Property Sheet parameters were added for existing procedures, where appropriate to capture information returned by Bamboo.
   - |
-    <p>Following new procedures were added for deployment process automation:</p>
-    <ul>
-      <li>GetDeploymentProjectsForPlan</li>
-      <li>CreateRelease</li>
-      <li>TriggerDeployment</li>
-    </ul>
+    Following new procedures were added for deployment process automation:
+
+      * GetDeploymentProjectsForPlan
+      * CreateRelease
+      * TriggerDeployment
+
   - |
-    <p>RunPlan procedure was enhanced to support the following:</p>
-    <ul>
-      <li>Run a build against custom VCS revision (branch).</li>
-      <li>Parametrized builds.</li>
-      <li>Show Build progress in Summary as the Build is running.</li>
-      <li>Ability to Queue a plan without waiting for it to complete.</li>
-      <li>Ability to wait for a build based on a configurable timeout.</li>
-    </ul>
+    RunPlan procedure was enhanced to support the following:
+
+      * Run a build against custom VCS revision (branch).
+      * Parametrized builds.
+      * Show Build progress in Summary as the Build is running.
+      * Ability to Queue a plan without waiting for it to complete.
+      * Ability to wait for a build based on a configurable timeout.
+
   - |
-    <p>Output parameters were added to these procedures:</p>
-    <ul>
-      <li>GetAllPlans</li>
-      <li>GetPlanDetails</li>
-      <li>GetPlanRuns</li>
-      <li>RunPlan</li>
-    </ul>
+    Output parameters were added to these procedures:
+
+      * GetAllPlans
+      * GetPlanDetails
+      * GetPlanRuns
+      * RunPlan
+
   - New procedure CollectReportingData was added to support Analytics using the DevOps Insight Server
   - Http Proxy support was added for Plugin Configuration.
 1.4.2:

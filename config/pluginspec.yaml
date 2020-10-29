@@ -1,11 +1,10 @@
-pluginName: EC-Bamboo
-description: CloudBees Flow Plugin for Atlassian Bamboo
-version: 1.5.1
-author: CloudBees
-authorUrl: http://www.electric-cloud.com/support
-supportLevel: 10
-metafile: { ecSupportLevel: 10 }
-category: Build
+pluginInfo:
+  pluginName: EC-Bamboo
+  description: CloudBees Flow Plugin for Atlassian Bamboo
+  version: 1.5.1
+  author: CloudBees
+  authorUrl: http://www.electric-cloud.com/support
+  category: Build
 
 configuration:
   shell: ec-perl

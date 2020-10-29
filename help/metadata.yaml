@@ -1,9 +1,3 @@
-overview: Should be replaced with 'overview.md'
-
-#knownIssues: |
-
-proceduresPreface: |
-  <b>IMPORTANT</b> Note that the names of Required parameters are marked in <span class="required">bold italics</span> in the parameter description table for each procedure.<br/>
 
 proceduresGrouping:
   groups:
