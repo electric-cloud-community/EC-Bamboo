@@ -4,12 +4,12 @@
   <label>EC-Bamboo</label>
   <author>CloudBees</author>
   <category>Build</category>
-  <description>CloudBees Flow Plugin for Atlassian Bamboo</description>
+  <description>CloudBees CD Plugin for Atlassian Bamboo</description>
   <configure>ec_config</configure>
-  <version>1.5.2</version>
+  <version>1.5.1</version>
   <authorUrl>http://www.electric-cloud.com/support</authorUrl>
   <help>help.xml</help>
-  <ecSupportLevel>10</ecSupportLevel>
   <depends min='1.4.1'>EC-PluginManager</depends>
+  <repositoryUrl>https://github.com/electric-cloud-community/EC-Bamboo</repositoryUrl>
   <commander-version min='6.0' />
 </plugin>
