@@ -977,7 +977,7 @@ sub _planBuildResultToShortInfo {
     if (defined $expanded && ref $expanded eq 'ARRAY') {
         for my $section (@$expanded) {
             if ($section eq 'labels' && $buildInfo->{labels}{size} > 0) {
-                $result{labels} = join(', ', map {$_->{name}} @{$buildInfo->{labels}});
+                $result{labels} = join(', ', map {$_->{name}} @{$buildInfo->{labels}{label}});
             }
             elsif ($section eq 'artifacts' && $buildInfo->{artifacts}{size}) {
                 my @artifacts = @{$buildInfo->{artifacts}{artifact}};

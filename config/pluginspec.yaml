@@ -1,7 +1,7 @@
 pluginInfo:
   pluginName: EC-Bamboo
   description: CloudBees CD Plugin for Atlassian Bamboo
-  version: 1.5.2
+  version: 1.5.3
   author: CloudBees
   authorUrl: http://www.electric-cloud.com/support
   category: Build
