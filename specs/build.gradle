@@ -43,7 +43,9 @@ dependencies {
     implementation 'com.jayway.restassured:rest-assured:2.4.0'
     implementation 'org.apache.camel:camel-xmljson:2.12.0'
 
-    implementation 'com.electriccloud:ec-specs-plugins-core:1.9.1'
+    implementation("com.cloudbees:hen:1.2.2") {
+        exclude(group: "org.codehaus.groovy", module: "groovy-all")
+    }
 
     implementation 'com.atlassian.bamboo:bamboo-specs-api:6.8.1'
     implementation 'com.atlassian.bamboo:bamboo-specs:6.8.1'
