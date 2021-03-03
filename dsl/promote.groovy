@@ -1,3 +1,5 @@
+
+// DO NOT EDIT THIS BLOCK BELOW=== promote_autogen starts ===
 import groovy.transform.BaseScript
 import com.electriccloud.commander.dsl.util.BasePlugin
 
@@ -14,34 +16,27 @@ def pluginDir = getProperty("/projects/$pluginName/pluginDir").value
 
 //List of procedure steps to which the plugin configuration credentials need to be attached
 def stepsWithAttachedCredentials = [
-[procedureName: "GetAllPlans", stepName: "GetAllPlans"],
-[procedureName: "GetPlanDetails", stepName: "GetPlanDetails"],
-[procedureName: "GetPlanRuns", stepName: "GetPlanRuns"],
-[procedureName: "RunPlan", stepName: "RunPlan"],
-[procedureName: "EnablePlan", stepName: "EnablePlan"],
-[procedureName: "DisablePlan", stepName: "DisablePlan"],
-[procedureName: "TriggerDeployment", stepName: "TriggerDeployment"],
-[procedureName: "GetDeploymentProjectsForPlan", stepName: "GetDeploymentProjectsForPlan"],
-[procedureName: "CreateRelease", stepName: "CreateRelease"],
-[procedureName: "CollectReportingData", stepName: "CollectReportingData"],
-[procedureName: "ValidateCRDParams", stepName: "ValidateCRDParams"],
-// === steps with credentials ends ===
-// Please do not remove the line above, it marks the place for the new steps
-// The code above will be updated automatically as you add more procedures into your plugin
-// Feel free to change the code below
+    [procedureName: "GetAllPlans", stepName: "GetAllPlans"],
+    [procedureName: "GetPlanDetails", stepName: "GetPlanDetails"],
+    [procedureName: "GetPlanRuns", stepName: "GetPlanRuns"],
+    [procedureName: "RunPlan", stepName: "RunPlan"],
+    [procedureName: "EnablePlan", stepName: "EnablePlan"],
+    [procedureName: "DisablePlan", stepName: "DisablePlan"],
+    [procedureName: "TriggerDeployment", stepName: "TriggerDeployment"],
+    [procedureName: "GetDeploymentProjectsForPlan", stepName: "GetDeploymentProjectsForPlan"],
+    [procedureName: "CreateRelease", stepName: "CreateRelease"],
+    [procedureName: "CollectReportingData", stepName: "CollectReportingData"],
+    [procedureName: "ValidateCRDParams", stepName: "ValidateCRDParams"],
+
 ]
 
-
 project pluginName, {
-    // Please do not remove the line below
     property 'ec_keepFilesExtensions', value: 'true'
-
-    // This line is required in order for React forms to work (you probably do not want to remove it too)
     property 'ec_formXmlCompliant', value: 'true'
     loadPluginProperties(pluginDir, pluginName)
     loadProcedures(pluginDir, pluginKey, pluginName, stepsWithAttachedCredentials)
-    // plugin configuration metadata
-    // Please remove the block below if your plugin does not require configuration
+
+    // Plugin configuration metadata
     property 'ec_config', {
         configLocation = 'ec_plugin_cfgs'
         form = '$[' + "/projects/$pluginName/procedures/CreateConfiguration/ec_parameterForm]"
@@ -53,23 +48,72 @@ project pluginName, {
         }
     }
 
-    property 'ec_dsl_libraries_path', value: 'libs'
-    property 'ec_devops_insight', {
-        property 'build', {
-            property 'source', value: 'Bamboo'
-            property 'operations', {
-                property 'createDOISDataSource', {
-                    property 'procedureName', value: 'ValidateCRDParams'
-                }
-                property 'modifyDOISDataSource', {
-                    property 'procedureName', value: 'ValidateCRDParams'
-                }
-            }
-        }
-    }
+    // Properties
+    property 'ec_dsl_libraries_path', {
+
+value = 'libs'
+
 }
 
-// Copy existing plugin configurations from the previous
-// version to this version. At the same time, also attach
-// the credentials to the required plugin procedure steps.
-upgrade(upgradeAction, pluginName, otherPluginName, stepsWithAttachedCredentials)
+    property 'ec_devops_insight', {
+
+expandable = false
+
+property 'build', {
+
+expandable = false
+
+property 'source', {
+
+value = 'Bamboo'
+
+}
+
+property 'operations', {
+
+expandable = false
+
+property 'createDOISDataSource', {
+
+expandable = false
+
+property 'procedureName', {
+
+value = 'ValidateCRDParams'
+
+}
+
+}
+
+property 'modifyDOISDataSource', {
+
+expandable = false
+
+property 'procedureName', {
+
+value = 'ValidateCRDParams'
+
+}
+
+}
+
+}
+
+}
+
+}
+
+    }
+
+def retainedProperties = []
+
+upgrade(upgradeAction, pluginName, otherPluginName, stepsWithAttachedCredentials, 'ec_plugin_cfgs', retainedProperties)
+// DO NOT EDIT THIS BLOCK ABOVE ^^^=== promote_autogen ends, checksum: c38e7c65bbc12c646446282f6601d31d ===
+// Do not edit the code above this line
+
+project pluginName, {
+    // You may add your own DSL instructions below this line, like
+    // property 'myprop', {
+    //     value: 'value'
+    // }
+}

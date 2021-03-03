@@ -7,6 +7,7 @@ pluginInfo:
   category: Build
   repositoryUrl: https://github.com/electric-cloud-community/EC-Bamboo
   supportUrl: 'GH Issues'
+  shell: 'ec-perl'
   label: Bamboo
   detailedDescription: |
     This plugin integrates with Atlassian Bamboo using REST API. You can control plan execution, deployments, create releases and collect information for the Release Command Center dashboard.
@@ -87,7 +88,6 @@ procedures:
   - name: GetAllPlans
     description: Returns all plans that are available for current user.
     hasConfig: true
-    shell: ec-perl
     parameters:
       - name: projectKey
         label: Project Key
@@ -120,7 +120,6 @@ procedures:
   - name: GetPlanDetails
     description: This procedure prints Bamboo build plan details.
     hasConfig: true
-    shell: ec-perl
     parameters:
       - name: projectKey
         label: Project Key
@@ -153,7 +152,6 @@ procedures:
   - name: GetPlanRuns
     description: This procedure returns information about runs on Bamboo build plan.
     hasConfig: true
-    shell: ec-perl
     parameters:
       - name: projectKey
         label: Project Key
@@ -206,7 +204,6 @@ procedures:
   - name: RunPlan
     description: This procedure runs Bamboo build plan.
     hasConfig: true
-    shell: ec-perl
     parameters:
       - name: projectKey
         label: Project Key
@@ -288,7 +285,6 @@ procedures:
   - name: EnablePlan
     description: This procedure enables build plan.
     hasConfig: true
-    shell: ec-perl
     parameters:
       - name: projectKey
         label: Project Key
@@ -304,7 +300,6 @@ procedures:
   - name: DisablePlan
     description: This procedure disables build plan.
     hasConfig: true
-    shell: ec-perl
     parameters:
       - name: projectKey
         label: Project Key
@@ -320,7 +315,6 @@ procedures:
   - name: TriggerDeployment
     description: This procedure runs Bamboo deployment plan.
     hasConfig: true
-    shell: ec-perl
     parameters:
       - name: deploymentProjectName
         label: Deployment Project Name
@@ -382,7 +376,6 @@ procedures:
   - name: GetDeploymentProjectsForPlan
     description: This procedure returns information about deployment projects linked to this build plan.
     hasConfig: true
-    shell: ec-perl
     parameters:
       - name: projectKey
         label: Project Key
@@ -422,7 +415,6 @@ procedures:
   - name: CreateRelease
     description: This procedure creates new release (version) from the build plan result.
     hasConfig: true
-    shell: ec-perl
     parameters:
       - name: deploymentProjectName
         label: Deployment Project Name
@@ -476,7 +468,6 @@ procedures:
   - name: CollectReportingData
     description: This procedure collects reporting data for the DevOpsInsight Dashboards. It collects build results with optional tests run details.
     hasConfig: true
-    shell: ec-perl
     parameters:
       - name: projectKey
         label: Project Key
@@ -566,10 +557,10 @@ procedures:
         documentation: Name of the CloudBees Flow release project collected data relates to.
         required: false
         type: entry
+
   - name: ValidateCRDParams
     description: Service procedure to check parameter values passed for DOISDataSource creation.
     hasConfig: true
-    shell: ec-perl
     parameters:
       - name: projectKey
         label: Project Key

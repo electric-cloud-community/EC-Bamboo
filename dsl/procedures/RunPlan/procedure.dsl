@@ -1,20 +1,22 @@
 // This procedure.dsl was generated automatically
-// === procedure_autogen starts ===
-procedure 'RunPlan', description: 'This procedure runs Bamboo build plan.', {
+// DO NOT EDIT THIS BLOCK BELOW=== procedure_autogen starts ===
+procedure 'RunPlan', description: '''This procedure runs Bamboo build plan.''', {
 
     step 'RunPlan', {
         description = ''
         command = new File(pluginDir, "dsl/procedures/RunPlan/steps/RunPlan.pl").text
         shell = 'ec-perl'
+        shell = 'ec-perl'
 
-        }
+        postProcessor = '''$[/myProject/perl/postpLoader]'''
+    }
 
     formalOutputParameter 'buildResultKey',
-        description: 'Composite key for the Run Result.'
+        description: '''Composite key for the Run Result.'''
 
     formalOutputParameter 'buildUrl',
-        description: 'Link to the result page.'
-// === procedure_autogen ends, checksum: 1b881808a3a68d3660935543567c0dbb ===
+        description: '''Link to the result page.'''
+// DO NOT EDIT THIS BLOCK ABOVE ^^^=== procedure_autogen ends, checksum: 40b1c462d42e1725cd5eac81b7f727a3 ===
 // Do not update the code above the line
 // procedure properties declaration can be placed in here, like
 // property 'property name', value: "value"
