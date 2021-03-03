@@ -1,53 +1,55 @@
-apply plugin: "groovy"
-apply plugin: 'idea'
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven {
+            url "https://dl.bintray.com/ecpluginsdev/maven"
+        }
+        mavenLocal()
+    }
 
-version = "1.0"
+    dependencies {
+        classpath "com.cloudbees:hen:1.1.1"
+    }
+}
+
+
+plugins {
+    id "com.cloudbees.cd.plugins.specs" version "1.8.1.0"
+}
+
+apply plugin: 'com.cloudbees.cd.plugins.specs-hen'
+
+version = "2.0.0"
 description = "EC-Bamboo Specs"
-
 sourceCompatibility = 1.8
 
 defaultTasks 'test'
 
 repositories {
-    //mavenLocal()
-    jcenter()
     mavenCentral()
-    maven {
-        url 'https://oss.sonatype.org/content/repositories/snapshots'
-    }
+    jcenter()
+//    mavenLocal()
     maven {
         url  "https://dl.bintray.com/ecpluginsdev/maven"
     }
 }
 dependencies {
-    compile 'org.codehaus.groovy:groovy-all:2.4.5:indy'
-    compile 'org.spockframework:spock-core:1.1-groovy-2.4'
-    compile 'com.jayway.restassured:rest-assured:2.4.0'
-    compile 'org.apache.camel:camel-xmljson:2.12.0'
+    implementation 'org.codehaus.groovy:groovy-all:2.5.5'
+    implementation 'org.spockframework:spock-core:1.2-groovy-2.4'
+    implementation ('com.electriccloud:ec-specs-plugins-core:1.9.2') {
+        exclude(group: "org.codehaus.groovy", module: "groovy-all")
+    }
+    implementation 'com.jayway.restassured:rest-assured:2.4.0'
+    implementation 'org.apache.camel:camel-xmljson:2.12.0'
 
-    compile 'com.electriccloud:ec-specs-plugins-core:1.9.1'
+    implementation 'com.electriccloud:ec-specs-plugins-core:1.9.1'
 
-    compile 'com.atlassian.bamboo:bamboo-specs-api:6.8.1'
-    compile 'com.atlassian.bamboo:bamboo-specs:6.8.1'
+    implementation 'com.atlassian.bamboo:bamboo-specs-api:6.8.1'
+    implementation 'com.atlassian.bamboo:bamboo-specs:6.8.1'
 
 }
 
-test {
-    def server = findProperty('server') ?: 'localhost'
-    systemProperties['COMMANDER_SERVER'] = server
-    systemProperties["COMMANDER_SECURE"] = '1'
-
-    testLogging {
-        showStandardStreams = true
-    }
-    outputs.upToDateWhen { false }
-    systemProperties['EC_SPECS_CLI'] = true
-
-    def destination = findProperty('reportDestination') ?: "spec-report"
-    if (destination) {
-        reports {
-            html.destination = destination
-        }
-    }
+sendAllureReports {
+    projectName = 'ec-bamboo'
 }
-
