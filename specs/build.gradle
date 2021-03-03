@@ -15,7 +15,7 @@ buildscript {
 
 
 plugins {
-    id "com.cloudbees.cd.plugins.specs" version "1.8.1.0"
+    id "com.cloudbees.cd.plugins.specs" version "1.9.0.0"
 }
 
 apply plugin: 'com.cloudbees.cd.plugins.specs-hen'
