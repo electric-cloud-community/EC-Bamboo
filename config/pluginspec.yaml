@@ -6,6 +6,11 @@ pluginInfo:
   authorUrl: http://www.electric-cloud.com/support
   category: Build
   repositoryUrl: https://github.com/electric-cloud-community/EC-Bamboo
+  supportUrl: 'GH Issues'
+  label: Bamboo
+  detailedDescription: |
+    This plugin integrates with Atlassian Bamboo using REST API. You can control plan execution, deployments, create releases and collect information for the Release Command Center dashboard.
+
 
 configuration:
   parameters:
@@ -56,6 +61,27 @@ configuration:
       userNameLabel: Proxy Username
       passwordLabel: Proxy Password
       required: false
+
+properties:
+  - propertyName: ec_dsl_libraries_path
+    value: 'libs'
+  - propertyName: ec_devops_insight
+    properties:
+      - propertyName: 'build'
+        properties:
+          - propertyName: 'source'
+            value: 'Bamboo'
+          - propertyName: 'operations'
+            properties:
+              - propertyName: 'createDOISDataSource'
+                properties:
+                  - propertyName: procedureName
+                    value: 'ValidateCRDParams'
+              - propertyName: 'modifyDOISDataSource'
+                properties:
+                  - propertyName: procedureName
+                    value: 'ValidateCRDParams'
+
 
 procedures:
   - name: GetAllPlans

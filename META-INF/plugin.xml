@@ -7,9 +7,12 @@
   <description>CloudBees CD Plugin for Atlassian Bamboo</description>
   <configure>ec_config</configure>
   <version>1.5.3</version>
-  <authorUrl>http://www.electric-cloud.com/support</authorUrl>
+  <authorUrl>GH Issues</authorUrl>
   <help>help.xml</help>
+  <catalogLabel>Bamboo</catalogLabel>
   <depends min='1.4.1'>EC-PluginManager</depends>
   <repositoryUrl>https://github.com/electric-cloud-community/EC-Bamboo</repositoryUrl>
+  <detailedDescription>This plugin integrates with Atlassian Bamboo using REST API. You can control plan execution, deployments, create releases and collect information for the Release Command Center dashboard.
+</detailedDescription>
   <commander-version min='6.0' />
 </plugin>
