@@ -360,8 +360,7 @@ class PluginTestHelper extends PluginSpockTestSupport {
     def initBambooClient(){
         URI bambooURI = new URI(BAMBOO_URL)
 
-        def host = commanderAddress// bambooURI.getHost()
-
+        def host =  bambooURI.getHost() ?: 'localhost'
         def scheme = bambooURI.getScheme() ?: 'http'
         def port = bambooURI.getPort()
         def urlPath = bambooURI.getPath()
