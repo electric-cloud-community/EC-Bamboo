@@ -3,7 +3,7 @@
     Please not not edit this file manually as it will be regenerated.
 -->
 <editor>
-  <help>/commander/pages/@PLUGIN_NAME@/help?s=Administration&amp;ss=Plugins#ValidateCRDParams</help>
+  <help>https://github.com/electric-cloud-community/EC-Bamboo</help>
   <formElement>
     <type>entry</type>
     <property>config</property>
