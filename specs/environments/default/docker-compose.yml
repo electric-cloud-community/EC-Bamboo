@@ -17,7 +17,7 @@ services:
   bamboo-server:
     image: electricflow/bamboo
     ports:
-      - 8085:8085
+      - 8081:8085
       - 54663:54663
     environment:
       BAMBOO_VERSION: 6.7
