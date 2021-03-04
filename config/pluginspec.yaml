@@ -115,7 +115,8 @@ procedures:
         value: /myJob/plans
         dependsOn: resultFormat
         condition: ${resultFormat} != 'none'
-    outputParameters: {planKeys: 'List of comma-separated plan keys'}
+    outputParameters:
+      planKeys: 'List of comma-separated plan keys'
 
   - name: GetPlanDetails
     description: This procedure prints Bamboo build plan details.
@@ -172,7 +173,15 @@ procedures:
         label: Build State Filter
         documentation: Get only plan runs with this state
         type: select
-        options: [{ name: 'All', value: 'All' }, { name: 'Successful', value: 'Successful' }, { name: 'Failed', value: 'Failed' }, { name: 'Unknown', value: 'Unknown' }]
+        options:
+          - name: 'All'
+            value: 'All'
+          - name: 'Successful'
+            value: 'Successful'
+          - name: 'Failed'
+            value: 'Failed'
+          - name: 'Unknown'
+            value: 'Unknown'
         value: All
         required: false
       - name: resultFormat
@@ -196,10 +205,10 @@ procedures:
         required: false
         dependsOn: resultFormat
         condition: ${resultFormat} != 'none'
-    outputParameters: {
-      resultKeys: "List of comma-separated plan build result keys.",
+    outputParameters:
+      resultKeys: "List of comma-separated plan build result keys."
       latestResultKey: 'Key for the latest build run.'
-    }
+
 
   - name: RunPlan
     description: This procedure runs Bamboo build plan.
@@ -277,10 +286,9 @@ procedures:
         required: false
         dependsOn: resultFormat
         condition: ${resultFormat} != 'none'
-    outputParameters: {
-      buildResultKey: 'Composite key for the Run Result.',
+    outputParameters:
+      buildResultKey: 'Composite key for the Run Result.'
       buildUrl: 'Link to the result page.'
-    }
 
   - name: EnablePlan
     description: This procedure enables build plan.
@@ -368,10 +376,10 @@ procedures:
         required: false
         dependsOn: resultFormat
         condition: ${resultFormat} != 'none'
-    outputParameters: {
-      deploymentResultKey: 'Key of the deployment result.',
+    outputParameters:
+      deploymentResultKey: 'Key of the deployment result.'
       deploymentResultUrl: 'URL to the deployment result report.'
-    }
+
 
   - name: GetDeploymentProjectsForPlan
     description: This procedure returns information about deployment projects linked to this build plan.
@@ -408,9 +416,8 @@ procedures:
         required: false
         dependsOn: resultFormat
         condition: ${resultFormat} != 'none'
-    outputParameters: {
-      deploymentProjectKeys: 'List of comma-separated deployment project keys for the plan',
-    }
+    outputParameters:
+      deploymentProjectKeys: 'List of comma-separated deployment project keys for the plan'
 
   - name: CreateRelease
     description: This procedure creates new release (version) from the build plan result.
@@ -462,9 +469,9 @@ procedures:
         required: false
         dependsOn: resultFormat
         condition: ${resultFormat} != 'none'
-    outputParameters: {
+    outputParameters:
       release: 'Name of the created release.'
-    }
+
   - name: CollectReportingData
     description: This procedure collects reporting data for the DevOpsInsight Dashboards. It collects build results with optional tests run details.
     hasConfig: true
