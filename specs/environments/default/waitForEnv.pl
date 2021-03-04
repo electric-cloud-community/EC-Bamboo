@@ -7,7 +7,7 @@ use Data::Dumper;
 
 my $ua = LWP::UserAgent->new();
 
-my $bamboo_url = 'http://' . $ENV{COMMANDER_SERVER} . ':8081' ;
+my $bamboo_url = 'http://localhost:8081' ;
 my $bamboo_username = $ENV{BAMBOO_USERNAME} || 'admin';
 my $bamboo_password = $ENV{BAMBOO_PASSWORD} || 'admin123';
 
