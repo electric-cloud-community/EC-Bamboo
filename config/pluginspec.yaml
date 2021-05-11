@@ -6,6 +6,8 @@ pluginInfo:
   authorUrl: http://www.electric-cloud.com/support
   category: Build
   repositoryUrl: https://github.com/electric-cloud-community/EC-Bamboo
+  catalogLabel: Bamboo
+  detailedDescription: This plugin provides an integration with Bamboo CI server, enabling you with centralized management, orchestration and visibility of your entire Bamboo infrastructure (managing agents, pools and builds) for enterprise-scale use cases. 
 
 configuration:
   parameters:
